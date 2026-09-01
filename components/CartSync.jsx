@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useSession } from 'next-auth/react'
 import { setCart } from '@/lib/features/cart/cartSlice'
@@ -11,11 +11,16 @@ export default function CartSync() {
     const timer = useRef(null)
     const seeded = useRef(false)
     const cartRef = useRef(cartItems)
+    const [ready, setReady] = useState(false)
     cartRef.current = cartItems
 
-    // Seed Redux from DB once when authenticated (guest items win on conflict)
     useEffect(() => {
-        if (status !== 'authenticated' || seeded.current) return
+        if (status !== 'authenticated') {
+            seeded.current = false
+            setReady(false)
+            return
+        }
+        if (seeded.current) return
         seeded.current = true
         fetch('/api/cart')
             .then((r) => r.json())
@@ -29,11 +34,11 @@ export default function CartSync() {
                 }
             })
             .catch(() => {})
+            .finally(() => setReady(true))
     }, [status, dispatch])
 
-    // Persist Redux -> DB on change (debounced) when authenticated
     useEffect(() => {
-        if (status !== 'authenticated') return
+        if (status !== 'authenticated' || !ready) return
         if (timer.current) clearTimeout(timer.current)
         timer.current = setTimeout(() => {
             fetch('/api/cart', {
@@ -43,7 +48,7 @@ export default function CartSync() {
             }).catch(() => {})
         }, 600)
         return () => timer.current && clearTimeout(timer.current)
-    }, [cartItems, status])
+    }, [cartItems, status, ready])
 
     return null
 }

@@ -3,44 +3,53 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, MapPin, Maximize, BedDouble, CheckCircle, Star, CalendarIcon } from 'lucide-react'
-import Image from 'next/image'
-import ScheduleVisitModal from '@/components/ScheduleVisitModal'
+import CatalogImage from '@/components/CatalogImage'
+import dynamic from 'next/dynamic'
 import ReviewsList from '@/components/ReviewsList'
 import WishlistButton from '@/components/WishlistButton'
+import { BRAND_GREEN } from '@/lib/brand-ui'
+import { DetailSkeleton } from '@/components/CatalogSkeleton'
+import { cachedJson, peekDetail } from '@/lib/cachedJson'
+
+const ScheduleVisitModal = dynamic(() => import('@/components/ScheduleVisitModal'), { ssr: false })
 
 const PropertyPage = () => {
     const { propertyId } = useParams()
-    const [property, setProperty] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const detailUrl = `/api/properties/${propertyId}`
+    const initial = peekDetail(detailUrl, '/api/properties', propertyId)
+    const [property, setProperty] = useState(() => (initial?.id ? initial : null))
+    const [loading, setLoading] = useState(!initial?.id)
     const [notFound, setNotFound] = useState(false)
     const [showVisitModal, setShowVisitModal] = useState(false)
     const [tab, setTab] = useState('Overview')
 
     useEffect(() => {
-        setLoading(true)
+        let cancelled = false
         setNotFound(false)
-        setProperty(null)
-        fetch(`/api/properties/${propertyId}`)
-            .then(async (res) => {
-                if (res.status === 404) {
+        const hit = peekDetail(detailUrl, '/api/properties', propertyId)
+        if (hit?.id) {
+            setProperty(hit)
+            setLoading(false)
+        } else {
+            setLoading(true)
+            setProperty(null)
+        }
+        cachedJson(detailUrl)
+            .then((data) => {
+                if (cancelled) return
+                if (data?.error || !data?.id) {
                     setNotFound(true)
-                    return null
+                    setProperty(null)
+                    return
                 }
-                if (!res.ok) throw new Error('Failed to load')
-                return res.json()
+                setProperty(data)
             })
-            .then((data) => { if (data) setProperty(data) })
-            .catch(() => setNotFound(true))
-            .finally(() => setLoading(false))
-    }, [propertyId])
+            .catch(() => { if (!cancelled) setNotFound(true) })
+            .finally(() => { if (!cancelled) setLoading(false) })
+        return () => { cancelled = true }
+    }, [propertyId, detailUrl])
 
-    if (loading) {
-        return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center">
-                <p className="text-slate-500 text-sm">Loading…</p>
-            </div>
-        )
-    }
+    if (loading) return <DetailSkeleton />
 
     if (notFound || !property) {
         return (
@@ -69,14 +78,19 @@ const PropertyPage = () => {
             <div className="flex max-lg:flex-col gap-8 lg:gap-12">
                 <div className="lg:w-1/2">
                     <div className="aspect-[4/3] bg-slate-100 rounded-2xl overflow-hidden relative">
-                        <Image
+                        <CatalogImage
                             src={property.images?.[0] || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600&h=450&fit=crop'}
                             alt={property.title}
                             width={600}
                             height={450}
                             className="w-full h-full object-cover"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                            priority
                         />
-                        <span className={`absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-lg ${property.listingType === 'SALE' ? 'bg-amber-500' : 'bg-blue-500'}`}>
+                        <span
+                            className={`absolute top-4 left-4 text-white text-xs font-bold px-3 py-1 rounded-lg ${property.listingType === 'SALE' ? '' : 'bg-blue-500'}`}
+                            style={property.listingType === 'SALE' ? { backgroundColor: BRAND_GREEN } : undefined}
+                        >
                             {property.listingType === 'SALE' ? 'FOR SALE' : 'FOR RENT'}
                         </span>
                         <div className="absolute top-4 right-4">
@@ -86,7 +100,10 @@ const PropertyPage = () => {
                 </div>
 
                 <div className="flex-1">
-                    <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2 py-1 rounded-md">
+                    <span
+                        className="text-xs font-medium px-2 py-1 rounded-md"
+                        style={{ color: BRAND_GREEN, backgroundColor: '#eef4ef' }}
+                    >
                         {property.listingType === 'SALE' ? 'For Sale' : 'For Rent'}
                     </span>
                     <h1 className="text-2xl sm:text-3xl font-bold text-slate-800 mt-3">{property.title}</h1>

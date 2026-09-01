@@ -1,10 +1,12 @@
 'use client'
+import { memo } from 'react'
 import { ShoppingCart, Star } from 'lucide-react'
 import Link from 'next/link'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '@/lib/features/cart/cartSlice'
 import toast from 'react-hot-toast'
 import WishlistButton from '@/components/WishlistButton'
+import CatalogImage from '@/components/CatalogImage'
 import { BRAND_GREEN } from '@/lib/brand-ui'
 
 const currency = '₹'
@@ -18,14 +20,18 @@ function formatReviewCount(count) {
 }
 
 function getRatingInfo(product) {
+    const count = product.reviewCount ?? (product.rating || []).length
+    if (!count) return { avg: null, count: 0 }
+    if (typeof product.avgRating === 'number') {
+        return { avg: Math.round(product.avgRating * 10) / 10, count }
+    }
     const ratings = product.rating || []
-    if (!ratings.length) return { avg: null, count: 0 }
     const sum = ratings.reduce((acc, curr) => acc + curr.rating, 0)
     const avg = Math.round((sum / ratings.length) * 10) / 10
-    return { avg, count: ratings.length }
+    return { avg, count }
 }
 
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, fluid = false }) => {
     const dispatch = useDispatch()
     const cart = useSelector((state) => state.cart?.cartItems) || {}
     const inCart = Boolean(cart[product.id])
@@ -46,16 +52,17 @@ const ProductCard = ({ product }) => {
     }
 
     return (
-        <article className="w-[172px] sm:w-[188px] flex-shrink-0 flex flex-col rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden">
+        <article className={`${fluid ? 'w-full min-w-0' : 'w-[172px] sm:w-[188px] flex-shrink-0'} flex flex-col rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden`}>
             <Link href={`/products/${product.id}`} className="group block">
                 <div className="relative aspect-square bg-slate-50 overflow-hidden">
                     {product.images?.[0] ? (
-                        <img
+                        <CatalogImage
                             width={188}
                             height={188}
                             className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                             src={product.images[0]}
                             alt={product.name}
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 188px"
                         />
                     ) : (
                         <div className="w-full h-full bg-slate-100" />
@@ -153,4 +160,4 @@ const ProductCard = ({ product }) => {
     )
 }
 
-export default ProductCard
+export default memo(ProductCard)

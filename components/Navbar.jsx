@@ -27,6 +27,7 @@ import {
     buildProductsMenuItems,
     SERVICES_SUBCATEGORIES,
     PROPERTIES_SUBCATEGORIES,
+    BOOK_SERVICE_ITEM,
 } from '@/lib/nav-menus'
 
 /** Reference design tokens */
@@ -82,6 +83,7 @@ function NavIcon({ name, size = 18 }) {
 }
 
 function PopularDropdown({ open, items, onNavigate, anchorEl, className = 'w-72' }) {
+    const router = useRouter()
     const [pos, setPos] = useState({ top: 0, left: 0 })
 
     useEffect(() => {
@@ -116,7 +118,12 @@ function PopularDropdown({ open, items, onNavigate, anchorEl, className = 'w-72'
                     <Link
                         key={item.name}
                         href={item.href}
-                        onClick={onNavigate}
+                        onClick={(e) => {
+                            e.preventDefault()
+                            const href = item.href
+                            onNavigate()
+                            router.push(href)
+                        }}
                         className="flex items-center gap-3 px-5 py-2.5 text-sm hover:bg-[#eef4ef] transition-colors"
                         style={{ color: BRAND.text }}
                     >
@@ -149,7 +156,15 @@ const cities = [
 ]
 
 const LOCATION_KEY = 'leafyland_location'
-const SCROLL_COMPACT_AT = 48
+
+/* Collapsing the bottom row shortens the page by its own height, which can move
+   the scroll position back across a single threshold and leave the navbar
+   flipping between states. globals.css stops the browser from compensating for
+   the resize; these two thresholds are the second guard, for cases where the
+   scroll position still shifts because the page can no longer scroll as far.
+   Keep them more than one row height (h-11 plus its border, 45px) apart. */
+const SCROLL_COMPACT_AT = 64
+const SCROLL_EXPAND_AT = 16
 
 function nearestCity(lat, lng) {
     let best = cities[0]
@@ -203,32 +218,45 @@ const Navbar = () => {
 
     useEffect(() => {
         let cancelled = false
-        Promise.all([
-            cachedJson('/api/products/niches'),
-            cachedJson('/api/services/niches'),
-            cachedJson('/api/properties/niches'),
-        ]).then(([products, services, properties]) => {
+        const load = () => {
             if (cancelled) return
-            const { all, leafy, marketplace } = splitProductNiches(Array.isArray(products) ? products : [])
-            setNiches({
-                productsAll: all,
-                productsLeafy: leafy,
-                productsMarketplace: marketplace,
-                services: Array.isArray(services) ? services : [],
-                properties: Array.isArray(properties) ? properties : [],
-            })
-        }).catch(() => {})
-        return () => { cancelled = true }
+            Promise.all([
+                cachedJson('/api/products/niches'),
+                cachedJson('/api/services/niches'),
+                cachedJson('/api/properties/niches'),
+            ]).then(([products, services, properties]) => {
+                if (cancelled) return
+                const { all, leafy, marketplace } = splitProductNiches(Array.isArray(products) ? products : [])
+                setNiches({
+                    productsAll: all,
+                    productsLeafy: leafy,
+                    productsMarketplace: marketplace,
+                    services: Array.isArray(services) ? services : [],
+                    properties: Array.isArray(properties) ? properties : [],
+                })
+            }).catch(() => {})
+        }
+        const idle = typeof requestIdleCallback === 'function'
+            ? requestIdleCallback(load, { timeout: 1800 })
+            : setTimeout(load, 200)
+        return () => {
+            cancelled = true
+            if (typeof cancelIdleCallback === 'function') cancelIdleCallback(idle)
+            else clearTimeout(idle)
+        }
     }, [])
 
     const navMenus = useMemo(() => {
         const productItems = buildProductsMenuItems()
-        const serviceItems = niches.services.length > 0
-            ? niches.services.map((n) => ({
-                name: n.name,
-                href: `/services?category=${encodeURIComponent(n.name)}`,
-            }))
-            : SERVICES_SUBCATEGORIES
+        const serviceItems = [
+            ...(niches.services.length > 0
+                ? niches.services.map((n) => ({
+                    name: n.name,
+                    href: `/services?category=${encodeURIComponent(n.name)}`,
+                }))
+                : SERVICES_SUBCATEGORIES),
+            BOOK_SERVICE_ITEM,
+        ]
         const propertyItems = niches.properties.length > 0
             ? niches.properties.map((n) => ({
                 name: n.name,
@@ -245,7 +273,10 @@ const Navbar = () => {
     }, [niches])
 
     useEffect(() => {
-        const onScroll = () => setScrolled(window.scrollY > SCROLL_COMPACT_AT)
+        const onScroll = () =>
+            setScrolled((isCompact) =>
+                window.scrollY > (isCompact ? SCROLL_EXPAND_AT : SCROLL_COMPACT_AT),
+            )
         onScroll()
         window.addEventListener('scroll', onScroll, { passive: true })
         return () => window.removeEventListener('scroll', onScroll)
@@ -261,15 +292,24 @@ const Navbar = () => {
             localStorage.setItem(LOCATION_KEY, 'Mumbai')
             return
         }
-        navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                const city = nearestCity(pos.coords.latitude, pos.coords.longitude)
-                setLocation(city)
-                localStorage.setItem(LOCATION_KEY, city)
-            },
-            () => { localStorage.setItem(LOCATION_KEY, 'Mumbai') },
-            { timeout: 8000 },
-        )
+        const locate = () => {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const city = nearestCity(pos.coords.latitude, pos.coords.longitude)
+                    setLocation(city)
+                    localStorage.setItem(LOCATION_KEY, city)
+                },
+                () => { localStorage.setItem(LOCATION_KEY, 'Mumbai') },
+                { timeout: 4000, maximumAge: 600_000 },
+            )
+        }
+        const idle = typeof requestIdleCallback === 'function'
+            ? requestIdleCallback(locate, { timeout: 4000 })
+            : setTimeout(locate, 800)
+        return () => {
+            if (typeof cancelIdleCallback === 'function') cancelIdleCallback(idle)
+            else clearTimeout(idle)
+        }
     }, [])
 
     const selectCity = (city) => {
@@ -459,7 +499,7 @@ const Navbar = () => {
                                 alt="LeafyLand"
                                 width={150}
                                 height={38}
-                                className="h-7 sm:h-9 w-auto object-contain"
+                                className="h-6 sm:h-7 md:h-9 w-auto object-contain"
                                 priority
                             />
                         </Link>
@@ -569,11 +609,11 @@ const Navbar = () => {
                         <div className="flex-1 md:hidden" />
 
                         {/* Actions */}
-                        <div className="flex items-center gap-0 sm:gap-1 ml-auto shrink-0">
+                        <div className="flex items-center gap-0 ml-auto shrink-0">
                             <button
                                 type="button"
                                 onClick={() => setMobileSearchOpen(true)}
-                                className="p-2 lg:hidden rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="p-1.5 sm:p-2 lg:hidden rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Open search"
                             >
@@ -582,7 +622,7 @@ const Navbar = () => {
 
                             <Link
                                 href={accountHref}
-                                className="flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                             >
                                 <User size={20} strokeWidth={1.75} />
@@ -593,7 +633,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/orders"
-                                className="flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="hidden sm:flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                             >
                                 <Package size={20} strokeWidth={1.75} />
@@ -612,7 +652,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/cart"
-                                className="relative flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="relative flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                             >
                                 <ShoppingCart size={20} strokeWidth={1.75} />
@@ -843,7 +883,7 @@ const Navbar = () => {
                                                         <Link
                                                             key={item.name}
                                                             href={item.href}
-                                                            onClick={() => setMobileMenuOpen(false)}
+                                                            onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
                                                             className="flex items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 hover:bg-emerald-50"
                                                         >
                                                             {item.icon && <NavIcon name={item.icon} size={17} />}
@@ -858,20 +898,21 @@ const Navbar = () => {
                             </div>
 
                             <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-2">
-                                <Link href="/products" onClick={() => setMobileMenuOpen(false)}
+                                <Link href="/products" onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
                                     className="flex items-center justify-center gap-2 py-2.5 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold">
                                     <Percent size={16} /> Today&apos;s Deals
                                 </Link>
-                                <Link href="/become-seller" onClick={() => setMobileMenuOpen(false)}
+                                <Link href="/become-seller" onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
                                     className="flex items-center justify-center gap-2 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-semibold">
                                     <Store size={16} /> Sell on LeafyLand
                                 </Link>
-                                <Link href="/services" onClick={() => setMobileMenuOpen(false)}
+                                <Link href="/services" onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
                                     className="flex items-center justify-center gap-2 py-2.5 border border-emerald-200 text-emerald-700 rounded-xl text-sm font-semibold">
                                     <CalendarDays size={16} /> Book a Service
                                 </Link>
-                                <Link href={accountHref} onClick={() => setMobileMenuOpen(false)}
-                                    className="w-full py-2.5 bg-emerald-900 hover:bg-emerald-950 text-white font-medium rounded-xl text-sm text-center">
+                                <Link href={accountHref} onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
+                                    className="w-full py-2.5 text-white font-medium rounded-xl text-sm text-center hover:opacity-90 transition-opacity"
+                                    style={{ backgroundColor: BRAND.green }}>
                                     {session?.user ? 'Account' : 'Login / Sign Up'}
                                 </Link>
                             </div>

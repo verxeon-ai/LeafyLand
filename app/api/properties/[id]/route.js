@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { error, json, handleApiError } from '@/lib/api'
+import { error, json, handleApiError, PUBLIC_DETAIL_CACHE } from '@/lib/api'
 import { avgRating, serializeReview } from '@/lib/reviews'
 
 export async function GET(_req, { params }) {
@@ -8,7 +8,7 @@ export async function GET(_req, { params }) {
         const property = await prisma.property.findUnique({
             where: { id },
             include: {
-                store: true,
+                store: { select: { id: true, name: true, username: true, logo: true } },
                 rating: {
                     include: { user: { select: { name: true, image: true } } },
                     orderBy: { createdAt: 'desc' },
@@ -20,7 +20,7 @@ export async function GET(_req, { params }) {
             ...property,
             avgRating: avgRating(property.rating),
             reviews: property.rating.map(serializeReview),
-        })
+        }, 200, PUBLIC_DETAIL_CACHE)
     } catch (e) {
         return handleApiError(e)
     }

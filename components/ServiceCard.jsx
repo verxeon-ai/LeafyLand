@@ -1,6 +1,6 @@
 'use client'
 import { MapPin, Star, ArrowRight } from 'lucide-react'
-import Image from 'next/image'
+import CatalogImage from '@/components/CatalogImage'
 import Link from 'next/link'
 import WishlistButton from '@/components/WishlistButton'
 
@@ -13,12 +13,13 @@ const ServiceCard = ({ service }) => {
     return (
         <Link href={`/services/${service.id}`} className="group block w-48 sm:w-52 flex-shrink-0">
             <div className="relative bg-slate-50 rounded-2xl overflow-hidden aspect-[4/3]">
-                <Image
+                <CatalogImage
                     width={208}
                     height={156}
                     className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
                     src={service.images?.[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=208&h=156&fit=crop'}
                     alt={service.name}
+                    sizes="208px"
                 />
                 <span className="absolute top-2 left-2 bg-blue-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md">
                     {service.category}

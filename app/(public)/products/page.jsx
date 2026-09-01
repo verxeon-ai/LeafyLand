@@ -1,35 +1,53 @@
 'use client'
 import { Suspense, useState, useEffect, useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import ProductCard from "@/components/ProductCard"
 import { Search, Leaf, Store, Package } from 'lucide-react'
-import { cachedJson } from '@/lib/cachedJson'
+import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
 import { isMarketplaceCategory } from '@/lib/categories'
+import { ProductGridSkeleton } from '@/components/CatalogSkeleton'
+
+function productListUrl(urlSearch) {
+    if (!urlSearch) return '/api/products'
+    return `/api/products?search=${encodeURIComponent(urlSearch)}`
+}
+
+function productsPageHref(category, search) {
+    const params = new URLSearchParams()
+    if (search) params.set('search', search)
+    if (category && category !== 'All') params.set('category', category)
+    const qs = params.toString()
+    return qs ? `/products?${qs}` : '/products'
+}
 
 function ProductsContent() {
     const searchParams = useSearchParams()
-    const urlCategory = searchParams.get('category') || 'All'
+    const selectedCategory = searchParams.get('category') || 'All'
     const urlSearch = searchParams.get('search') || ''
+    const listUrl = productListUrl(urlSearch)
 
+    const cached = peekCachedJson(listUrl)
     const [search, setSearch] = useState(urlSearch)
-    const [selectedCategory, setSelectedCategory] = useState(urlCategory)
     const [sortBy, setSortBy] = useState('featured')
-    const [products, setProducts] = useState([])
+    const [products, setProducts] = useState(() => Array.isArray(cached) ? cached : [])
+    const [loading, setLoading] = useState(!Array.isArray(cached))
 
     useEffect(() => {
         let cancelled = false
-        const params = new URLSearchParams()
-        if (urlSearch) params.set('search', urlSearch)
-        if (urlCategory && urlCategory !== 'All') params.set('category', urlCategory)
-        const qs = params.toString()
-        cachedJson(`/api/products${qs ? `?${qs}` : ''}`)
+        const url = productListUrl(urlSearch)
+        const hit = peekCachedJson(url)
+        if (Array.isArray(hit)) {
+            setProducts(hit)
+            setLoading(false)
+        } else {
+            setLoading(true)
+        }
+        cachedJson(url)
             .then((data) => { if (!cancelled && Array.isArray(data)) setProducts(data) })
+            .finally(() => { if (!cancelled) setLoading(false) })
         return () => { cancelled = true }
-    }, [urlCategory, urlSearch])
-
-    useEffect(() => {
-        setSelectedCategory(urlCategory)
-    }, [urlCategory])
+    }, [urlSearch])
 
     useEffect(() => {
         setSearch(urlSearch)
@@ -37,9 +55,9 @@ function ProductsContent() {
 
     const categories = useMemo(() => {
         const set = new Set(products.map((p) => p.category).filter(Boolean))
-        if (urlCategory && urlCategory !== 'All') set.add(urlCategory)
+        if (selectedCategory && selectedCategory !== 'All') set.add(selectedCategory)
         return ['All', ...Array.from(set)]
-    }, [products, urlCategory])
+    }, [products, selectedCategory])
 
     const allFiltered = products.filter(p => {
         const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase())
@@ -51,7 +69,6 @@ function ProductsContent() {
         return 0
     })
 
-    // Pin LeafyLand items at top, marketplace below
     const filtered = [
         ...allFiltered.filter(p => !isMarketplaceCategory(p.category)),
         ...allFiltered.filter(p => isMarketplaceCategory(p.category)),
@@ -71,7 +88,9 @@ function ProductsContent() {
             <div className="mb-6">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-800">{pageTitle}</h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    {filtered.length === 0 ? (
+                    {loading ? (
+                        'Finding products…'
+                    ) : filtered.length === 0 ? (
                         emptyMessage
                     ) : (
                         <>
@@ -108,35 +127,36 @@ function ProductsContent() {
 
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-4">
                 {categories.map(cat => (
-                    <button
+                    <Link
                         key={cat}
-                        onClick={() => setSelectedCategory(cat)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition ${
+                        href={productsPageHref(cat, search)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition ${
                             selectedCategory === cat
-                                ? 'bg-emerald-600 text-white'
+                                ? 'bg-[#2f7d4a] text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
                         {cat}
-                    </button>
+                    </Link>
                 ))}
             </div>
 
-            {filtered.length === 0 ? (
+            {loading ? (
+                <ProductGridSkeleton count={10} />
+            ) : filtered.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 bg-white px-6 py-20 text-center">
                     <Package size={36} className="mx-auto text-slate-300 mb-3" />
                     <p className="text-sm sm:text-base font-medium text-slate-700">{emptyMessage}</p>
                     <p className="text-xs text-slate-500 mt-1.5">Try another category or clear your filters.</p>
-                    <button
-                        onClick={() => { setSearch(''); setSelectedCategory('All') }}
-                        className="mt-4 text-emerald-600 text-sm font-semibold hover:underline"
+                    <Link
+                        href="/products"
+                        className="mt-4 inline-block text-emerald-600 text-sm font-semibold hover:underline"
                     >
                         Clear filters
-                    </button>
+                    </Link>
                 </div>
             ) : (
                 <div className="space-y-6">
-                    {/* LeafyLand Products */}
                     {leafyCount > 0 && (
                         <div>
                             <div className="flex items-center gap-2 mb-3">
@@ -145,15 +165,14 @@ function ProductsContent() {
                                 </span>
                                 <div className="flex-1 h-px bg-emerald-100" />
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                                 {filtered.filter(p => !isMarketplaceCategory(p.category)).map(product => (
-                                    <ProductCard key={product.id} product={product} />
+                                    <ProductCard key={product.id} product={product} fluid />
                                 ))}
                             </div>
                         </div>
                     )}
 
-                    {/* Marketplace Products */}
                     {marketplaceCount > 0 && (
                         <div>
                             <div className="flex items-center gap-2 mb-3">
@@ -162,9 +181,9 @@ function ProductsContent() {
                                 </span>
                                 <div className="flex-1 h-px bg-blue-100" />
                             </div>
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4">
                                 {filtered.filter(p => isMarketplaceCategory(p.category)).map(product => (
-                                    <ProductCard key={product.id} product={product} />
+                                    <ProductCard key={product.id} product={product} fluid />
                                 ))}
                             </div>
                         </div>

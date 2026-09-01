@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { error, json } from '@/lib/api'
+import { error, json, PUBLIC_DETAIL_CACHE } from '@/lib/api'
 import { avgRating, serializeReview } from '@/lib/reviews'
 
 export async function GET(_req, { params }) {
@@ -19,5 +19,5 @@ export async function GET(_req, { params }) {
         ...service,
         avgRating: avgRating(service.rating),
         reviews: service.rating.map(serializeReview),
-    })
+    }, 200, PUBLIC_DETAIL_CACHE)
 }

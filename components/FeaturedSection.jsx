@@ -39,7 +39,7 @@ const FeaturedSection = ({ title, items, renderItem, viewAllLink, viewAllText = 
             {/* Horizontal scrollable row */}
             <div
                 ref={scrollRef}
-                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 scroll-smooth"
+                className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 scroll-smooth overscroll-x-contain -mx-4 px-4 sm:mx-0 sm:px-0"
             >
                 {items.map((item, i) => (
                     <div key={item.id || i} className="flex-shrink-0">

@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { STRIP_CATEGORIES } from '@/lib/categories'
 
-export const dynamic = 'force-dynamic'
-
 function defaults() {
     return STRIP_CATEGORIES
 }
@@ -31,5 +29,9 @@ export async function GET() {
         })
     }
 
-    return NextResponse.json(categories)
+    return NextResponse.json(categories, {
+        headers: {
+            'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+        },
+    })
 }

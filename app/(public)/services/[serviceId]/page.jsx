@@ -3,44 +3,52 @@ import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ChevronLeft, MapPin, Star, Clock, CheckCircle } from 'lucide-react'
-import Image from 'next/image'
-import BookServiceModal from '@/components/BookServiceModal'
+import CatalogImage from '@/components/CatalogImage'
+import dynamic from 'next/dynamic'
 import ReviewsList from '@/components/ReviewsList'
 import WishlistButton from '@/components/WishlistButton'
+import { DetailSkeleton } from '@/components/CatalogSkeleton'
+import { cachedJson, peekDetail } from '@/lib/cachedJson'
+
+const BookServiceModal = dynamic(() => import('@/components/BookServiceModal'), { ssr: false })
 
 const ServicePage = () => {
     const { serviceId } = useParams()
-    const [service, setService] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const detailUrl = `/api/services/${serviceId}`
+    const initial = peekDetail(detailUrl, '/api/services', serviceId)
+    const [service, setService] = useState(() => (initial?.id ? initial : null))
+    const [loading, setLoading] = useState(!initial?.id)
     const [notFound, setNotFound] = useState(false)
     const [showBookModal, setShowBookModal] = useState(false)
     const [tab, setTab] = useState('Overview')
 
     useEffect(() => {
-        setLoading(true)
+        let cancelled = false
         setNotFound(false)
-        setService(null)
-        fetch(`/api/services/${serviceId}`)
-            .then(async (res) => {
-                if (res.status === 404) {
+        const hit = peekDetail(detailUrl, '/api/services', serviceId)
+        if (hit?.id) {
+            setService(hit)
+            setLoading(false)
+        } else {
+            setLoading(true)
+            setService(null)
+        }
+        cachedJson(detailUrl)
+            .then((data) => {
+                if (cancelled) return
+                if (data?.error || !data?.id) {
                     setNotFound(true)
-                    return null
+                    setService(null)
+                    return
                 }
-                if (!res.ok) throw new Error('Failed to load')
-                return res.json()
+                setService(data)
             })
-            .then((data) => { if (data) setService(data) })
-            .catch(() => setNotFound(true))
-            .finally(() => setLoading(false))
-    }, [serviceId])
+            .catch(() => { if (!cancelled) setNotFound(true) })
+            .finally(() => { if (!cancelled) setLoading(false) })
+        return () => { cancelled = true }
+    }, [serviceId, detailUrl])
 
-    if (loading) {
-        return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center">
-                <p className="text-slate-500 text-sm">Loading…</p>
-            </div>
-        )
-    }
+    if (loading) return <DetailSkeleton />
 
     if (notFound || !service) {
         return (
@@ -69,12 +77,14 @@ const ServicePage = () => {
             <div className="flex max-lg:flex-col gap-8 lg:gap-12">
                 <div className="lg:w-1/2">
                     <div className="relative aspect-[4/3] bg-slate-100 rounded-2xl overflow-hidden">
-                        <Image
+                        <CatalogImage
                             src={service.images?.[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=600&h=450&fit=crop'}
                             alt={service.name}
                             width={600}
                             height={450}
                             className="w-full h-full object-cover"
+                            sizes="(max-width: 1024px) 100vw, 50vw"
+                            priority
                         />
                         <div className="absolute top-4 right-4">
                             <WishlistButton itemId={service.id} itemType="service" className="shadow-md" />

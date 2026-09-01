@@ -3,14 +3,13 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-import Loading from '@/components/Loading'
 import { Store, Upload, CheckCircle, Leaf, Info } from 'lucide-react'
 import { fileToDataUrl } from '@/components/store/StoreLogo'
 
 export default function CreateStore() {
     const [alreadySubmitted, setAlreadySubmitted] = useState(false)
     const [status, setStatus] = useState('')
-    const [loading, setLoading] = useState(true)
+    const [checking, setChecking] = useState(true)
     const [message, setMessage] = useState('')
 
     const [storeInfo, setStoreInfo] = useState({
@@ -45,7 +44,7 @@ export default function CreateStore() {
         } catch {
             toast.error('Could not load store status')
         } finally {
-            setLoading(false)
+            setChecking(false)
         }
     }
 
@@ -83,8 +82,6 @@ export default function CreateStore() {
     useEffect(() => {
         fetchSellerStatus()
     }, [])
-
-    if (loading) return <Loading />
 
     if (alreadySubmitted) {
         return (
@@ -292,7 +289,8 @@ export default function CreateStore() {
                         <div className="pt-2">
                             <button
                                 type="submit"
-                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm rounded-xl active:scale-[0.98] transition-all shadow-sm shadow-emerald-200"
+                                disabled={checking}
+                                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white font-semibold text-sm rounded-xl active:scale-[0.98] transition-all shadow-sm shadow-emerald-200"
                             >
                                 <Leaf size={16} />
                                 Submit Store Application

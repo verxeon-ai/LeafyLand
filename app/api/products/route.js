@@ -1,5 +1,21 @@
 import { prisma } from '@/lib/prisma'
-import { json, serializeProduct } from '@/lib/api'
+import { serializeProductList } from '@/lib/api'
+
+export const dynamic = 'force-dynamic'
+
+const LIST_SELECT = {
+    id: true,
+    name: true,
+    price: true,
+    mrp: true,
+    category: true,
+    images: true,
+    inStock: true,
+    featured: true,
+    storeId: true,
+    store: { select: { name: true, username: true } },
+    rating: { select: { rating: true } },
+}
 
 export async function GET(req) {
     const { searchParams } = new URL(req.url)
@@ -10,6 +26,10 @@ export async function GET(req) {
         .split(',')
         .map((s) => s.trim())
         .filter(Boolean)
+    const parsedLimit = Number(searchParams.get('limit'))
+    const take = ids.length
+        ? undefined
+        : Math.min(Math.max(searchParams.has('limit') && Number.isFinite(parsedLimit) ? parsedLimit : 120, 1), 200)
 
     const products = await prisma.product.findMany({
         where: {
@@ -27,20 +47,17 @@ export async function GET(req) {
                 }
                 : {}),
         },
-        include: {
-            store: { select: { name: true, username: true } },
-            // List views only need rating numbers — skip reviews/user/orderItems
-            rating: { select: { rating: true } },
-        },
+        select: LIST_SELECT,
         orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
+        ...(take ? { take } : {}),
     })
 
-    const body = products.map(serializeProduct)
+    const body = products.map(serializeProductList)
     return new Response(JSON.stringify(body), {
         status: 200,
         headers: {
             'Content-Type': 'application/json',
-            'Cache-Control': 'private, max-age=30, stale-while-revalidate=60',
+            'Cache-Control': 'public, max-age=0, s-maxage=60, stale-while-revalidate=300',
         },
     })
 }

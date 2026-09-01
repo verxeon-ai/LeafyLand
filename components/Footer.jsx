@@ -4,7 +4,7 @@ import {
     ShoppingBag, Building2, Wrench, Tag, Store, Leaf, CircleHelp,
     Shield, FileText, Lock, Phone, Mail, MapPin, Headphones,
     ShieldCheck, Truck, BadgeCheck, Award, ArrowRight,
-    Facebook, Instagram, Youtube,
+    Facebook, Instagram, Youtube, CalendarDays,
 } from 'lucide-react'
 import { assets } from '@/assets/assets'
 import { brandRadiusClass, BRAND_GREEN } from '@/lib/brand-ui'
@@ -20,6 +20,7 @@ const marketplaceLinks = [
     { text: 'Products', path: '/products', icon: ShoppingBag },
     { text: 'Properties', path: '/properties', icon: Building2 },
     { text: 'Services', path: '/services', icon: Wrench },
+    { text: 'Book a Service', path: '/services', icon: CalendarDays },
     { text: 'Classifieds', path: '/products', icon: Tag },
     { text: 'Become a Seller', path: '/become-seller', icon: Store },
 ]

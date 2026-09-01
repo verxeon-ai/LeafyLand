@@ -1,9 +1,14 @@
 'use client'
 import { useEffect, useState } from 'react'
+import dynamic from 'next/dynamic'
 import { IndianRupee, ShoppingBag, Package, Star, TrendingUp, TrendingDown, AlertTriangle } from 'lucide-react'
 import StatCard from '@/components/admin/StatCard'
 import StatusBadge from '@/components/admin/StatusBadge'
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+const VendorRevenueChart = dynamic(() => import('@/components/charts/VendorRevenueChart'), {
+    ssr: false,
+    loading: () => <div className="h-[260px] bg-slate-50 rounded-xl animate-pulse" />,
+})
 
 export default function VendorDashboard() {
     const [dash, setDash] = useState(null)
@@ -48,18 +53,7 @@ export default function VendorDashboard() {
                 <div className="bg-white rounded-2xl border border-slate-100 p-5">
                     <h2 className="text-lg font-semibold text-slate-800 mb-4">Revenue This Week</h2>
                     <div className="w-full" style={{ minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height={260}>
-                        <AreaChart data={revenueChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                formatter={(value) => [`₹${value.toLocaleString('en-IN')}`, 'Revenue']}
-                            />
-                            <Area type="monotone" dataKey="revenue" stroke="#10b981" fill="#10b981" fillOpacity={0.15} strokeWidth={2} />
-                        </AreaChart>
-                    </ResponsiveContainer>
+                    <VendorRevenueChart data={revenueChartData} />
                     </div>
                 </div>
 

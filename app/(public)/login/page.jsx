@@ -45,7 +45,443 @@ const FEATURES = [
     { icon: Users, title: 'Experts', text: 'Agronomists, architects & garden professionals' },
 ]
 
-const inputClass = `auth-input w-full pl-10 pr-4 py-2 lg:py-2.5 bg-white border border-[#e5ebe6] ${brandRadiusClass} text-sm outline-none placeholder:text-gray-400 focus:border-[#2f7d4a] focus:ring-1 focus:ring-[#2f7d4a]/20 transition`
+const inputClass = `auth-input w-full pl-10 pr-4 bg-white border border-[#e5ebe6] ${brandRadiusClass} outline-none placeholder:text-gray-400 focus:border-[#2f7d4a] focus:ring-1 focus:ring-[#2f7d4a]/20 transition`
+
+/**
+ * Vertical rhythm is driven by CSS variables instead of fixed Tailwind
+ * spacing so the card compacts on short viewports and relaxes on tall ones.
+ * Values at the top of each clamp match the previous static mobile design;
+ * the lg block restores the exact desktop spacing.
+ */
+const AUTH_CSS = `
+.auth-page {
+    --auth-shell-pad: 0.5rem;
+    --auth-shell-x: clamp(0.75rem, 4vw, 1.25rem);
+    --auth-card-pad: 1.25rem;
+    --auth-tabs-mb: 0.75rem;
+    --auth-lede-mb: 0.625rem;
+    --auth-field-gap: 0.5rem;
+    --auth-input-py: 0.5rem;
+    --auth-divider-my: 0.5rem;
+    --auth-google-h: 2.25rem;
+    --auth-hero-max: 15rem;
+    --auth-logo-row-h: 2.25rem;
+    --auth-logo-h: 1.875rem;
+    --auth-card-overlap: -1rem;
+
+    /* min-height rather than height: the shell fills exactly one screen, but
+       can still grow when sign-up, a large system font, or an open keyboard
+       needs more room. Growing lets the page scroll instead of clipping. */
+    min-height: 100vh;
+    min-height: 100dvh;
+
+    /* Grows into a tall window but never shrinks below its content: a zero
+       shrink factor keeps the shell from compressing under its own form, so
+       overflow always goes downward, where the page can scroll. */
+    flex: 1 0 auto;
+}
+
+@supports (height: 1svh) {
+    .auth-page {
+        --auth-shell-pad: clamp(0.375rem, 1.1svh, 0.75rem);
+        --auth-card-pad: clamp(0.9rem, 2.7svh, 1.25rem);
+        --auth-tabs-mb: clamp(0.5rem, 1.7svh, 0.75rem);
+        --auth-lede-mb: clamp(0.4rem, 1.5svh, 0.625rem);
+        --auth-field-gap: clamp(0.375rem, 1.15svh, 0.5rem);
+        --auth-input-py: clamp(0.4375rem, 1.2svh, 0.5rem);
+        --auth-divider-my: clamp(0.35rem, 1.1svh, 0.5rem);
+        --auth-google-h: clamp(2.1rem, 4.6svh, 2.25rem);
+        --auth-hero-max: min(20rem, 40svh);
+        --auth-logo-row-h: clamp(2rem, 6svh, 2.25rem);
+        --auth-logo-h: clamp(1.5rem, 5svh, 1.875rem);
+    }
+}
+
+@media (min-width: 1024px) {
+    .auth-page {
+        --auth-card-pad: 1.5rem;
+        --auth-tabs-mb: 1rem;
+        --auth-lede-mb: 1rem;
+        --auth-field-gap: 0.75rem;
+        --auth-input-py: 0.625rem;
+        --auth-divider-my: 0.875rem;
+        --auth-google-h: 2.5rem;
+
+        --auth-stage-py: 2rem;
+        --auth-stage-px: 2.5rem;
+        --auth-card-col-w: 25rem;
+        --auth-bottom-py: 0.75rem;
+        --auth-bottom-pb: 1rem;
+    }
+}
+
+/* Desktop spacing is height-aware for the same reason mobile is: a 1366x768
+   laptop leaves roughly 640px of viewport, and the fixed values above add up
+   to more than that once sign-up adds a field. Every clamp maximum is the
+   original desktop number, so a comfortably tall window is unchanged. */
+@supports (height: 1svh) {
+    @media (min-width: 1024px) {
+        .auth-page {
+            --auth-card-pad: clamp(1rem, 2.7svh, 1.5rem);
+            --auth-tabs-mb: clamp(0.5rem, 2.2svh, 1rem);
+            --auth-lede-mb: clamp(0.5rem, 2.2svh, 1rem);
+            --auth-field-gap: clamp(0.4rem, 1.65svh, 0.75rem);
+            --auth-input-py: clamp(0.45rem, 1.4svh, 0.625rem);
+            --auth-divider-my: clamp(0.4rem, 1.9svh, 0.875rem);
+            --auth-google-h: clamp(2.1rem, 5.5svh, 2.5rem);
+
+            --auth-stage-py: clamp(1rem, 3.2svh, 2rem);
+            --auth-bottom-py: clamp(0.5rem, 1.6svh, 0.75rem);
+            --auth-bottom-pb: clamp(0.5rem, 1.7svh, 1rem);
+        }
+    }
+}
+
+/* Very short viewports (small phones in portrait, any phone in landscape) get
+   a tighter tier than the clamp minimums so the taller sign-up form still
+   fits. Input font-size is deliberately untouched — it must stay 16px. */
+@media (max-height: 500px) and (max-width: 1023px) {
+    .auth-page {
+        --auth-shell-pad: 0.3125rem;
+        --auth-card-pad: 0.75rem;
+        --auth-tabs-mb: 0.4375rem;
+        --auth-lede-mb: 0.3125rem;
+        --auth-field-gap: 0.3125rem;
+        --auth-input-py: 0.375rem;
+        --auth-divider-my: 0.3125rem;
+        --auth-google-h: 2rem;
+    }
+}
+
+/* Landscape phones, around 360px of height: the card alone is taller than the
+   viewport, so spend the last of the surrounding chrome before giving up and
+   scrolling. No portrait phone reaches this tier — the shortest is 480px. */
+@media (max-height: 430px) and (max-width: 1023px) {
+    .auth-page {
+        --auth-card-pad: 0.5rem;
+        --auth-tabs-mb: 0.25rem;
+        --auth-lede-mb: 0.1875rem;
+        --auth-field-gap: 0.25rem;
+        --auth-input-py: 0.3125rem;
+        --auth-divider-my: 0.25rem;
+        --auth-google-h: 1.75rem;
+        --auth-logo-row-h: 1.625rem;
+        --auth-logo-h: 1.25rem;
+    }
+
+    .auth-legal {
+        display: none;
+    }
+}
+
+/* Mobile shell. Safe-area insets keep notches and the home indicator clear of
+   the form in both orientations. */
+.auth-mobile {
+    flex: 1 0 auto;
+    padding-top: max(var(--auth-shell-pad), env(safe-area-inset-top, 0px));
+    padding-bottom: max(var(--auth-shell-pad), env(safe-area-inset-bottom, 0px));
+    padding-left: max(var(--auth-shell-x), env(safe-area-inset-left, 0px));
+    padding-right: max(var(--auth-shell-x), env(safe-area-inset-right, 0px));
+}
+
+.auth-mobile-inner {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    /* Takes over once the illustration has grown as far as it may, so spare
+       height is split above and below the stack instead of pooling under it. */
+    justify-content: center;
+    width: 100%;
+    max-width: 26rem;
+    margin-inline: auto;
+}
+
+.auth-topbar {
+    position: relative;
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    height: var(--auth-logo-row-h);
+}
+
+.auth-logo {
+    height: var(--auth-logo-h);
+    width: auto;
+    object-fit: contain;
+}
+
+/* The illustration is the only flexible band: it grows into leftover height up
+   to --auth-hero-max and collapses toward nothing when the viewport is short,
+   so the form is never the thing that gets squeezed. */
+.auth-hero {
+    position: relative;
+    flex: 1 1 0%;
+    min-height: 0;
+    max-height: var(--auth-hero-max);
+    overflow: hidden;
+}
+
+/* Out of flow on purpose. An in-flow image contributes a content-based minimum
+   height to the column, which would push the shell past one screen and defeat
+   the collapse; absolute positioning leaves the band sized purely by the space
+   flexbox has left over. max-width/max-height keep it centred and contained. */
+.auth-hero-img {
+    position: absolute;
+    inset: 0;
+    margin: auto;
+    width: auto;
+    height: auto;
+    max-width: 90%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.auth-card-wrap {
+    position: relative;
+    z-index: 10;
+    flex: 0 0 auto;
+    margin-top: var(--auth-card-overlap);
+}
+
+.auth-legal {
+    flex: 0 0 auto;
+    margin-top: var(--auth-shell-pad);
+    text-align: center;
+}
+
+/* Short viewports: drop the illustration rather than squeeze the form, and
+   undo the overlap it was sitting under. Sign-up carries an extra field and a
+   consent row, so it gives the illustration up sooner. */
+@media (max-height: 540px) {
+    .auth-page.is-signup .auth-hero {
+        display: none;
+    }
+
+    .auth-page.is-signup {
+        --auth-card-overlap: 0rem;
+    }
+}
+
+@media (max-height: 480px) {
+    .auth-hero {
+        display: none;
+    }
+
+    .auth-page {
+        --auth-card-overlap: 0rem;
+    }
+}
+
+/* Desktop composition. The brand column and the card sit in normal flow inside
+   a grid, so the stage is sized by its own content and the page can scroll when
+   a window is genuinely too short. Both used to be absolutely positioned, which
+   meant they added no height: the stage stayed one screen tall and clipped
+   whatever did not fit, with nothing to scroll to. Only the decorative photo is
+   still out of flow. */
+.auth-desktop {
+    flex: 1 0 auto;
+}
+
+.auth-stage {
+    position: relative;
+    display: flex;
+    flex: 1 0 auto;
+    padding-block: var(--auth-stage-py);
+    background-color: #f7faf7;
+}
+
+.auth-stage-grid {
+    position: relative;
+    z-index: 10;
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr) var(--auth-card-col-w);
+    align-items: stretch;
+    gap: 2rem;
+    padding-left: var(--auth-stage-px);
+    padding-right: 5rem;
+}
+
+.auth-card-col {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Auto margins rather than centred alignment: they clamp to zero once free
+   space runs out, so a short window pushes the card down where the page can
+   scroll, instead of splitting the overflow across the top edge too. */
+.auth-card-col > * {
+    margin-block: auto;
+}
+
+/* Pinned to the top of the stage while the card stays vertically centred —
+   the arrangement the absolute positioning used to produce. */
+.auth-brand {
+    align-self: start;
+    max-width: 20rem;
+}
+
+.auth-brand-logo {
+    height: 2.25rem;
+    height: clamp(1.75rem, 3.4svh, 2.25rem);
+    width: auto;
+    object-fit: contain;
+}
+
+.auth-brand-title {
+    margin-top: 2rem;
+    margin-top: clamp(1rem, 3.4svh, 2rem);
+    font-size: 2.15rem;
+    font-size: clamp(1.55rem, 3.9svh, 2.15rem);
+    line-height: 1.12;
+}
+
+.auth-brand-lede {
+    margin-top: 0.75rem;
+}
+
+.auth-features {
+    display: flex;
+    flex-direction: column;
+    margin-top: 1.5rem;
+    margin-top: clamp(0.875rem, 2.6svh, 1.5rem);
+    gap: 0.75rem;
+    gap: clamp(0.5rem, 1.6svh, 0.75rem);
+}
+
+.auth-feature-icon {
+    width: 2.5rem;
+    width: clamp(2rem, 4.3svh, 2.5rem);
+    height: 2.5rem;
+    height: clamp(2rem, 4.3svh, 2.5rem);
+}
+
+.auth-plants {
+    position: absolute;
+    top: 1.5rem;
+    bottom: 0.75rem;
+    /* Sits in the gap between the brand column and the card: the left edge
+       clears the brand text at every width, and the right edge stops short of
+       the card's left edge (card width + the grid's right padding) so the form
+       never covers the photo. */
+    left: max(30%, 24rem);
+    right: calc(var(--auth-card-col-w) + 5rem + 1.5rem);
+    overflow: hidden;
+    border-radius: 0.75rem;
+}
+
+.auth-plants-fade {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 28%;
+    background-image: linear-gradient(to right, #f7faf7, rgba(247, 250, 247, 0));
+}
+
+/* Just above the lg breakpoint the brand column, photo, and card cannot all
+   fit side by side, and the photo would be left as a narrow sliver. It steps
+   aside there and returns as soon as there is room. */
+@media (max-width: 1099px) {
+    .auth-plants {
+        display: none;
+    }
+}
+
+.auth-bottom {
+    position: relative;
+    z-index: 30;
+    flex: 0 0 auto;
+    padding-inline: 1.5rem;
+    padding-bottom: var(--auth-bottom-pb);
+}
+
+.auth-bottom-card {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding-inline: 1.25rem;
+    padding-block: var(--auth-bottom-py);
+    border-radius: 1rem;
+    background-color: #eef3ef;
+}
+
+@media (min-width: 1280px) {
+    .auth-stage-grid {
+        padding-left: 3.5rem;
+    }
+
+    .auth-brand-title {
+        font-size: 2.5rem;
+        font-size: clamp(1.55rem, 4.4svh, 2.5rem);
+    }
+
+    .auth-bottom {
+        padding-inline: 2rem;
+    }
+}
+
+/* Laptop-height windows: give up the two purely decorative rows so the brand
+   column, the form, and the switch bar all still fit one screen. Both return
+   on a taller window. */
+@media (min-width: 1024px) and (max-height: 820px) {
+    .auth-secure-note,
+    .auth-bottom-perks {
+        display: none;
+    }
+}
+
+/* Shorter still (scaled displays, split-screen, half-height windows). The card
+   itself is already at the floor of its clamps, so the last thing left to trade
+   is chrome around it. Below roughly 560px the composition genuinely cannot fit
+   and the page scrolls — reachable, which is the point. */
+@media (min-width: 1024px) and (max-height: 680px) {
+    .auth-page {
+        --auth-stage-py: 0.75rem;
+        --auth-bottom-pb: 0.625rem;
+    }
+
+    .auth-legal-desktop {
+        display: none;
+    }
+
+    .auth-bottom-icon {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+}
+
+.auth-input {
+    /* 16px stops iOS Safari from zooming the viewport on focus. */
+    font-size: 1rem;
+    padding-top: var(--auth-input-py);
+    padding-bottom: var(--auth-input-py);
+    /* Breathing room when the browser scrolls a focused field clear of the keyboard. */
+    scroll-margin-block: 1.25rem;
+}
+
+.auth-google {
+    height: var(--auth-google-h);
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+@media (min-width: 1024px) {
+    .auth-input {
+        font-size: 0.875rem;
+    }
+}
+
+.auth-input:-webkit-autofill,
+.auth-input:-webkit-autofill:hover,
+.auth-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
+    -webkit-text-fill-color: #1f2937 !important;
+    caret-color: #1f2937;
+    transition: background-color 9999s ease-out;
+}
+`
 
 function LeafMark() {
     return (
@@ -180,7 +616,7 @@ function LoginForm() {
 
     const googleBlock = (
         <>
-            <div className="flex items-center gap-3 my-2 lg:my-3.5">
+            <div className="flex items-center gap-3" style={{ marginBlock: 'var(--auth-divider-my)' }}>
                 <div className="flex-1 h-px bg-[#e5ebe6]" />
                 <span className="text-[11px] text-gray-400">or continue with</span>
                 <div className="flex-1 h-px bg-[#e5ebe6]" />
@@ -189,14 +625,17 @@ function LoginForm() {
                 callbackUrl={safeCallbackUrl}
                 disabled={loading}
                 label="Google"
-                className="border-[#e5ebe6] shadow-none h-9 lg:h-10"
+                className="auth-google border-[#e5ebe6] shadow-none"
             />
         </>
     )
 
     const formCard = (mobile) => (
-        <div className={`bg-white ${mobile ? `rounded-[1.5rem] shadow-[0_12px_40px_rgba(31,41,55,0.08)] p-5` : `rounded-[1.5rem] shadow-[0_24px_60px_rgba(15,40,20,0.10)] p-6`}`}>
-            <div className={`flex items-end ${mobile ? 'mb-3' : 'mb-4'}`}>
+        <div
+            className={`bg-white rounded-[1.5rem] ${mobile ? 'shadow-[0_12px_40px_rgba(31,41,55,0.08)]' : 'shadow-[0_24px_60px_rgba(15,40,20,0.10)]'}`}
+            style={{ padding: 'var(--auth-card-pad)' }}
+        >
+            <div className="flex items-end" style={{ marginBottom: 'var(--auth-tabs-mb)' }}>
                 {['Login', 'Sign Up'].map((tab) => {
                     const active = tab === 'Sign Up' ? isSignUp : !isSignUp
                     return (
@@ -227,7 +666,10 @@ function LoginForm() {
                         : 'Glad to see you again'}{' '}
                 <LeafMark />
             </h2>
-            <p className={`text-sm mt-0.5 ${mobile ? 'mb-2.5' : 'mt-1 mb-4'}`} style={{ color: BRAND.muted }}>
+            <p
+                className="auth-lede text-sm mt-0.5 lg:mt-1"
+                style={{ color: BRAND.muted, marginBottom: 'var(--auth-lede-mb)' }}
+            >
                 {isSignUp
                     ? 'Join LeafyLand today'
                     : mobile
@@ -236,12 +678,19 @@ function LoginForm() {
             </p>
 
             {formError && (
-                <p className={`mb-3 text-sm text-red-600 bg-red-50 border border-red-100 ${brandRadiusClass} px-3 py-2`}>
+                <p
+                    className={`text-sm text-red-600 bg-red-50 border border-red-100 ${brandRadiusClass} px-3 py-2`}
+                    style={{ marginBottom: 'var(--auth-tabs-mb)' }}
+                >
                     {formError}
                 </p>
             )}
 
-            <form onSubmit={handleSubmit} className={mobile ? 'space-y-2' : 'space-y-3'}>
+            <form
+                onSubmit={handleSubmit}
+                className="flex flex-col"
+                style={{ gap: 'var(--auth-field-gap)' }}
+            >
                 {isSignUp && (
                     <Field label="Full Name" icon={User} compact={mobile}>
                         <input
@@ -321,8 +770,8 @@ function LoginForm() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className={`w-full ${mobile ? 'py-2' : 'py-2.5'} text-white text-sm font-semibold ${brandRadiusClass} transition-opacity hover:opacity-90 disabled:opacity-60`}
-                    style={{ backgroundColor: BRAND.green }}
+                    className={`w-full text-white text-sm font-semibold ${brandRadiusClass} transition-opacity hover:opacity-90 disabled:opacity-60`}
+                    style={{ backgroundColor: BRAND.green, paddingBlock: 'var(--auth-input-py)' }}
                 >
                     {loading ? 'Please wait…' : isSignUp ? 'Create Account' : (
                         <>
@@ -336,7 +785,7 @@ function LoginForm() {
             {googleBlock}
 
             {!mobile && (
-                <p className="mt-3.5 flex items-center justify-center gap-1.5 text-[11px]" style={{ color: BRAND.muted }}>
+                <p className="auth-secure-note mt-3.5 flex items-center justify-center gap-1.5 text-[11px]" style={{ color: BRAND.muted }}>
                     <ShieldCheck size={13} style={{ color: BRAND.green }} />
                     Secure & Encrypted Connection
                 </p>
@@ -345,76 +794,85 @@ function LoginForm() {
     )
 
     return (
-        <div className="h-full flex flex-col overflow-hidden" style={{ backgroundColor: '#f4f8f5' }}>
-            <style>{`
-                .auth-input:-webkit-autofill,
-                .auth-input:-webkit-autofill:hover,
-                .auth-input:-webkit-autofill:focus {
-                    -webkit-box-shadow: 0 0 0 1000px #ffffff inset !important;
-                    -webkit-text-fill-color: #1f2937 !important;
-                    caret-color: #1f2937;
-                    transition: background-color 9999s ease-out;
-                }
-            `}</style>
+        <div
+            className={`auth-page flex flex-col${isSignUp ? ' is-signup' : ''}`}
+            style={{ backgroundColor: '#f4f8f5' }}
+        >
+            <style>{AUTH_CSS}</style>
             {/* Mobile — header + floating illustration + raised form card */}
-            <div className="lg:hidden h-full flex flex-col overflow-hidden bg-white px-4 pt-2 pb-2">
-                <div className="flex items-center justify-center relative h-9 shrink-0">
-                    <Link
-                        href="/"
-                        className="absolute left-0 p-1.5 text-gray-500"
-                        aria-label="Back to home"
-                    >
-                        <ArrowLeft size={22} strokeWidth={1.75} />
-                    </Link>
-                    <Link href="/">
-                        <Image src={assets.logo} alt="LeafyLand" width={150} height={38} className="h-[30px] w-auto object-contain" />
-                    </Link>
-                </div>
+            <div className="auth-mobile lg:hidden flex flex-col bg-white">
+                <div className="auth-mobile-inner">
+                    <div className="auth-topbar">
+                        <Link
+                            href="/"
+                            className="absolute left-0 p-1.5 text-gray-500"
+                            aria-label="Back to home"
+                        >
+                            <ArrowLeft size={22} strokeWidth={1.75} />
+                        </Link>
+                        <Link href="/">
+                            <Image src={assets.logo} alt="LeafyLand" width={150} height={38} className="auth-logo" />
+                        </Link>
+                    </div>
 
-                <div className="shrink-0 flex justify-center -mt-1">
-                    <Image
-                        src="/auth-hero.png"
-                        alt=""
-                        width={640}
-                        height={360}
-                        className="w-[90%] h-[158px] object-contain"
-                        priority
-                    />
-                </div>
+                    <div className="auth-hero">
+                        <Image
+                            src="/auth-hero.png"
+                            alt=""
+                            width={640}
+                            height={360}
+                            className="auth-hero-img"
+                            priority
+                        />
+                    </div>
 
-                <div className="relative z-10 -mt-4 flex-1 min-h-0">
-                    {formCard(true)}
-                    <p className="text-center text-[10px] mt-3" style={{ color: BRAND.muted }}>
+                    <div className="auth-card-wrap">
+                        {formCard(true)}
+                    </div>
+
+                    <p className="auth-legal text-[10px]" style={{ color: BRAND.muted }}>
                         © {new Date().getFullYear()} LeafyLand. All rights reserved.
                     </p>
                 </div>
             </div>
 
             {/* Desktop */}
-            <div className="hidden lg:flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="flex-1 relative min-h-0" style={{ backgroundColor: '#f7faf7' }}>
-                    <div className="absolute top-0 left-0 w-[40%] z-10 px-10 xl:px-14 pt-8 xl:pt-10">
-                        <Link href="/" className="inline-flex w-fit">
-                            <Image src={assets.logo} alt="LeafyLand" width={160} height={40} className="h-9 w-auto object-contain" />
-                        </Link>
+            <div className="auth-desktop hidden lg:flex flex-col">
+                <div className="auth-stage">
+                    <div className="auth-plants">
+                        <Image
+                            src="/auth-plants.png"
+                            alt=""
+                            fill
+                            sizes="50vw"
+                            className="object-cover object-[center_60%]"
+                            priority
+                        />
+                        <div className="auth-plants-fade" />
+                    </div>
 
-                        <div className="mt-8 xl:mt-10 max-w-[320px]">
-                            <h1 className="text-[2.15rem] xl:text-[2.5rem] font-bold leading-[1.12]" style={{ color: BRAND.text }}>
+                    <div className="auth-stage-grid">
+                        <div className="auth-brand">
+                            <Link href="/" className="inline-flex w-fit">
+                                <Image src={assets.logo} alt="LeafyLand" width={160} height={40} className="auth-brand-logo" />
+                            </Link>
+
+                            <h1 className="auth-brand-title font-bold" style={{ color: BRAND.text }}>
                                 {isSignUp ? 'Join' : 'Welcome'}
                                 <br />
                                 <span style={{ color: BRAND.green }}>{isSignUp ? 'LeafyLand!' : 'Back!'}</span>
                             </h1>
-                            <p className="mt-3 text-sm leading-relaxed" style={{ color: BRAND.muted }}>
+                            <p className="auth-brand-lede text-sm leading-relaxed" style={{ color: BRAND.muted }}>
                                 {isSignUp
                                     ? 'Create an account to shop, book, hire, and sell — all in one place.'
                                     : 'Sign in to continue your journey with LeafyLand'}
                             </p>
 
-                            <ul className="mt-6 space-y-3">
+                            <ul className="auth-features">
                                 {FEATURES.map((item) => (
                                     <li key={item.title} className="flex items-start gap-3">
                                         <span
-                                            className="flex items-center justify-center w-10 h-10 rounded-full bg-white shrink-0 shadow-sm"
+                                            className="auth-feature-icon flex items-center justify-center rounded-full bg-white shrink-0 shadow-sm"
                                             style={{ color: BRAND.green }}
                                         >
                                             <item.icon size={18} strokeWidth={1.75} />
@@ -431,36 +889,16 @@ function LoginForm() {
                                 ))}
                             </ul>
                         </div>
-                    </div>
 
-                    <div
-                        className="absolute top-6 bottom-3 left-[30%] overflow-hidden rounded-xl"
-                        style={{ right: 'calc(5rem + 400px - 5.5rem)' }}
-                    >
-                        <Image
-                            src="/auth-plants.png"
-                            alt=""
-                            fill
-                            sizes="50vw"
-                            className="object-cover object-[center_60%]"
-                            priority
-                        />
-                        <div className="absolute inset-y-0 left-0 w-[28%] bg-gradient-to-r from-[#f7faf7] to-transparent" />
-                    </div>
-
-                    <div className="absolute inset-y-0 right-20 z-20 flex items-center">
-                        <div className="w-[400px]">
+                        <div className="auth-card-col">
                             {formCard(false)}
                         </div>
                     </div>
                 </div>
 
-                <div className="shrink-0 px-6 xl:px-8 pb-4 pt-0 relative z-30">
-                    <div
-                        className="rounded-2xl px-5 py-3 flex items-center gap-4"
-                        style={{ backgroundColor: '#eef3ef' }}
-                    >
-                        <span className="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-white shrink-0" style={{ color: BRAND.green }}>
+                <div className="auth-bottom">
+                    <div className="auth-bottom-card">
+                        <span className="auth-bottom-icon flex items-center justify-center w-12 h-12 rounded-full bg-white shrink-0" style={{ color: BRAND.green }}>
                             <svg viewBox="0 0 32 32" className="w-7 h-7" aria-hidden>
                                 <ellipse cx="16" cy="28" rx="8" ry="2" fill="#e7efe8" />
                                 <rect x="13" y="20" width="6" height="8" rx="1.5" fill="#c4ae8a" />
@@ -475,7 +913,7 @@ function LoginForm() {
                             <p className="text-base font-semibold leading-tight" style={{ color: BRAND.green }}>
                                 {isSignUp ? 'Sign in and pick up where you left off' : 'Create an account and explore more'}
                             </p>
-                            <div className="hidden md:flex items-center gap-4 mt-1 text-[11px]" style={{ color: BRAND.muted }}>
+                            <div className="auth-bottom-perks flex items-center gap-4 mt-1 text-[11px]" style={{ color: BRAND.muted }}>
                                 <span className="inline-flex items-center gap-1"><Package size={12} /> Track Orders</span>
                                 <span className="inline-flex items-center gap-1"><Heart size={12} /> Save Favorites</span>
                                 <span className="inline-flex items-center gap-1"><Zap size={12} /> Faster Checkout</span>
@@ -491,7 +929,7 @@ function LoginForm() {
                             {isSignUp ? 'Sign In' : 'Create Account'}
                         </button>
                     </div>
-                    <p className="text-center text-[11px] mt-2.5" style={{ color: BRAND.muted }}>
+                    <p className="auth-legal-desktop text-center text-[11px] mt-2.5" style={{ color: BRAND.muted }}>
                         © {new Date().getFullYear()} LeafyLand. All rights reserved.
                     </p>
                 </div>
@@ -502,7 +940,7 @@ function LoginForm() {
 
 export default function LoginPage() {
     return (
-        <Suspense fallback={<div className="min-h-screen" style={{ backgroundColor: '#f4f8f5' }} />}>
+        <Suspense fallback={<div className="flex-1" style={{ backgroundColor: '#f4f8f5' }} />}>
             <LoginForm />
         </Suspense>
     )

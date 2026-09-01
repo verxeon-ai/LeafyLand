@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { Leaf, Wrench, Droplets, Home as HomeIcon, Scissors, FlaskConical, Fence, ChevronDown, Smartphone, Laptop, Shirt, Sofa, Dumbbell, BookOpen, Gamepad2, Sparkles, Car } from 'lucide-react'
+import { Leaf, Wrench, Droplets, Home as HomeIcon, Scissors, FlaskConical, Fence, ChevronDown, Smartphone, Laptop, Shirt, Sofa, Dumbbell, BookOpen, Gamepad2, Sparkles, Car, CalendarDays } from 'lucide-react'
 import Link from 'next/link'
 import { cachedJson } from '@/lib/cachedJson'
 
@@ -39,17 +39,20 @@ const META = {
     'Farmhouses': {
         sub: 'Buy or rent', icon: HomeIcon, color: 'bg-[#fff3e0]', iconColor: 'text-orange-600',
         subcategories: [
-            { name: 'Farmhouses', href: '/properties' },
-            { name: 'Land', href: '/properties' },
-            { name: 'Farm Stays', href: '/properties' },
+            { name: 'Farmhouses', href: '/properties?type=Farmhouse' },
+            { name: 'Land', href: '/properties?type=Agricultural+Land' },
+            { name: 'Farm Stays', href: '/properties?type=Farm+Stay' },
         ],
     },
     'Landscaping': {
         sub: 'Book a pro', icon: Scissors, color: 'bg-[#e8f5e9]', iconColor: 'text-emerald-600',
         subcategories: [
-            { name: 'Daily Needs', href: '/services' },
-            { name: 'Home Services', href: '/services' },
-            { name: 'Garden Maintenance', href: '/services' },
+            { name: 'Daily Needs', href: '/services?category=Daily+Needs+Services' },
+            { name: 'Home Services', href: '/services?category=Home+Services' },
+            { name: 'Garden Maintenance', href: '/services?category=Garden+Maintenance' },
+            { name: 'Landscaping', href: '/services?category=Landscaping' },
+            { name: 'Irrigation', href: '/services?category=Irrigation' },
+            { name: 'Book a service', href: '/services', icon: CalendarDays },
         ],
     },
     'Fertilizers': {
@@ -238,21 +241,24 @@ const CategoriesStrip = ({ activeCategory, onSelect }) => {
                                             <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider px-2 py-1">{cat.name}</p>
                                         </div>
                                         <div className="p-1.5">
-                                            {(meta.subcategories || []).map((sub, j) => (
+                                            {(meta.subcategories || []).map((sub, j) => {
+                                                const SubIcon = sub.icon || Icon
+                                                return (
                                                 <Link
                                                     key={j}
                                                     href={sub.href}
                                                     onClick={() => setOpenDropdown(null)}
                                                     className="flex items-center gap-2.5 px-3 py-2.5 text-xs font-medium text-slate-600 hover:bg-emerald-50 hover:text-emerald-700 rounded-lg transition-colors"
                                                 >
-                                                    <Icon size={13} className="text-slate-400" />
+                                                    <SubIcon size={13} className="text-slate-400" />
                                                     {sub.name}
                                                 </Link>
-                                            ))}
+                                                )
+                                            })}
                                         </div>
                                         <div className="p-1.5 border-t border-slate-100">
                                             <Link
-                                                href={meta.subcategories?.[0]?.href || '/products'}
+                                                href={cat.name === 'Farmhouses' ? '/properties' : cat.name === 'Landscaping' ? '/services' : (meta.subcategories?.[0]?.href || '/products')}
                                                 onClick={() => setOpenDropdown(null)}
                                                 className="flex items-center justify-center gap-1 px-3 py-2 text-[11px] font-semibold text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
                                             >

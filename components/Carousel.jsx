@@ -1,7 +1,8 @@
 'use client'
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { brandPrimaryCtaClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 const BRAND = {
@@ -48,20 +49,28 @@ const slides = [
     },
 ]
 
-function HeroSlide({ badge, title, subtitle, cta, href, image, wide }) {
+function HeroSlide({ badge, title, subtitle, cta, href, image, wide, priority = false }) {
     return (
         <div className="relative w-full h-full overflow-hidden">
-            <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover object-center" />
+            <Image
+                src={image}
+                alt=""
+                fill
+                className="object-cover object-center"
+                sizes="(max-width: 768px) 100vw, 1280px"
+                quality={70}
+                priority={priority}
+            />
             <div className="absolute left-0 top-0 h-full w-[60%] bg-gradient-to-r from-white/70 via-white/60 to-transparent" />
-            <div className="relative z-10 h-full flex items-center px-5 sm:px-8 md:px-12 lg:px-14">
-                <div className={wide ? 'max-w-[50%] sm:max-w-[55%] md:max-w-[60%] lg:max-w-xl' : 'max-w-[45%] sm:max-w-[50%] md:max-w-[55%] lg:max-w-lg'}>
+            <div className="relative z-10 h-full flex items-center px-4 sm:px-8 md:px-12 lg:px-14">
+                <div className={wide ? 'max-w-[min(100%,20rem)] sm:max-w-[55%] md:max-w-[60%] lg:max-w-xl pr-10 sm:pr-0' : 'max-w-[min(100%,18rem)] sm:max-w-[50%] md:max-w-[55%] lg:max-w-lg pr-10 sm:pr-0'}>
                     <p
                         className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.14em]"
                         style={{ color: BRAND.green }}
                     >
                         {badge}
                     </p>
-                    <h2 className="mt-1.5 sm:mt-2 text-lg sm:text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-800 leading-snug">
+                    <h2 className="mt-1.5 sm:mt-2 text-base sm:text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-800 leading-snug">
                         {title}
                     </h2>
                     <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-sm md:text-base text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
@@ -108,14 +117,17 @@ const Carousel = () => {
                 setTouchX(null)
             }}
         >
-            {slides.map((slide, i) => (
+            {slides.map((slide, i) => {
+                const nearby = i === current || i === (current + 1) % slides.length || i === (current - 1 + slides.length) % slides.length
+                return (
                 <div
                     key={slide.id}
                     className={`absolute inset-0 transition-opacity duration-500 ${i === current ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
                 >
-                    <HeroSlide {...slide} />
+                    {nearby && <HeroSlide {...slide} priority={i === current} />}
                 </div>
-            ))}
+                )
+            })}
 
             <button
                 type="button"

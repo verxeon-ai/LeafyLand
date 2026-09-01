@@ -1,20 +1,32 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { Suspense, useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'next/navigation'
+import Link from 'next/link'
 import PropertyCard from "@/components/PropertyCard"
 import { Search } from 'lucide-react'
+import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
+import { PropertyGridSkeleton } from '@/components/CatalogSkeleton'
 
-const PropertiesPage = () => {
-    const [search, setSearch] = useState('')
-    const [selectedType, setSelectedType] = useState('All')
+const PropertiesContent = () => {
+    const searchParams = useSearchParams()
+    const urlType = searchParams.get('type') || ''
+    const urlSearch = searchParams.get('search') || ''
+    const selectedType = urlType || 'All'
+    const [search, setSearch] = useState(urlSearch)
     const [listingFilter, setListingFilter] = useState('All')
-    const [properties, setProperties] = useState([])
-    const [loading, setLoading] = useState(true)
+    const [properties, setProperties] = useState(() => Array.isArray(peekCachedJson('/api/properties')) ? peekCachedJson('/api/properties') : [])
+    const [loading, setLoading] = useState(() => !Array.isArray(peekCachedJson('/api/properties')))
 
     useEffect(() => {
-        fetch('/api/properties')
-            .then((r) => r.json())
-            .then((data) => { if (Array.isArray(data)) setProperties(data) })
-            .finally(() => setLoading(false))
+        setSearch(urlSearch)
+    }, [urlSearch])
+
+    useEffect(() => {
+        let cancelled = false
+        cachedJson('/api/properties')
+            .then((data) => { if (!cancelled && Array.isArray(data)) setProperties(data) })
+            .finally(() => { if (!cancelled) setLoading(false) })
+        return () => { cancelled = true }
     }, [])
 
     const propertyTypes = useMemo(() => {
@@ -60,9 +72,9 @@ const PropertiesPage = () => {
                     <button
                         key={type}
                         onClick={() => setListingFilter(type)}
-                        className={`px-4 py-2 rounded-full text-xs font-medium transition ${
+                        className={`px-4 py-2 rounded-xl text-xs font-medium transition ${
                             listingFilter === type
-                                ? 'bg-amber-500 text-white'
+                                ? 'bg-[#2f7d4a] text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
@@ -74,30 +86,28 @@ const PropertiesPage = () => {
             {/* Property type filter (derived from data) */}
             <div className="flex gap-2 overflow-x-auto no-scrollbar pb-4 mb-4">
                 {propertyTypes.map((type) => (
-                    <button
+                    <Link
                         key={type}
-                        onClick={() => setSelectedType(type)}
-                        className={`flex-shrink-0 px-4 py-2 rounded-full text-xs font-medium transition ${
+                        href={type === 'All' ? '/properties' : `/properties?type=${encodeURIComponent(type)}`}
+                        className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition ${
                             selectedType === type
-                                ? 'bg-amber-600 text-white'
+                                ? 'bg-[#2f7d4a] text-white'
                                 : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                         }`}
                     >
                         {type}
-                    </button>
+                    </Link>
                 ))}
             </div>
 
             {loading ? (
-                <div className="text-center py-20">
-                    <p className="text-slate-500 text-sm">Loading properties…</p>
-                </div>
+                <PropertyGridSkeleton count={4} />
             ) : filtered.length === 0 ? (
                 <div className="text-center py-20">
                     <p className="text-slate-500 text-sm">No properties found matching your criteria.</p>
-                    <button onClick={() => { setSearch(''); setSelectedType('All'); setListingFilter('All') }} className="mt-3 text-amber-600 text-sm font-medium hover:underline">
+                    <Link href="/properties" className="mt-3 inline-block text-amber-600 text-sm font-medium hover:underline">
                         Clear filters
-                    </button>
+                    </Link>
                 </div>
             ) : (
                 <div className="space-y-6">
@@ -111,7 +121,7 @@ const PropertiesPage = () => {
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                                 {filtered.map((property) => (
-                                    <PropertyCard key={property.id} property={property} />
+                                    <PropertyCard key={property.id} property={property} fluid />
                                 ))}
                             </div>
                         </div>
@@ -127,7 +137,7 @@ const PropertiesPage = () => {
                             </div>
                             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
                                 {filtered.filter(p => p.marketplace).map((property) => (
-                                    <PropertyCard key={property.id} property={property} />
+                                    <PropertyCard key={property.id} property={property} fluid />
                                 ))}
                             </div>
                         </div>
@@ -138,4 +148,10 @@ const PropertiesPage = () => {
     )
 }
 
-export default PropertiesPage
+export default function PropertiesPage() {
+    return (
+        <Suspense fallback={<div className="min-h-[50vh]" />}>
+            <PropertiesContent />
+        </Suspense>
+    )
+}

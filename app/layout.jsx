@@ -6,7 +6,14 @@ import CartSync from "@/components/CartSync";
 import WishlistSync from "@/components/WishlistSync";
 import "./globals.css";
 
-const outfit = Outfit({ subsets: ["latin"], weight: ["400", "500", "600"], display: "swap" });
+const outfit = Outfit({
+    subsets: ["latin"],
+    weight: ["400", "500", "600"],
+    display: "swap",
+    preload: true,
+    adjustFontFallback: true,
+    fallback: ["system-ui", "Segoe UI", "sans-serif"],
+});
 
 export const metadata = {
     title: "LeafyLand — Plants, Properties & Landscaping Services",
@@ -14,6 +21,12 @@ export const metadata = {
     icons: {
         icon: "/favicon.svg",
     },
+};
+
+export const viewport = {
+    width: "device-width",
+    initialScale: 1,
+    viewportFit: "cover",
 };
 
 export default function RootLayout({ children }) {

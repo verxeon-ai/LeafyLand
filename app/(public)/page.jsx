@@ -5,55 +5,32 @@ import ExploreCategories from "@/components/ExploreCategories";
 import FeaturedSection from "@/components/FeaturedSection";
 import ProductCard from "@/components/ProductCard";
 import PropertyCard from "@/components/PropertyCard";
-import { cachedJson } from '@/lib/cachedJson'
+import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
 import { isMarketplaceCategory } from '@/lib/categories'
-import { ShieldCheck, Truck, Leaf, ChevronRight, Droplets, Scissors, Sparkles, Recycle, Flower2, Wrench, Package, Home as HomeIcon, AlertTriangle, RefreshCw, Building, Paintbrush, Hammer, Droplet, Camera, Trash2, Zap } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import Link from "next/link";
+import ServiceCategoryCard from "@/components/ServiceCategoryCard";
+import { ProductGridSkeleton } from "@/components/CatalogSkeleton";
 
-const serviceIcons = {
-    'Plant Watering': Droplets,
-    'Lawn Mowing': Scissors,
-    'Garden Cleaning': Sparkles,
-    'Pest Control': ShieldCheck,
-    'Waste Recycling': Recycle,
-    'Indoor Plant Care': Leaf,
-    'Soil Replacement': Flower2,
-    'Irrigation Repair': Wrench,
-    'Compost Pickup': Truck,
-    'Balcony Setup': HomeIcon,
-    'Emergency Garden': AlertTriangle,
-    'Plant Replacement': RefreshCw,
-    'Housekeeping': Building,
-    'Deep Cleaning': Sparkles,
-    'AC Service': Zap,
-    'Appliance Repair': Wrench,
-    'Plumbing': Droplet,
-    'Electrical': Zap,
-    'Painting': Paintbrush,
-    'Carpentry': Hammer,
-    'Waterproofing': ShieldCheck,
-    'CCTV': Camera,
-    'Shifting': Package,
-    'Junk Removal': Trash2,
+function asList(value) {
+    return Array.isArray(value) ? value : []
 }
 
 export default function Home() {
-    const [products, setProducts] = useState([])
-    const [services, setServices] = useState([])
-    const [properties, setProperties] = useState([])
+    const [products, setProducts] = useState(() => asList(peekCachedJson('/api/products')))
+    const [services, setServices] = useState(() => asList(peekCachedJson('/api/services')))
+    const [properties, setProperties] = useState(() => asList(peekCachedJson('/api/properties')))
+    const [catalogReady, setCatalogReady] = useState(() => peekCachedJson('/api/products') !== undefined)
 
     useEffect(() => {
         let cancelled = false
-        Promise.all([
-            cachedJson('/api/products'),
-            cachedJson('/api/services'),
-            cachedJson('/api/properties'),
-        ]).then(([p, s, pr]) => {
+        cachedJson('/api/products').then((p) => {
             if (cancelled) return
             if (Array.isArray(p)) setProducts(p)
-            if (Array.isArray(s)) setServices(s)
-            if (Array.isArray(pr)) setProperties(pr)
-        }).catch(() => {})
+            setCatalogReady(true)
+        }).catch(() => { if (!cancelled) setCatalogReady(true) })
+        cachedJson('/api/services').then((s) => { if (!cancelled && Array.isArray(s)) setServices(s) }).catch(() => {})
+        cachedJson('/api/properties').then((pr) => { if (!cancelled && Array.isArray(pr)) setProperties(pr) }).catch(() => {})
         return () => { cancelled = true }
     }, [])
 
@@ -106,20 +83,27 @@ export default function Home() {
             </div>
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1">
-                {/* Popular Plants */}
+                {!catalogReady && products.length === 0 && (
+                    <div className="py-5">
+                        <div className="h-5 w-36 bg-slate-100 rounded mb-3 animate-pulse" />
+                        <ProductGridSkeleton count={5} />
+                    </div>
+                )}
+                {catalogReady && (featuredProducts.length > 0 || allProducts.length > 0) && (
                 <FeaturedSection
                     title="Popular Plants"
                     items={featuredProducts.length > 0 ? featuredProducts : allProducts}
                     viewAllLink="/products"
                     renderItem={(product) => <ProductCard product={product} />}
                 />
+                )}
 
                 {/* Indoor Greenary */}
                 {indoorGreenary.length > 0 && (
                     <FeaturedSection
                         title="Indoor Greenary"
                         items={indoorGreenary}
-                        viewAllLink="/products?category=Indoor+Greenary"
+                        viewAllLink="/products?category=Indoor%20Greenary"
                         renderItem={(product) => <ProductCard product={product} />}
                     />
                 )}
@@ -186,22 +170,10 @@ export default function Home() {
                                 See All <ChevronRight size={14} />
                             </Link>
                         </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                            {dailyServices.map(service => {
-                                const Icon = serviceIcons[service.name] || Leaf
-                                return (
-                                    <Link
-                                        key={service.id}
-                                        href={`/services/${service.id}`}
-                                        className="flex flex-col items-center gap-2.5 p-4 bg-white rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all group"
-                                    >
-                                        <div className="w-11 h-11 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                                            <Icon size={20} className="text-emerald-600" />
-                                        </div>
-                                        <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight">{service.name}</span>
-                                    </Link>
-                                )
-                            })}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            {dailyServices.map(service => (
+                                <ServiceCategoryCard key={service.id} service={service} />
+                            ))}
                         </div>
                     </section>
                 )}
@@ -218,22 +190,10 @@ export default function Home() {
                                 See All <ChevronRight size={14} />
                             </Link>
                         </div>
-                        <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-                            {homeServices.map(service => {
-                                const Icon = serviceIcons[service.name] || Leaf
-                                return (
-                                    <Link
-                                        key={service.id}
-                                        href={`/services/${service.id}`}
-                                        className="flex flex-col items-center gap-2.5 p-4 bg-white rounded-2xl border border-slate-100 hover:border-emerald-200 hover:shadow-md transition-all group"
-                                    >
-                                        <div className="w-11 h-11 rounded-full bg-emerald-50 flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
-                                            <Icon size={20} className="text-emerald-600" />
-                                        </div>
-                                        <span className="text-[11px] font-semibold text-slate-700 text-center leading-tight">{service.name}</span>
-                                    </Link>
-                                )
-                            })}
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                            {homeServices.map(service => (
+                                <ServiceCategoryCard key={service.id} service={service} />
+                            ))}
                         </div>
                     </section>
                 )}

@@ -39,8 +39,8 @@ const HowItWorksPage = () => {
             {/* For Vendors */}
             <section className="mb-12">
                 <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                        <UserPlus size={16} className="text-blue-600" />
+                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                        <UserPlus size={16} className="text-[#2f7d4a]" />
                     </div>
                     For Vendors & Service Providers
                 </h2>
@@ -51,23 +51,23 @@ const HowItWorksPage = () => {
                         { icon: Star, title: "Get Orders & Grow", desc: "Manage orders, build your reputation with reviews, and grow your business." },
                     ].map((step, i) => (
                         <div key={i} className="relative p-5 bg-white border border-slate-100 rounded-2xl">
-                            <span className="absolute -top-3 -left-1 w-7 h-7 bg-blue-600 text-white text-xs font-bold rounded-full flex items-center justify-center">{i + 1}</span>
-                            <step.icon size={20} className="text-blue-600 mb-2" />
+                            <span className="absolute -top-3 -left-1 w-7 h-7 bg-[#2f7d4a] text-white text-xs font-bold rounded-full flex items-center justify-center">{i + 1}</span>
+                            <step.icon size={20} className="text-[#2f7d4a] mb-2" />
                             <h3 className="font-semibold text-slate-800 text-sm">{step.title}</h3>
                             <p className="text-xs text-slate-500 mt-1 leading-relaxed">{step.desc}</p>
                         </div>
                     ))}
                 </div>
                 <div className="text-center mt-4">
-                    <Link href="/become-seller" className="text-sm font-semibold text-blue-600 hover:underline">Become a Seller →</Link>
+                    <Link href="/become-seller" className="text-sm font-semibold text-[#2f7d4a] hover:underline">Become a Seller →</Link>
                 </div>
             </section>
 
             {/* For Property Listers */}
             <section className="mb-12">
                 <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
-                    <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-                        <Home size={16} className="text-amber-600" />
+                    <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
+                        <Home size={16} className="text-[#2f7d4a]" />
                     </div>
                     For Property Listers
                 </h2>
@@ -78,15 +78,15 @@ const HowItWorksPage = () => {
                         { icon: Star, title: "Close the Deal", desc: "Meet, negotiate, and complete the transaction offline at your pace." },
                     ].map((step, i) => (
                         <div key={i} className="relative p-5 bg-white border border-slate-100 rounded-2xl">
-                            <span className="absolute -top-3 -left-1 w-7 h-7 bg-amber-600 text-white text-xs font-bold rounded-full flex items-center justify-center">{i + 1}</span>
-                            <step.icon size={20} className="text-amber-600 mb-2" />
+                            <span className="absolute -top-3 -left-1 w-7 h-7 bg-[#2f7d4a] text-white text-xs font-bold rounded-full flex items-center justify-center">{i + 1}</span>
+                            <step.icon size={20} className="text-[#2f7d4a] mb-2" />
                             <h3 className="font-semibold text-slate-800 text-sm">{step.title}</h3>
                             <p className="text-xs text-slate-500 mt-1 leading-relaxed">{step.desc}</p>
                         </div>
                     ))}
                 </div>
                 <div className="text-center mt-4">
-                    <Link href="/properties" className="text-sm font-semibold text-amber-600 hover:underline">Browse Properties →</Link>
+                    <Link href="/properties" className="text-sm font-semibold text-[#2f7d4a] hover:underline">Browse Properties →</Link>
                 </div>
             </section>
         </div>

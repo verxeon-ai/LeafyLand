@@ -64,16 +64,16 @@ function VerifyEmailContent() {
     }
 
     return (
-        <div className="min-h-[80vh] flex items-center justify-center px-4 py-10 bg-slate-50/50">
+        <div className="min-h-[60svh] flex items-center justify-center px-4 py-8 sm:py-10 bg-slate-50/50">
             <div className="w-full max-w-md">
-                <div className="text-center mb-8">
+                <div className="text-center mb-6 sm:mb-8">
                     <Link href="/" className="inline-flex items-center gap-2 mb-3">
                         <Image src={assets.logo} alt="LeafyLand" width={140} height={35} className="h-9 w-auto object-contain" />
                     </Link>
                     <h1 className="text-xl font-bold text-slate-800">Verify your email</h1>
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6 sm:p-8 space-y-5">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-5 sm:p-8 space-y-5">
                     {status === 'verifying' && (
                         <p className="text-sm text-slate-600 text-center">Verifying your email…</p>
                     )}
@@ -115,7 +115,7 @@ function VerifyEmailContent() {
                                         placeholder="you@example.com"
                                         value={email}
                                         onChange={(e) => setEmail(e.target.value)}
-                                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
+                                        className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:border-emerald-500"
                                     />
                                 </div>
                                 <button
@@ -142,7 +142,7 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
     return (
-        <Suspense fallback={<div className="min-h-[80vh]" />}>
+        <Suspense fallback={<div className="min-h-[60svh]" />}>
             <VerifyEmailContent />
         </Suspense>
     )

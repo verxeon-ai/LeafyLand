@@ -2,9 +2,14 @@
 
 import { useEffect, useState } from 'react'
 import { Users, IndianRupee, ShoppingBag, Store } from 'lucide-react'
+import dynamic from 'next/dynamic'
 import StatCard from '@/components/admin/StatCard'
 import StatusBadge from '@/components/admin/StatusBadge'
-import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+
+const AdminDashboardCharts = dynamic(() => import('@/components/charts/AdminDashboardCharts'), {
+    ssr: false,
+    loading: () => <div className="h-[340px] bg-white rounded-2xl border border-slate-100 animate-pulse" />,
+})
 
 const formatDate = (value) => {
     if (!value) return '—'
@@ -32,7 +37,19 @@ export default function AdminDashboard() {
     }, [])
 
     if (loading) {
-        return <p className="text-slate-500">Loading dashboard…</p>
+        return (
+            <div className="space-y-6">
+                <h1 className="text-2xl font-semibold text-slate-800">
+                    Admin <span className="font-bold">Dashboard</span>
+                </h1>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 animate-pulse">
+                    {Array.from({ length: 4 }, (_, i) => (
+                        <div key={i} className="h-24 bg-white rounded-2xl border border-slate-100" />
+                    ))}
+                </div>
+                <div className="h-[340px] bg-white rounded-2xl border border-slate-100 animate-pulse" />
+            </div>
+        )
     }
 
     if (error || !data) {
@@ -55,52 +72,7 @@ export default function AdminDashboard() {
                 <StatCard icon={Store} label="Active Stores" value={stats.stores.toLocaleString('en-IN')} color="bg-amber-100" />
             </div>
 
-            {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Orders Area Chart */}
-                <div className="bg-white rounded-2xl border border-slate-100 p-5">
-                    <h2 className="text-lg font-semibold text-slate-800 mb-4">Orders Overview</h2>
-                    <div className="w-full" style={{ minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <AreaChart data={ordersChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                            />
-                            <Area
-                                type="monotone"
-                                dataKey="orders"
-                                stroke="#10b981"
-                                fill="#10b981"
-                                fillOpacity={0.15}
-                                strokeWidth={2}
-                            />
-                        </AreaChart>
-                    </ResponsiveContainer>
-                    </div>
-                </div>
-
-                {/* Revenue Bar Chart */}
-                <div className="bg-white rounded-2xl border border-slate-100 p-5">
-                    <h2 className="text-lg font-semibold text-slate-800 mb-4">Revenue</h2>
-                    <div className="w-full" style={{ minWidth: 0 }}>
-                    <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={revenueChartData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-                            <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <YAxis tick={{ fontSize: 12 }} stroke="#94a3b8" />
-                            <Tooltip
-                                contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
-                                formatter={(value) => [`₹${Number(value).toLocaleString('en-IN')}`, 'Revenue']}
-                            />
-                            <Bar dataKey="revenue" fill="#10b981" radius={[6, 6, 0, 0]} />
-                        </BarChart>
-                    </ResponsiveContainer>
-                    </div>
-                </div>
-            </div>
+            <AdminDashboardCharts ordersChartData={ordersChartData} revenueChartData={revenueChartData} />
 
             {/* Tables */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

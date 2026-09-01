@@ -30,6 +30,27 @@
     button {
         cursor: pointer;
     }
+
+    /* The sticky navbar drops its 44px category row once you scroll. Scroll
+       anchoring treats that as content shrinking above the viewport and shifts
+       the scroll position by the same amount to compensate, which yanks the page
+       backwards mid-scroll and can flip the navbar between states. Shifting the
+       content up is the intended result here, so opt the document out. */
+    html {
+        overflow-anchor: none;
+        overflow-x: clip;
+    }
+
+    body {
+        overflow-x: clip;
+        min-width: 0;
+    }
+
+    img,
+    video,
+    iframe {
+        max-width: 100%;
+    }
 }
 
 .no-scrollbar::-webkit-scrollbar {

@@ -5,38 +5,44 @@ import ProductDetails from '@/components/ProductDetails'
 import ProductDescription from '@/components/ProductDescription'
 import Link from 'next/link'
 import { ChevronLeft } from 'lucide-react'
+import { cachedJson, peekDetail } from '@/lib/cachedJson'
+import { DetailSkeleton } from '@/components/CatalogSkeleton'
 
 const ProductPage = () => {
     const { productId } = useParams()
-    const [product, setProduct] = useState(null)
-    const [loading, setLoading] = useState(true)
+    const detailUrl = `/api/products/${productId}`
+    const initial = peekDetail(detailUrl, '/api/products', productId)
+    const [product, setProduct] = useState(() => (initial?.id ? initial : null))
+    const [loading, setLoading] = useState(!initial?.id)
     const [notFound, setNotFound] = useState(false)
 
     useEffect(() => {
-        setLoading(true)
+        let cancelled = false
         setNotFound(false)
-        setProduct(null)
-        fetch(`/api/products/${productId}`)
-            .then(async (res) => {
-                if (res.status === 404) {
+        const hit = peekDetail(detailUrl, '/api/products', productId)
+        if (hit?.id) {
+            setProduct(hit)
+            setLoading(false)
+        } else {
+            setLoading(true)
+            setProduct(null)
+        }
+        cachedJson(detailUrl)
+            .then((data) => {
+                if (cancelled) return
+                if (data?.error || !data?.id) {
                     setNotFound(true)
-                    return null
+                    setProduct(null)
+                    return
                 }
-                if (!res.ok) throw new Error('Failed to load')
-                return res.json()
+                setProduct(data)
             })
-            .then((data) => { if (data) setProduct(data) })
-            .catch(() => setNotFound(true))
-            .finally(() => setLoading(false))
-    }, [productId])
+            .catch(() => { if (!cancelled) setNotFound(true) })
+            .finally(() => { if (!cancelled) setLoading(false) })
+        return () => { cancelled = true }
+    }, [productId, detailUrl])
 
-    if (loading) {
-        return (
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-20 text-center">
-                <p className="text-slate-500 text-sm">Loading…</p>
-            </div>
-        )
-    }
+    if (loading) return <DetailSkeleton />
 
     if (notFound || !product) {
         return (
@@ -54,7 +60,7 @@ const ProductPage = () => {
             <Link href="/products" className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-emerald-600 mb-6 transition">
                 <ChevronLeft size={16} /> Back to Products
             </Link>
-            <ProductDetails product={product} />
+            <ProductDetails key={product.id} product={product} />
             <ProductDescription product={product} />
         </div>
     )

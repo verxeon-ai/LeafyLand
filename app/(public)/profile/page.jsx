@@ -13,10 +13,10 @@ import WishlistSection from '@/components/WishlistSection'
 import ConfirmLogoutModal from '@/components/ConfirmLogoutModal'
 
 export default function BuyerProfilePage() {
-    const { data: session, update } = useSession()
+    const { data: session, status: sessionStatus, update } = useSession()
     const [showLogout, setShowLogout] = useState(false)
     const [profile, setProfile] = useState(null)
-    const [name, setName] = useState('')
+    const [name, setName] = useState(() => session?.user?.name || '')
     const [saving, setSaving] = useState(false)
     const [loading, setLoading] = useState(true)
 
@@ -31,6 +31,26 @@ export default function BuyerProfilePage() {
             .catch((err) => toast.error(err.message))
             .finally(() => setLoading(false))
     }, [])
+
+    const display = profile || session?.user
+    const waiting = loading && !display
+
+    if (waiting || (sessionStatus === 'loading' && !display)) {
+        return (
+            <div className="min-h-[70vh] bg-slate-50/60">
+                <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-pulse">
+                        <div className="h-32 bg-emerald-700/40" />
+                        <div className="p-6 space-y-3">
+                            <div className="h-4 w-40 bg-slate-100 rounded" />
+                            <div className="h-10 w-full bg-slate-100 rounded-xl" />
+                            <div className="h-10 w-full bg-slate-100 rounded-xl" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     const saveProfile = async (e) => {
         e.preventDefault()
@@ -51,14 +71,6 @@ export default function BuyerProfilePage() {
         } finally {
             setSaving(false)
         }
-    }
-
-    if (loading) {
-        return (
-            <div className="min-h-[70vh] flex items-center justify-center text-slate-400 text-sm">
-                Loading profile…
-            </div>
-        )
     }
 
     const store = profile?.store
@@ -88,18 +100,18 @@ export default function BuyerProfilePage() {
                     <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-8 text-white">
                         <div className="flex items-center gap-4">
                             <div className="w-16 h-16 rounded-full bg-white/15 border border-white/25 flex items-center justify-center overflow-hidden shrink-0">
-                                {profile?.image ? (
-                                    <Image src={profile.image} alt="" width={64} height={64} className="w-full h-full object-cover" />
+                                {display?.image ? (
+                                    <Image src={display.image} alt="" width={64} height={64} className="w-full h-full object-cover" />
                                 ) : (
                                     <User size={28} className="text-white" />
                                 )}
                             </div>
                             <div className="min-w-0">
                                 <h1 className="text-xl sm:text-2xl font-bold truncate">
-                                    {profile?.name || session?.user?.name || 'Buyer'}
+                                    {display?.name || 'Buyer'}
                                 </h1>
                                 <p className="text-emerald-100 text-sm flex items-center gap-1.5 mt-1 truncate">
-                                    <Mail size={14} /> {profile?.email}
+                                    <Mail size={14} /> {display?.email}
                                 </p>
                                 <span className="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold bg-white/15 px-2 py-0.5 rounded-full">
                                     <Shield size={12} /> Buyer Account
@@ -123,14 +135,14 @@ export default function BuyerProfilePage() {
                         <div>
                             <label className="text-xs font-medium text-slate-500 mb-1.5 block">Email</label>
                             <input
-                                value={profile?.email || ''}
+                                value={display?.email || ''}
                                 disabled
                                 className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500"
                             />
                         </div>
                         <button
                             type="submit"
-                            disabled={saving}
+                            disabled={saving || loading}
                             className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
                         >
                             {saving ? 'Saving…' : 'Save changes'}

@@ -1,55 +1,84 @@
 import Link from 'next/link'
-import { ArrowRight, ShieldCheck, TrendingUp, Truck, Users, Store, Leaf, Star, CheckCircle2, IndianRupee, HeadphonesIcon, BarChart3 } from 'lucide-react'
+import Image from 'next/image'
+import {
+    ArrowRight, ShieldCheck, TrendingUp, Store, Leaf,
+    CheckCircle2, IndianRupee, HeadphonesIcon, BarChart3,
+} from 'lucide-react'
+import { BRAND_GREEN } from '@/lib/brand-ui'
 
 export const metadata = {
-    title: 'Become a Seller – LeafyLand',
-    description: "Join India's largest green marketplace. Sell plants, tools, seeds, garden products and more to thousands of buyers across India.",
+    title: 'Sell on LeafyLand',
+    description: "Join India's green marketplace. Sell plants, tools, seeds, garden products and more to thousands of buyers across India.",
+}
+
+const BRAND = {
+    green: BRAND_GREEN,
+    mint: '#f4f8f5',
+    mintBorder: '#e4eee6',
+    greenLight: '#eef4ef',
+    text: '#1f2937',
+    muted: '#6b7280',
 }
 
 const benefits = [
     {
         icon: TrendingUp,
-        color: 'bg-emerald-100 text-emerald-600',
-        title: 'Grow Your Sales',
-        desc: 'Reach thousands of plant lovers and garden enthusiasts across India actively looking for what you sell.',
+        title: 'Grow your sales',
+        desc: 'Reach plant lovers and garden enthusiasts across India who are already shopping on LeafyLand.',
     },
     {
         icon: Store,
-        color: 'bg-lime-100 text-lime-700',
-        title: 'Your Own Storefront',
-        desc: 'Get a dedicated store page with your logo, products, reviews, and a unique URL you can share anywhere.',
+        title: 'Your own storefront',
+        desc: 'A dedicated store page with your logo, products, reviews, and a URL you can share anywhere.',
     },
     {
         icon: IndianRupee,
-        color: 'bg-orange-100 text-orange-600',
-        title: 'Zero Commission to Start',
-        desc: 'List your products for free and pay only when you grow. Transparent pricing with no hidden fees.',
+        title: 'Transparent pricing',
+        desc: 'List for free to start. Clear fees, no surprises — you only pay as you grow.',
     },
     {
         icon: ShieldCheck,
-        color: 'bg-teal-100 text-teal-600',
-        title: 'Verified Seller Badge',
-        desc: 'Get admin-verified and earn a trust badge that boosts buyer confidence and conversions.',
+        title: 'Verified seller badge',
+        desc: 'Get reviewed by our team and earn a trust badge that helps buyers choose you with confidence.',
     },
     {
         icon: BarChart3,
-        color: 'bg-blue-100 text-blue-600',
-        title: 'Seller Dashboard',
-        desc: 'Manage orders, track inventory, view analytics, and respond to customers — all from one place.',
+        title: 'Seller dashboard',
+        desc: 'Manage orders, inventory, analytics, and customer messages from one place.',
     },
     {
         icon: HeadphonesIcon,
-        color: 'bg-purple-100 text-purple-600',
-        title: 'Dedicated Support',
-        desc: 'Our seller success team is here to help you set up, resolve issues, and scale your green business.',
+        title: 'Dedicated support',
+        desc: 'Our seller team helps you set up, resolve issues, and scale your green business.',
     },
 ]
 
 const steps = [
-    { number: '01', title: 'Create Your Account', desc: 'Sign up or log in to your LeafyLand account.' },
-    { number: '02', title: 'Submit Store Details', desc: 'Fill in your store name, description, contact info, and upload your logo.' },
-    { number: '03', title: 'Get Verified', desc: 'Our team reviews your application within 24–48 hours and activates your store.' },
-    { number: '04', title: 'Start Selling', desc: 'Add your products, set prices, and start receiving orders from buyers across India.' },
+    { number: '1', title: 'Create your account', desc: 'Sign up or log in to LeafyLand to get started.' },
+    { number: '2', title: 'Submit store details', desc: 'Add your store name, description, contact info, and logo.' },
+    { number: '3', title: 'Get verified', desc: 'We review your application within 24–48 hours.' },
+    { number: '4', title: 'Start selling', desc: 'List products, set prices, and receive orders across India.' },
+]
+
+const pillars = [
+    {
+        title: 'Products',
+        desc: 'Plants, tools, soil, planters and garden essentials.',
+        href: '/create-store',
+        art: '/icons/services/plant.png',
+    },
+    {
+        title: 'Services',
+        desc: 'Landscaping, irrigation, maintenance and home care.',
+        href: '/create-store',
+        art: '/icons/services/garden-design.png',
+    },
+    {
+        title: 'Properties',
+        desc: 'Farmhouses, farmland and green stays.',
+        href: '/create-store',
+        art: '/icons/services/maintenance.png',
+    },
 ]
 
 const categories = [
@@ -58,146 +87,199 @@ const categories = [
     'Landscaping Materials', 'Irrigation Equipment', 'Organic Compost', 'Big Plants',
 ]
 
+const heroCtaClass =
+    'inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-semibold rounded-xl transition-colors whitespace-nowrap'
+
 export default function BecomeSeller() {
     return (
-        <div className="bg-slate-50">
-
-            {/* Hero */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-emerald-700 via-emerald-600 to-teal-600">
-                <div className="absolute inset-0 opacity-[0.06]" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-                <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-white/10 blur-3xl" />
-                <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-teal-300/20 blur-3xl" />
-
-                <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
-                    <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur text-emerald-100 text-xs font-semibold px-4 py-1.5 rounded-full mb-6 border border-white/20">
-                        <Leaf size={13} />
-                        India's Green Marketplace
-                    </div>
-                    <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight max-w-3xl mx-auto">
-                        Sell Your Green Products to <span className="text-emerald-200">Millions</span>
-                    </h1>
-                    <p className="mt-5 text-base sm:text-lg text-emerald-100 max-w-xl mx-auto leading-relaxed">
-                        Join 500+ verified sellers on LeafyLand — India's fastest-growing marketplace for plants, garden products, tools, and more.
-                    </p>
-                    <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-                        <Link
-                            href="/create-store"
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-emerald-700 font-bold text-sm rounded-xl hover:bg-emerald-50 transition-colors shadow-xl shadow-black/20"
-                        >
-                            Start Selling Now <ArrowRight size={16} />
-                        </Link>
-                        <Link
-                            href="/how-it-works"
-                            className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/25 transition-colors backdrop-blur"
-                        >
-                            How It Works
-                        </Link>
-                    </div>
-
-                    {/* Quick stats */}
-                    <div className="flex flex-wrap items-center justify-center gap-8 mt-12 pt-10 border-t border-white/20">
-                        {[
-                            { value: '500+', label: 'Active Sellers' },
-                            { value: '10K+', label: 'Products Listed' },
-                            { value: '50+', label: 'Cities Covered' },
-                            { value: '5K+', label: 'Happy Buyers' },
-                        ].map((s, i) => (
-                            <div key={i} className="text-center">
-                                <p className="text-2xl sm:text-3xl font-extrabold text-white">{s.value}</p>
-                                <p className="text-xs text-emerald-200 mt-0.5">{s.label}</p>
+        <div className="bg-slate-50/50">
+            {/* Hero — same language as the homepage carousel */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2">
+                <div className="relative overflow-hidden rounded-xl bg-white shadow-sm min-h-[240px] sm:min-h-[300px] lg:min-h-[340px]">
+                    <img
+                        src="/bgs1.png"
+                        alt=""
+                        className="absolute inset-0 hidden sm:block h-full w-full object-cover object-center"
+                    />
+                    <div className="absolute inset-0 bg-[#f4f8f5] sm:bg-gradient-to-r sm:from-white sm:via-white/85 sm:to-transparent" />
+                    <div className="relative z-10 flex h-full min-h-[240px] sm:min-h-[300px] lg:min-h-[340px] items-center px-5 sm:px-10 lg:px-14 py-10">
+                        <div className="max-w-lg">
+                            <p
+                                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                                style={{ color: BRAND.green }}
+                            >
+                                Sell on LeafyLand
+                            </p>
+                            <h1 className="mt-2 text-2xl sm:text-3xl lg:text-[2.15rem] font-semibold text-slate-800 leading-snug">
+                                Grow your green business with India&apos;s plant marketplace
+                            </h1>
+                            <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+                                List plants, tools, services and properties. Reach buyers who are already looking for what you sell.
+                            </p>
+                            <div className="mt-5">
+                                <Link
+                                    href="/create-store"
+                                    className={`${heroCtaClass} text-white hover:opacity-90`}
+                                    style={{ backgroundColor: BRAND.green }}
+                                >
+                                    Start selling
+                                    <ArrowRight size={15} strokeWidth={2} />
+                                </Link>
                             </div>
-                        ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
-            {/* Benefits */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-                <div className="text-center mb-12">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Why Sell on LeafyLand?</h2>
-                    <p className="text-slate-500 mt-2 text-sm sm:text-base">Everything you need to run and grow your green business online</p>
+            {/* What you can list */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+                <div className="mb-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: BRAND.green }}>
+                        Three ways to sell
+                    </p>
+                    <h2 className="mt-1.5 text-lg sm:text-xl font-semibold text-slate-800">What can you list?</h2>
+                    <p className="mt-1 text-sm text-slate-500">One store. Products, services, and properties — all in the LeafyLand catalog.</p>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    {benefits.map((b, i) => (
-                        <div key={i} className="bg-white rounded-2xl p-6 border border-slate-100 hover:shadow-lg hover:-translate-y-0.5 transition-all">
-                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${b.color}`}>
-                                <b.icon size={22} />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {pillars.map((p) => (
+                        <Link
+                            key={p.title}
+                            href={p.href}
+                            className="group flex items-start gap-4 rounded-xl border bg-[#f4f8f5] px-4 py-5 transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_28px_rgba(47,125,74,0.12)] hover:border-[#c5d6c9]"
+                            style={{ borderColor: BRAND.mintBorder }}
+                        >
+                            <span className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-white shadow-[0_6px_18px_rgba(47,125,74,0.08)] ring-1 ring-white overflow-hidden">
+                                <Image
+                                    src={p.art}
+                                    alt=""
+                                    width={56}
+                                    height={56}
+                                    className="h-11 w-11 object-contain"
+                                />
+                            </span>
+                            <div className="min-w-0 pt-1">
+                                <h3 className="text-sm font-semibold text-slate-800 flex items-center gap-1.5">
+                                    {p.title}
+                                    <ArrowRight size={13} className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" style={{ color: BRAND.green }} />
+                                </h3>
+                                <p className="mt-1 text-xs text-slate-500 leading-relaxed">{p.desc}</p>
                             </div>
-                            <h3 className="font-bold text-slate-800 text-base mb-2">{b.title}</h3>
-                            <p className="text-sm text-slate-500 leading-relaxed">{b.desc}</p>
+                        </Link>
+                    ))}
+                </div>
+            </section>
+
+            {/* Benefits */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+                <div className="mb-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: BRAND.green }}>
+                        Why LeafyLand
+                    </p>
+                    <h2 className="mt-1.5 text-lg sm:text-xl font-semibold text-slate-800">Why sell with us?</h2>
+                    <p className="mt-1 text-sm text-slate-500">Tools and trust to run your green business online.</p>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {benefits.map((b) => (
+                        <div
+                            key={b.title}
+                            className="rounded-xl bg-white border p-5"
+                            style={{ borderColor: BRAND.mintBorder }}
+                        >
+                            <div
+                                className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl"
+                                style={{ backgroundColor: BRAND.greenLight, color: BRAND.green }}
+                            >
+                                <b.icon size={18} strokeWidth={1.75} />
+                            </div>
+                            <h3 className="text-sm font-semibold text-slate-800">{b.title}</h3>
+                            <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">{b.desc}</p>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* How it works */}
-            <section className="bg-gradient-to-br from-emerald-50 to-teal-50 py-16 sm:py-20">
+            {/* Steps */}
+            <section className="py-10 sm:py-14" style={{ backgroundColor: BRAND.mint }}>
                 <div className="max-w-7xl mx-auto px-4 sm:px-6">
-                    <div className="text-center mb-12">
-                        <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800">Get Started in 4 Simple Steps</h2>
-                        <p className="text-slate-500 mt-2 text-sm sm:text-base">From sign-up to first sale — it's fast and straightforward</p>
+                    <div className="mb-8">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: BRAND.green }}>
+                            Getting started
+                        </p>
+                        <h2 className="mt-1.5 text-lg sm:text-xl font-semibold text-slate-800">Four steps to your first sale</h2>
+                        <p className="mt-1 text-sm text-slate-500">From sign-up to going live — usually within a couple of days.</p>
                     </div>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        {steps.map((step, i) => (
-                            <div key={i} className="relative bg-white rounded-2xl p-6 border border-slate-100 shadow-sm text-center">
-                                <span className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-emerald-600 text-white font-extrabold text-lg mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        {steps.map((step) => (
+                            <div
+                                key={step.number}
+                                className="relative rounded-xl bg-white border p-5"
+                                style={{ borderColor: BRAND.mintBorder }}
+                            >
+                                <span
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-sm font-semibold text-white"
+                                    style={{ backgroundColor: BRAND.green }}
+                                >
                                     {step.number}
                                 </span>
-                                <h3 className="font-bold text-slate-800 text-sm mb-2">{step.title}</h3>
-                                <p className="text-xs text-slate-500 leading-relaxed">{step.desc}</p>
-                                {i < steps.length - 1 && (
-                                    <ArrowRight size={18} className="hidden lg:block absolute -right-3 top-1/2 -translate-y-1/2 text-emerald-400 z-10" />
-                                )}
+                                <h3 className="mt-3 text-sm font-semibold text-slate-800">{step.title}</h3>
+                                <p className="mt-1 text-xs text-slate-500 leading-relaxed">{step.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
 
-            {/* Categories you can sell */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-20">
-                <div className="text-center mb-10">
-                    <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-800">What Can You Sell?</h2>
-                    <p className="text-slate-500 mt-2 text-sm sm:text-base">List products across any of our popular green categories</p>
+            {/* Categories */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-14">
+                <div className="mb-6">
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: BRAND.green }}>
+                        Categories
+                    </p>
+                    <h2 className="mt-1.5 text-lg sm:text-xl font-semibold text-slate-800">Popular things sellers list</h2>
+                    <p className="mt-1 text-sm text-slate-500">Start with one category, then expand as you grow.</p>
                 </div>
-                <div className="flex flex-wrap justify-center gap-3">
-                    {categories.map((cat, i) => (
-                        <span key={i} className="flex items-center gap-1.5 px-4 py-2 bg-white border border-emerald-100 rounded-full text-sm text-slate-700 font-medium shadow-sm hover:border-emerald-400 hover:text-emerald-700 transition-colors cursor-default">
-                            <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                <div className="flex flex-wrap gap-2.5">
+                    {categories.map((cat) => (
+                        <span
+                            key={cat}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white border text-sm font-medium text-slate-700 rounded-xl"
+                            style={{ borderColor: BRAND.mintBorder }}
+                        >
+                            <CheckCircle2 size={14} strokeWidth={2} className="shrink-0" style={{ color: BRAND.green }} />
                             {cat}
                         </span>
                     ))}
                 </div>
             </section>
 
-
             {/* Final CTA */}
-            <section className="max-w-7xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
-                <div className="bg-gradient-to-br from-emerald-900 to-emerald-950 rounded-3xl px-6 py-14 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 w-72 h-72 rounded-full bg-emerald-500/10 blur-3xl" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full bg-teal-500/10 blur-3xl" />
-                    <div className="relative z-10">
-                        <Users size={36} className="text-emerald-400 mx-auto mb-4" />
-                        <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white leading-tight max-w-xl mx-auto">
-                            Ready to Join India's Green Seller Community?
-                        </h2>
-                        <p className="text-slate-400 mt-4 max-w-md mx-auto text-sm sm:text-base">
-                            Set up your store in minutes. No technical knowledge needed. Our team will guide you every step of the way.
-                        </p>
-                        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-                            <Link
-                                href="/create-store"
-                                className="inline-flex items-center gap-2 px-8 py-3.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-sm rounded-xl transition-colors shadow-lg shadow-emerald-500/30"
-                            >
-                                Create Your Store <ArrowRight size={16} />
-                            </Link>
-                            <Link
-                                href="/contact"
-                                className="inline-flex items-center gap-2 px-8 py-3.5 bg-white/10 hover:bg-white/20 text-white font-semibold text-sm rounded-xl border border-white/20 transition-colors"
-                            >
-                                Talk to Our Team
-                            </Link>
-                        </div>
+            <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-14 sm:pb-20">
+                <div
+                    className="rounded-xl px-6 sm:px-10 py-10 sm:py-12 text-center"
+                    style={{ backgroundColor: BRAND.green }}
+                >
+                    <Leaf size={22} className="mx-auto mb-3 text-white/80" />
+                    <h2 className="text-xl sm:text-2xl font-semibold text-white leading-snug max-w-lg mx-auto">
+                        Ready to sell on LeafyLand?
+                    </h2>
+                    <p className="mt-2 text-sm text-white/80 max-w-md mx-auto leading-relaxed">
+                        Set up your store in minutes. No technical setup — we&apos;ll walk you through the rest.
+                    </p>
+                    <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
+                        <Link
+                            href="/create-store"
+                            className={`${heroCtaClass} bg-white hover:opacity-95`}
+                            style={{ color: BRAND.green }}
+                        >
+                            Create your store
+                            <ArrowRight size={15} strokeWidth={2} />
+                        </Link>
+                        <Link
+                            href="/contact"
+                            className="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-white rounded-xl border border-white/30 hover:bg-white/10 transition-colors"
+                        >
+                            Talk to our team
+                        </Link>
                     </div>
                 </div>
             </section>

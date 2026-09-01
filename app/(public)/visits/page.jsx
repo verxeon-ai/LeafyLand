@@ -49,7 +49,15 @@ export default function BuyerVisitsPage() {
         setRatingFor(null)
     }
 
-    if (loading) return <p className="p-8 text-slate-500">Loading visits…</p>
+    if (loading) return (
+        <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
+            <h1 className="text-2xl font-bold text-slate-800">My Property Visits</h1>
+            <div className="space-y-3 animate-pulse">
+                <div className="h-24 bg-slate-100 rounded-2xl" />
+                <div className="h-24 bg-slate-100 rounded-2xl" />
+            </div>
+        </div>
+    )
 
     return (
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">

@@ -48,28 +48,28 @@ const PropertyDetails = ({ property }) => {
     }
 
     return (
-        <div className="flex max-lg:flex-col gap-12">
-            <div className="flex max-sm:flex-col-reverse gap-3">
-                <div className="flex sm:flex-col gap-3">
+        <div className="flex max-lg:flex-col gap-8 lg:gap-12 min-w-0">
+            <div className="flex max-sm:flex-col-reverse gap-3 min-w-0 w-full lg:w-auto">
+                <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-visible no-scrollbar">
                     {(property.images || []).map((image, index) => (
                         <div
                             key={index}
                             onClick={() => setMainImage(image)}
-                            className="bg-slate-100 flex items-center justify-center size-26 rounded-lg group cursor-pointer overflow-hidden"
+                            className="bg-slate-100 flex items-center justify-center size-16 sm:size-20 rounded-lg group cursor-pointer overflow-hidden shrink-0"
                         >
                             <Image src={image} className="w-full h-full object-cover group-hover:scale-105 transition" alt="" width={100} height={100} />
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-center items-center h-100 sm:size-113 bg-slate-100 rounded-lg overflow-hidden">
+                <div className="flex justify-center items-center w-full aspect-square max-h-72 sm:max-h-96 sm:max-w-md bg-slate-100 rounded-lg overflow-hidden">
                     {mainImage && (
                         <Image src={mainImage} alt="" width={500} height={500} className="w-full h-full object-cover" />
                     )}
                 </div>
             </div>
 
-            <div className="flex-1">
-                <h1 className="text-3xl font-semibold text-slate-800">{property.title}</h1>
+            <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-slate-800">{property.title}</h1>
                 <p className="flex items-center gap-1.5 text-slate-500 mt-2">
                     <MapPinIcon size={16} /> {property.location}
                 </p>
@@ -106,16 +106,16 @@ const PropertyDetails = ({ property }) => {
 
                 <p className="text-slate-600 mt-6 max-w-xl">{property.description}</p>
 
-                <div className="flex gap-4 mt-8">
+                <div className="flex flex-col sm:flex-row gap-3 mt-8">
                     <button
                         onClick={() => setShowVisitModal(true)}
-                        className="flex items-center gap-2 bg-emerald-900 text-white px-8 py-3 text-sm font-medium rounded hover:bg-emerald-950 active:scale-95 transition"
+                        className="flex items-center justify-center gap-2 bg-emerald-900 text-white px-6 sm:px-8 py-3 text-sm font-medium rounded-xl hover:bg-emerald-950 active:scale-95 transition"
                     >
                         <CalendarIcon size={16} /> Schedule Visit
                     </button>
                     <button
                         onClick={() => setShowContact(true)}
-                        className="flex items-center gap-2 border border-slate-300 text-slate-700 px-8 py-3 text-sm font-medium rounded hover:bg-slate-50 active:scale-95 transition"
+                        className="flex items-center justify-center gap-2 border border-slate-300 text-slate-700 px-6 sm:px-8 py-3 text-sm font-medium rounded-xl hover:bg-slate-50 active:scale-95 transition"
                     >
                         <MessageSquare size={16} /> Contact Seller
                     </button>

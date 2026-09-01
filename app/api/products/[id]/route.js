@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { error, json, serializeProduct } from '@/lib/api'
+import { error, json, serializeProduct, PUBLIC_DETAIL_CACHE } from '@/lib/api'
 
 export async function GET(_req, { params }) {
     const { id } = await params
@@ -12,5 +12,5 @@ export async function GET(_req, { params }) {
         },
     })
     if (!product) return error('Product not found', 404)
-    return json(serializeProduct(product))
+    return json(serializeProduct(product), 200, PUBLIC_DETAIL_CACHE)
 }

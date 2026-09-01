@@ -2,7 +2,6 @@
 import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 import Image from "next/image"
-import Loading from "@/components/Loading"
 
 export default function StoreManageProducts() {
     const currency = process.env.NEXT_PUBLIC_CURRENCY_SYMBOL || '₹'
@@ -32,7 +31,16 @@ export default function StoreManageProducts() {
         fetchProducts()
     }, [])
 
-    if (loading) return <Loading />
+    if (loading) return (
+        <>
+            <h1 className="text-2xl text-slate-500 mb-5">Manage <span className="text-slate-800 font-medium">Products</span></h1>
+            <div className="space-y-2 animate-pulse">
+                <div className="h-12 bg-slate-100 rounded-xl" />
+                <div className="h-12 bg-slate-100 rounded-xl" />
+                <div className="h-12 bg-slate-100 rounded-xl" />
+            </div>
+        </>
+    )
 
     return (
         <>

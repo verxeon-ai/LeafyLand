@@ -6,6 +6,7 @@ import OrderItem from '@/components/OrderItem'
 export default function Orders() {
     const [orders, setOrders] = useState([])
     const [productRatings, setProductRatings] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         Promise.all([fetch('/api/orders'), fetch('/api/ratings')])
@@ -16,6 +17,7 @@ export default function Orders() {
                 if (Array.isArray(ratingsData)) setProductRatings(ratingsData)
             })
             .catch(() => {})
+            .finally(() => setLoading(false))
     }, [])
 
     const handleRated = (created) => {
@@ -24,7 +26,13 @@ export default function Orders() {
 
     return (
         <div className="min-h-[70vh] mx-6">
-            {orders.length > 0 ? (
+            {loading ? (
+                <div className="my-20 max-w-7xl mx-auto space-y-4 animate-pulse">
+                    <div className="h-8 w-48 bg-slate-100 rounded" />
+                    <div className="h-24 bg-slate-100 rounded-xl" />
+                    <div className="h-24 bg-slate-100 rounded-xl" />
+                </div>
+            ) : orders.length > 0 ? (
                 <div className="my-20 max-w-7xl mx-auto">
                     <PageTitle heading="My Orders" text={`Showing total ${orders.length} orders`} linkText={'Go to home'} />
 
