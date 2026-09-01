@@ -275,12 +275,11 @@ const Footer = () => {
                                 </div>
                             ))}
                         </div>
-                    </div>
+                </div>
+            </div>
 
-                    <div
-                        className="border-t border-gray-200 px-5 py-4 sm:px-8 lg:px-10"
-                        style={{ backgroundColor: BRAND.bottomBg }}
-                    >
+            <div className="border-t border-gray-200" style={{ backgroundColor: BRAND.bottomBg }}>
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4">
                         <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 text-xs" style={{ color: BRAND.muted }}>
                             <p className="md:flex-1">© 2026 LeafyLand. All rights reserved.</p>
                             <div className="flex flex-wrap items-center gap-2">
@@ -300,7 +299,6 @@ const Footer = () => {
                                 Go Green. Choose LeafyLand.
                             </p>
                         </div>
-                    </div>
                 </div>
             </div>
         </footer>
