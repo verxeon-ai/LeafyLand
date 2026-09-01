@@ -3,7 +3,12 @@
 import { signIn } from 'next-auth/react'
 import { useState } from 'react'
 
-export default function GoogleSignInButton({ callbackUrl = '/auth/continue', disabled = false }) {
+export default function GoogleSignInButton({
+    callbackUrl = '/auth/continue',
+    disabled = false,
+    className = '',
+    label = 'Continue with Google',
+}) {
     const [loading, setLoading] = useState(false)
 
     const handleClick = () => {
@@ -17,7 +22,7 @@ export default function GoogleSignInButton({ callbackUrl = '/auth/continue', dis
             type="button"
             onClick={handleClick}
             disabled={disabled || loading}
-            className="w-full flex items-center justify-center gap-2.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 transition-colors disabled:opacity-60 shadow-sm"
+            className={`w-full flex items-center justify-center gap-2.5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-700 transition-colors disabled:opacity-60 ${className}`}
         >
             <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
                 <path
@@ -37,7 +42,7 @@ export default function GoogleSignInButton({ callbackUrl = '/auth/continue', dis
                     fill="#EA4335"
                 />
             </svg>
-            {loading ? 'Redirecting to Google…' : 'Continue with Google'}
+            {loading ? 'Redirecting…' : label}
         </button>
     )
 }
