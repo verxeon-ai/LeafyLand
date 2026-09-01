@@ -1,100 +1,310 @@
-import Link from "next/link";
-import Image from "next/image";
-import { assets } from "@/assets/assets";
+import Link from 'next/link'
+import Image from 'next/image'
+import {
+    ShoppingBag, Building2, Wrench, Tag, Store, Leaf, CircleHelp,
+    Shield, FileText, Lock, Phone, Mail, MapPin, Headphones,
+    ShieldCheck, Truck, BadgeCheck, Award, ArrowRight,
+    Facebook, Instagram, Youtube,
+} from 'lucide-react'
+import { assets } from '@/assets/assets'
+import { brandRadiusClass, BRAND_GREEN } from '@/lib/brand-ui'
+
+const BRAND = {
+    green: BRAND_GREEN,
+    bottomBg: '#f4f8f5',
+    text: '#1f2937',
+    muted: '#6b7280',
+}
+
+const marketplaceLinks = [
+    { text: 'Products', path: '/products', icon: ShoppingBag },
+    { text: 'Properties', path: '/properties', icon: Building2 },
+    { text: 'Services', path: '/services', icon: Wrench },
+    { text: 'Classifieds', path: '/products', icon: Tag },
+    { text: 'Become a Seller', path: '/become-seller', icon: Store },
+]
+
+const companyLinks = [
+    { text: 'About LeafyLand', path: '/about', icon: Leaf },
+    { text: 'How It Works', path: '/how-it-works', icon: CircleHelp },
+    { text: 'Seller Policy', path: '/seller-policy', icon: Shield },
+    { text: 'Terms & Conditions', path: '/terms', icon: FileText },
+    { text: 'Privacy Policy', path: '/privacy', icon: Lock },
+]
+
+const socialLinks = [
+    { icon: Facebook, label: 'Facebook', href: 'https://www.facebook.com/share/1BhC6xSjTR/?mibextid=wwXIfr' },
+    { icon: Instagram, label: 'Instagram', href: 'https://www.instagram.com/leafyland_official?igsh=MXFvcjVxdGwyZXk2bw%3D%3D&utm_source=qr' },
+    { icon: Youtube, label: 'YouTube', href: 'https://www.youtube.com/@leafyland' },
+]
+
+const trustItems = [
+    { icon: ShieldCheck, title: 'Secure & Safe', text: '100% secure payments and data protection' },
+    { icon: Truck, title: 'Fast Delivery', text: 'Quick delivery and real-time tracking' },
+    { icon: Award, title: 'Verified Vendors', text: 'Vetted sellers you can trust' },
+    { icon: BadgeCheck, title: 'Trusted Platform', text: 'Verified sellers and quality services' },
+]
+
+function SectionTitle({ children }) {
+    return (
+        <div className="mb-4">
+            <h3
+                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
+                style={{ color: BRAND.text }}
+            >
+                {children}
+            </h3>
+            <span
+                className="mt-1.5 block h-0.5 w-7 rounded-full"
+                style={{ backgroundColor: BRAND.green }}
+            />
+        </div>
+    )
+}
+
+function FooterLink({ href, icon: Icon, children }) {
+    return (
+        <li>
+            <Link
+                href={href}
+                className="group flex items-center gap-2.5 text-sm transition-colors"
+                style={{ color: BRAND.muted }}
+            >
+                {Icon && (
+                    <Icon
+                        size={15}
+                        strokeWidth={1.75}
+                        className="shrink-0"
+                        style={{ color: BRAND.green }}
+                    />
+                )}
+                <span className="group-hover:underline" style={{ color: BRAND.text }}>
+                    {children}
+                </span>
+            </Link>
+        </li>
+    )
+}
+
+function VisaLogo() {
+    return (
+        <svg viewBox="0 0 48 16" className="h-4 w-[42px]" aria-label="Visa">
+            <rect width="48" height="16" rx="2" fill="white" />
+            <text
+                x="24"
+                y="12.2"
+                textAnchor="middle"
+                fill="#1A1F71"
+                fontFamily="Arial Black, Arial, sans-serif"
+                fontStyle="italic"
+                fontWeight="800"
+                fontSize="11"
+                letterSpacing="-0.4"
+            >
+                VISA
+            </text>
+        </svg>
+    )
+}
+
+function MastercardLogo() {
+    return (
+        <svg viewBox="0 0 32 20" className="h-5 w-8" aria-label="Mastercard">
+            <circle cx="12" cy="10" r="7.5" fill="#EB001B" />
+            <circle cx="20" cy="10" r="7.5" fill="#F79E1B" />
+            <path
+                d="M16 4.6a7.5 7.5 0 0 1 0 10.8 7.5 7.5 0 0 1 0-10.8Z"
+                fill="#FF5F00"
+            />
+        </svg>
+    )
+}
+
+function UpiLogo() {
+    return (
+        <svg viewBox="0 0 48 16" className="h-4 w-[42px]" aria-label="UPI">
+            <text
+                x="0"
+                y="12.5"
+                fill="#097939"
+                fontFamily="Arial, Helvetica, sans-serif"
+                fontWeight="800"
+                fontSize="12"
+                letterSpacing="0.6"
+            >
+                UPI
+            </text>
+            <rect x="36.2" y="3" width="2.2" height="10" rx="0.4" fill="#097939" />
+            <rect x="39.4" y="3" width="2.2" height="10" rx="0.4" fill="#ED752E" />
+            <rect x="42.6" y="3" width="2.2" height="10" rx="0.4" fill="#F7C948" />
+        </svg>
+    )
+}
+
+const paymentLogos = [
+    { name: 'Visa', Logo: VisaLogo },
+    { name: 'Mastercard', Logo: MastercardLogo },
+    { name: 'UPI', Logo: UpiLogo },
+]
 
 const Footer = () => {
-
-    const MailIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M14.6654 4.66699L8.67136 8.48499C8.46796 8.60313 8.23692 8.66536 8.0017 8.66536C7.76647 8.66536 7.53544 8.60313 7.33203 8.48499L1.33203 4.66699M2.66536 2.66699H13.332C14.0684 2.66699 14.6654 3.26395 14.6654 4.00033V12.0003C14.6654 12.7367 14.0684 13.3337 13.332 13.3337H2.66536C1.92898 13.3337 1.33203 12.7367 1.33203 12.0003V4.00033C1.33203 3.26395 1.92898 2.66699 2.66536 2.66699Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const PhoneIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M9.22003 11.045C9.35772 11.1082 9.51283 11.1227 9.65983 11.086C9.80682 11.0493 9.93692 10.9636 10.0287 10.843L10.2654 10.533C10.3896 10.3674 10.5506 10.233 10.7357 10.1404C10.9209 10.0479 11.125 9.99967 11.332 9.99967H13.332C13.6857 9.99967 14.0248 10.1402 14.2748 10.3902C14.5249 10.6402 14.6654 10.9794 14.6654 11.333V13.333C14.6654 13.6866 14.5249 14.0258 14.2748 14.2758C14.0248 14.5259 13.6857 14.6663 13.332 14.6663C10.1494 14.6663 7.09719 13.4021 4.84675 11.1516C2.59631 8.90119 1.33203 5.84894 1.33203 2.66634C1.33203 2.31272 1.47251 1.97358 1.72256 1.72353C1.9726 1.47348 2.31174 1.33301 2.66536 1.33301H4.66536C5.01899 1.33301 5.35812 1.47348 5.60817 1.72353C5.85822 1.97358 5.9987 2.31272 5.9987 2.66634V4.66634C5.9987 4.87333 5.9505 5.07749 5.85793 5.26263C5.76536 5.44777 5.63096 5.60881 5.46536 5.73301L5.15336 5.96701C5.03098 6.06046 4.94471 6.1934 4.90923 6.34324C4.87374 6.49308 4.89122 6.65059 4.9587 6.78901C5.86982 8.63959 7.36831 10.1362 9.22003 11.045Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const MapPinIcon = () => (<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M13.3346 6.66634C13.3346 9.99501 9.64197 13.4617 8.40197 14.5323C8.28645 14.6192 8.14583 14.6662 8.0013 14.6662C7.85677 14.6662 7.71615 14.6192 7.60064 14.5323C6.36064 13.4617 2.66797 9.99501 2.66797 6.66634C2.66797 5.25185 3.22987 3.8953 4.23007 2.89511C5.23026 1.89491 6.58681 1.33301 8.0013 1.33301C9.41579 1.33301 10.7723 1.89491 11.7725 2.89511C12.7727 3.8953 13.3346 5.25185 13.3346 6.66634Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M8.0013 8.66634C9.10587 8.66634 10.0013 7.77091 10.0013 6.66634C10.0013 5.56177 9.10587 4.66634 8.0013 4.66634C6.89673 4.66634 6.0013 5.56177 6.0013 6.66634C6.0013 7.77091 6.89673 8.66634 8.0013 8.66634Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const FacebookIcon = () => (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M14.9987 1.66699H12.4987C11.3936 1.66699 10.3338 2.10598 9.55242 2.88738C8.77102 3.66878 8.33203 4.72859 8.33203 5.83366V8.33366H5.83203V11.667H8.33203V18.3337H11.6654V11.667H14.1654L14.9987 8.33366H11.6654V5.83366C11.6654 5.61265 11.7532 5.40068 11.9094 5.2444C12.0657 5.08812 12.2777 5.00033 12.4987 5.00033H14.9987V1.66699Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const InstagramIcon = () => (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M14.5846 5.41699H14.593M5.83464 1.66699H14.168C16.4692 1.66699 18.3346 3.53247 18.3346 5.83366V14.167C18.3346 16.4682 16.4692 18.3337 14.168 18.3337H5.83464C3.53345 18.3337 1.66797 16.4682 1.66797 14.167V5.83366C1.66797 3.53247 3.53345 1.66699 5.83464 1.66699ZM13.3346 9.47533C13.4375 10.1689 13.319 10.8772 12.9961 11.4995C12.6732 12.1218 12.1623 12.6265 11.536 12.9417C10.9097 13.2569 10.2 13.3667 9.50779 13.2553C8.81557 13.1439 8.1761 12.8171 7.68033 12.3213C7.18457 11.8255 6.85775 11.1861 6.74636 10.4938C6.63497 9.80162 6.74469 9.0919 7.05991 8.46564C7.37512 7.83937 7.87979 7.32844 8.50212 7.00553C9.12445 6.68261 9.83276 6.56415 10.5263 6.66699C11.2337 6.7719 11.8887 7.10154 12.3944 7.60725C12.9001 8.11295 13.2297 8.76789 13.3346 9.47533Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const TwitterIcon = () => (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M18.3346 3.33368C18.3346 3.33368 17.7513 5.08368 16.668 6.16701C18.0013 14.5003 8.83464 20.5837 1.66797 15.8337C3.5013 15.917 5.33464 15.3337 6.66797 14.167C2.5013 12.917 0.417969 8.00034 2.5013 4.16701C4.33464 6.33368 7.16797 7.58368 10.0013 7.50034C9.2513 4.00034 13.3346 2.00034 15.8346 4.33368C16.7513 4.33368 18.3346 3.33368 18.3346 3.33368Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const LinkedinIcon = () => (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M13.3346 6.66699C14.6607 6.66699 15.9325 7.19378 16.8702 8.13146C17.8079 9.06914 18.3346 10.3409 18.3346 11.667V17.5003H15.0013V11.667C15.0013 11.225 14.8257 10.801 14.5131 10.4885C14.2006 10.1759 13.7767 10.0003 13.3346 10.0003C12.8926 10.0003 12.4687 10.1759 12.1561 10.4885C11.8436 10.801 11.668 11.225 11.668 11.667V17.5003H8.33464V11.667C8.33464 10.3409 8.86142 9.06914 9.7991 8.13146C10.7368 7.19378 12.0086 6.66699 13.3346 6.66699Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M5.0013 7.50033H1.66797V17.5003H5.0013V7.50033Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M3.33464 5.00033C4.25511 5.00033 5.0013 4.25413 5.0013 3.33366C5.0013 2.41318 4.25511 1.66699 3.33464 1.66699C2.41416 1.66699 1.66797 2.41318 1.66797 3.33366C1.66797 4.25413 2.41416 5.00033 3.33464 5.00033Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-    const YouTubeIcon = () => (<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"> <path d="M17.87 5.18C17.69 4.49 17.17 3.97 16.48 3.79C15.26 3.46 10 3.46 10 3.46C10 3.46 4.74 3.46 3.52 3.79C2.83 3.97 2.31 4.49 2.13 5.18C1.8 6.4 1.8 10 1.8 10C1.8 10 1.8 13.6 2.13 14.82C2.31 15.51 2.83 16.03 3.52 16.21C4.74 16.54 10 16.54 10 16.54C10 16.54 15.26 16.54 16.48 16.21C17.17 16.03 17.69 15.51 17.87 14.82C18.2 13.6 18.2 10 18.2 10C18.2 10 18.2 6.4 17.87 5.18Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> <path d="M8.25 12.75L12.75 10L8.25 7.25V12.75Z" stroke="#90A1B9" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" /> </svg>)
-
-    const linkSections = [
-        {
-            title: "MARKETPLACE",
-            links: [
-                { text: "Products", path: '/products', icon: null },
-                { text: "Properties", path: '/properties', icon: null },
-                { text: "Services", path: '/services', icon: null },
-                { text: "Become a Seller", path: '/become-seller', icon: null },
-            ]
-        },
-        {
-            title: "COMPANY",
-            links: [
-                { text: "About LeafyLand", path: '/about', icon: null },
-                { text: "How It Works", path: '/how-it-works', icon: null },
-                { text: "Seller Policy", path: '/seller-policy', icon: null },
-                { text: "Terms & Conditions", path: '/terms', icon: null },
-                { text: "Privacy Policy", path: '/privacy', icon: null },
-            ]
-        },
-        {
-            title: "CONTACT",
-            links: [
-                { text: "+91 98679 09355", path: 'tel:+919867909355', icon: PhoneIcon },
-                { text: "hello@leafyland.com", path: 'mailto:hello@leafyland.com', icon: MailIcon },
-                { text: "Worli, Mumbai 400030", path: '/', icon: MapPinIcon }
-            ]
-        }
-    ];
-
-    const socialIcons = [
-        { icon: FacebookIcon, label: "Facebook", link: "https://www.facebook.com/share/1BhC6xSjTR/?mibextid=wwXIfr" },
-        { icon: InstagramIcon, label: "Instagram", link: "https://www.instagram.com/leafyland_official?igsh=MXFvcjVxdGwyZXk2bw%3D%3D&utm_source=qr" },
-        { icon: YouTubeIcon, label: "YouTube", link: "https://www.youtube.com/@leafyland" },
-    ]
-
     return (
-        <footer className="bg-[#c8e6c9]">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="flex flex-col md:flex-row items-start justify-between gap-10 py-10 border-b border-slate-500/30 text-slate-500">
-                    <div>
-                        <Link href="/" className="flex items-center">
-                            <Image src={assets.logo} alt="Leafyland" className="h-9 w-auto" />
-                        </Link>
-                        <p className="max-w-[410px] mt-6 text-sm">Leafyland is your marketplace for land, farmhouses, plants, gardening products, and professional landscaping services — everything you need to buy, sell, or hire, all in one place.</p>
-                        <div className="flex items-center gap-2.5 mt-5">
-                            {socialIcons.map((item, i) => (
-                                <Link
-                                    href={item.link}
-                                    key={i}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="flex items-center gap-2 px-4 py-2.5 bg-white/70 hover:bg-white rounded-lg text-slate-600 hover:text-emerald-700 text-xs font-medium transition-all shadow-sm hover:shadow"
-                                >
-                                    <item.icon />
-                                    <span>{item.label}</span>
+        <footer className="bg-white border-t border-gray-200">
+            <div className="bg-white">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-8 lg:py-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 lg:gap-8">
+                            <div>
+                                <Link href="/" className="inline-flex items-center hover:opacity-90 transition-opacity">
+                                    <Image
+                                        src={assets.logo}
+                                        alt="LeafyLand"
+                                        width={150}
+                                        height={38}
+                                        className="h-9 w-auto object-contain"
+                                    />
                                 </Link>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="flex flex-wrap justify-between w-full md:w-[55%] gap-5 text-sm ">
-                        {linkSections.map((section, index) => (
-                            <div key={index}>
-                                <h3 className="font-medium text-slate-700 md:mb-5 mb-3">{section.title}</h3>
-                                <ul className="space-y-2.5">
-                                    {section.links.map((link, i) => (
-                                        <li key={i} className="flex items-center gap-2">
-                                            {link.icon && <link.icon />}
-                                            <Link href={link.path} className="hover:underline transition">{link.text}</Link>
-                                        </li>
+                                <p className="mt-5 max-w-[280px] text-sm leading-relaxed" style={{ color: BRAND.muted }}>
+                                    LeafyLand is your trusted marketplace for plants, gardening, properties, services, and more — everything you need to buy, sell, book, or hire, all in one place.
+                                </p>
+                                <div className="flex items-center gap-2 mt-5">
+                                    {socialLinks.map((item) => (
+                                        <Link
+                                            key={item.label}
+                                            href={item.href}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            aria-label={item.label}
+                                            className={`flex items-center justify-center w-10 h-10 ${brandRadiusClass} border border-gray-200 bg-white hover:bg-[#eef4ef] transition-colors`}
+                                            style={{ color: BRAND.green }}
+                                        >
+                                            <item.icon size={16} strokeWidth={1.75} />
+                                        </Link>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div>
+                                <SectionTitle>Marketplace</SectionTitle>
+                                <ul className="space-y-3">
+                                    {marketplaceLinks.map((link) => (
+                                        <FooterLink key={link.text} href={link.path} icon={link.icon}>
+                                            {link.text}
+                                        </FooterLink>
                                     ))}
                                 </ul>
                             </div>
-                        ))}
+
+                            <div>
+                                <SectionTitle>Company</SectionTitle>
+                                <ul className="space-y-3">
+                                    {companyLinks.map((link) => (
+                                        <FooterLink key={link.text} href={link.path} icon={link.icon}>
+                                            {link.text}
+                                        </FooterLink>
+                                    ))}
+                                </ul>
+                            </div>
+
+                            <div>
+                                <SectionTitle>Contact Us</SectionTitle>
+                                <ul className="space-y-3">
+                                    <FooterLink href="tel:+919867909355" icon={Phone}>
+                                        +91 98679 09355
+                                    </FooterLink>
+                                    <FooterLink href="mailto:hello@leafyland.com" icon={Mail}>
+                                        hello@leafyland.com
+                                    </FooterLink>
+                                    <FooterLink href="/contact" icon={MapPin}>
+                                        Worli, Mumbai 400030
+                                    </FooterLink>
+                                </ul>
+                                <Link
+                                    href="/contact"
+                                    className={`mt-5 flex items-start gap-3 p-4 ${brandRadiusClass} transition-colors hover:opacity-95`}
+                                    style={{ backgroundColor: BRAND.bottomBg }}
+                                >
+                                    <span
+                                        className={`flex items-center justify-center w-9 h-9 ${brandRadiusClass} bg-white shrink-0`}
+                                        style={{ color: BRAND.green }}
+                                    >
+                                        <Headphones size={16} strokeWidth={1.75} />
+                                    </span>
+                                    <span>
+                                        <span className="block text-sm font-semibold" style={{ color: BRAND.text }}>
+                                            Need Help?
+                                        </span>
+                                        <span className="block text-xs mt-0.5" style={{ color: BRAND.muted }}>
+                                            We&apos;re here for you!
+                                        </span>
+                                        <span
+                                            className="mt-1 inline-flex items-center gap-1 text-xs font-semibold"
+                                            style={{ color: BRAND.green }}
+                                        >
+                                            Contact Support
+                                            <ArrowRight size={12} />
+                                        </span>
+                                    </span>
+                                </Link>
+                            </div>
+                        </div>
+
+                        <div
+                            className={`mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px ${brandRadiusClass} overflow-hidden`}
+                            style={{ backgroundColor: '#e5ebe6' }}
+                        >
+                            {trustItems.map((item) => (
+                                <div
+                                    key={item.title}
+                                    className="flex items-center gap-3 px-5 py-4"
+                                    style={{ backgroundColor: BRAND.bottomBg }}
+                                >
+                                    <span
+                                        className="flex items-center justify-center w-10 h-10 rounded-full border shrink-0"
+                                        style={{ color: BRAND.green, borderColor: '#c5d6c9', backgroundColor: 'white' }}
+                                    >
+                                        <item.icon size={18} strokeWidth={1.75} />
+                                    </span>
+                                    <span>
+                                        <span className="block text-sm font-semibold" style={{ color: BRAND.text }}>
+                                            {item.title}
+                                        </span>
+                                        <span className="block text-xs mt-0.5 leading-snug" style={{ color: BRAND.muted }}>
+                                            {item.text}
+                                        </span>
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div
+                        className="border-t border-gray-200 px-5 py-4 sm:px-8 lg:px-10"
+                        style={{ backgroundColor: BRAND.bottomBg }}
+                    >
+                        <div className="flex flex-col md:flex-row md:items-center gap-3 md:gap-4 text-xs" style={{ color: BRAND.muted }}>
+                            <p className="md:flex-1">© 2026 LeafyLand. All rights reserved.</p>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span>We accept:</span>
+                                {paymentLogos.map(({ name, Logo }) => (
+                                    <span
+                                        key={name}
+                                        title={name}
+                                        className={`inline-flex items-center justify-center h-7 px-2.5 bg-white border border-gray-200 ${brandRadiusClass}`}
+                                    >
+                                        <Logo />
+                                    </span>
+                                ))}
+                            </div>
+                            <p className="md:ml-auto inline-flex items-center gap-1.5 font-medium" style={{ color: BRAND.green }}>
+                                <Leaf size={13} strokeWidth={2} />
+                                Go Green. Choose LeafyLand.
+                            </p>
+                        </div>
                     </div>
                 </div>
-                <p className="py-4 text-sm text-slate-500">
-                    Copyright 2026 © Leafyland. All Rights Reserved.
-                </p>
             </div>
         </footer>
-    );
-};
+    )
+}
 
-export default Footer;
+export default Footer

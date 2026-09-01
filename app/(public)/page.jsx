@@ -7,7 +7,7 @@ import ProductCard from "@/components/ProductCard";
 import PropertyCard from "@/components/PropertyCard";
 import { cachedJson } from '@/lib/cachedJson'
 import { isMarketplaceCategory } from '@/lib/categories'
-import { ShieldCheck, Truck, Leaf, Star, ChevronRight, Droplets, Scissors, Sparkles, Recycle, Flower2, Wrench, Package, Home as HomeIcon, AlertTriangle, RefreshCw, Building, Paintbrush, Hammer, Droplet, Camera, Trash2, Zap, Compass, Bot, CalendarCheck, BadgeCheck, Sprout, TreePine } from "lucide-react";
+import { ShieldCheck, Truck, Leaf, ChevronRight, Droplets, Scissors, Sparkles, Recycle, Flower2, Wrench, Package, Home as HomeIcon, AlertTriangle, RefreshCw, Building, Paintbrush, Hammer, Droplet, Camera, Trash2, Zap } from "lucide-react";
 import Link from "next/link";
 
 const serviceIcons = {
@@ -279,6 +279,7 @@ export default function Home() {
                 )}
 
                 {/* ═══ MARKETPLACE SECTIONS ═══ */}
+                {(marketplaceProducts.length > 0 || marketplaceProperties.length > 0) && (
                 <>
                         {/* Divider */}
                         <div className="flex items-center gap-4 my-6">
@@ -387,64 +388,8 @@ export default function Home() {
                             />
                         )}
                     </>
+                )}
             </div>
-
-            {/* Expert Options */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-                    <div className="mb-4 sm:mb-5">
-                        <h2 className="text-lg sm:text-xl font-bold text-slate-800">Expert Services</h2>
-                        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                            Professional guidance for all your gardening needs
-                        </p>
-                    </div>
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-                        {[
-                            { icon: Compass, label: 'Landscape Architects', sub: 'Custom garden design', href: '/services' },
-                            { icon: Bot, label: 'Plant Doctor AI', sub: 'Instant health tips', href: '/services' },
-                            { icon: CalendarCheck, label: 'Onsite Agronomist', sub: 'Soil & farm consult', href: '/services' },
-                            { icon: BadgeCheck, label: 'Garden Contractors', sub: 'Verified professionals', href: '/services' },
-                        ].map((item, i) => (
-                            <Link
-                                key={i}
-                                href={item.href}
-                                className="flex flex-col gap-2.5 sm:gap-3 rounded-xl sm:rounded-2xl border border-emerald-100/80 bg-white p-3 sm:p-4 hover:border-emerald-300 hover:bg-emerald-50/40 transition-colors group"
-                            >
-                                <span className="inline-flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-lg bg-emerald-600 text-white shrink-0">
-                                    <item.icon size={18} strokeWidth={2} />
-                                </span>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-xs sm:text-sm font-semibold text-slate-800 leading-snug">
-                                        {item.label}
-                                    </p>
-                                    <p className="text-[10px] sm:text-xs text-slate-500 mt-0.5 leading-snug line-clamp-2">
-                                        {item.sub}
-                                    </p>
-                                </div>
-                                <span className="inline-flex items-center gap-0.5 text-[10px] sm:text-xs font-semibold text-emerald-700 group-hover:gap-1 transition-all">
-                                    Explore <ChevronRight size={12} />
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-
-            {/* Why LeafyLand — trust signals */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 my-8">
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        {[
-                            { icon: ShieldCheck, label: 'Vetted Vendors', sub: 'Quality checked', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-                            { icon: Truck, label: 'Fast Delivery', sub: 'Pan-India shipping', color: 'bg-blue-50 text-blue-600 border-blue-100' },
-                            { icon: Leaf, label: 'Quality Promise', sub: 'Healthy plants guaranteed', color: 'bg-green-50 text-green-600 border-green-100' },
-                            { icon: Star, label: 'Expert Advice', sub: 'Free gardening tips', color: 'bg-amber-50 text-amber-600 border-amber-100' },
-                        ].map((item, i) => (
-                            <div key={i} className={`flex flex-col items-center text-center p-4 rounded-2xl border ${item.color}`}>
-                                <item.icon size={22} className="mb-2" />
-                                <p className="text-xs font-semibold text-slate-800">{item.label}</p>
-                                <p className="text-[10px] text-slate-500 mt-0.5">{item.sub}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
         </div>
     );
 }
