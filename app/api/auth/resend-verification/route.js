@@ -4,6 +4,15 @@ import { error, json, handleApiError } from '@/lib/api'
 import { sendVerificationEmail } from '@/lib/email-verification'
 import { isEmailConfigured } from '@/lib/email'
 
+function sentResponse(verification) {
+    return json({
+        message: 'Verification email sent. Check your inbox.',
+        ...(process.env.NODE_ENV === 'development' && verification.verifyUrl
+            ? { verifyUrl: verification.verifyUrl }
+            : {}),
+    })
+}
+
 export async function POST(req) {
     try {
         const { email } = await req.json()
@@ -27,9 +36,7 @@ export async function POST(req) {
             return error('Email service is not configured. Contact support.', 503)
         }
 
-        await sendVerificationEmail(user.email, user.name)
-
-        return json({ message: 'Verification email sent. Check your inbox.' })
+        return sentResponse(await sendVerificationEmail(user.email, user.name))
     } catch (e) {
         console.error('Resend verification failed', e)
         return handleApiError(e)
@@ -60,9 +67,7 @@ export async function PUT(req) {
             return error('Email service is not configured. Contact support.', 503)
         }
 
-        await sendVerificationEmail(user.email, user.name)
-
-        return json({ message: 'Verification email sent. Check your inbox.' })
+        return sentResponse(await sendVerificationEmail(user.email, user.name))
     } catch (e) {
         console.error('Resend verification failed', e)
         return handleApiError(e)

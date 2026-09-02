@@ -567,7 +567,8 @@ function LoginForm() {
                 if (!res.ok) throw new Error(data.error || 'Could not create account')
 
                 if (data.devVerifyUrl) {
-                    console.info('[dev] Verification link:', data.devVerifyUrl)
+                    window.location.assign(data.devVerifyUrl)
+                    return
                 }
                 window.location.assign(`/verify-email?email=${encodeURIComponent(email)}`)
                 return

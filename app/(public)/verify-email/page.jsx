@@ -55,6 +55,10 @@ function VerifyEmailContent() {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Could not resend email')
+            if (data.verifyUrl) {
+                window.location.assign(data.verifyUrl)
+                return
+            }
             toast.success(data.message || 'Verification email sent')
         } catch (err) {
             toast.error(err.message || 'Could not resend email')
