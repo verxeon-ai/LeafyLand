@@ -9,7 +9,7 @@ import FilterChips from '@/components/admin/FilterChips'
 import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { brandLinkClass, BRAND_GREEN } from '@/lib/brand-ui'
-import { DetailFields, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
+import { DetailFields, DetailGallery, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
 
 export default function ProductsPage() {
   const { data: products, loading, error, reload: load } = useCachedJson('/api/admin/products', 'list')
@@ -104,11 +104,7 @@ export default function ProductsPage() {
       >
         {selectedProduct && (
           <>
-            <img
-              src={selectedProduct.images?.[0] || 'https://via.placeholder.com/400'}
-              alt=""
-              className="h-48 w-full rounded-xl object-cover"
-            />
+            <DetailGallery key={selectedProduct.id} images={selectedProduct.images} alt={selectedProduct.name} />
 
             <DetailSection title="About">
               <DetailNote>{displayValue(selectedProduct.description)}</DetailNote>

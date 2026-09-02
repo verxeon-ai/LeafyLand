@@ -25,8 +25,8 @@ const AdminDashboardCharts = dynamic(() => import('@/components/charts/AdminDash
     ssr: false,
     loading: () => (
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-            <div className={`${brandCardClass} h-[420px] animate-pulse`} />
-            <div className={`${brandCardClass} h-[420px] animate-pulse`} />
+            <div className={`${brandCardClass} h-44 animate-pulse`} />
+            <div className={`${brandCardClass} h-44 animate-pulse`} />
         </div>
     ),
 })
@@ -76,8 +76,8 @@ export default function AdminDashboard() {
                 <PageHeader title="Dashboard" description="Platform overview and recent activity" />
                 <AdminStatSkeleton />
                 <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div className={`${brandCardClass} h-[420px] animate-pulse`} />
-                    <div className={`${brandCardClass} h-[420px] animate-pulse`} />
+                    <div className={`${brandCardClass} h-44 animate-pulse`} />
+                    <div className={`${brandCardClass} h-44 animate-pulse`} />
                 </div>
             </div>
         )

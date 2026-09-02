@@ -1,5 +1,7 @@
 'use client'
 
+import { useState } from 'react'
+import CatalogImage from '@/components/CatalogImage'
 import { brandLabelClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export function displayValue(value) {
@@ -21,6 +23,58 @@ export function formatAdminDate(value) {
 
 export function formatAdminMoney(value) {
     return `₹${Number(value || 0).toLocaleString('en-IN')}`
+}
+
+export function DetailGallery({ images = [], alt = '' }) {
+    const list = (Array.isArray(images) ? images : [images]).filter(Boolean)
+    const [active, setActive] = useState(0)
+
+    if (!list.length) {
+        return (
+            <div className="flex h-56 items-center justify-center rounded-xl bg-[#f4f8f5] text-sm text-slate-400">
+                No photo
+            </div>
+        )
+    }
+
+    const src = list[Math.min(active, list.length - 1)]
+
+    return (
+        <div className="space-y-3">
+            <div className="flex min-h-[260px] items-center justify-center overflow-hidden rounded-xl bg-[#f4f8f5] px-4 py-5">
+                <CatalogImage
+                    src={src}
+                    alt={alt}
+                    width={800}
+                    height={600}
+                    className="max-h-[360px] w-full object-contain"
+                />
+            </div>
+            {list.length > 1 ? (
+                <div className="flex gap-2 overflow-x-auto pb-1">
+                    {list.map((image, index) => (
+                        <button
+                            key={`${image}-${index}`}
+                            type="button"
+                            onClick={() => setActive(index)}
+                            className={`h-14 w-14 shrink-0 overflow-hidden rounded-xl border ${
+                                index === active ? 'border-[#2f7d4a]' : 'border-[#e4eee6]'
+                            }`}
+                            aria-label={`Photo ${index + 1}`}
+                        >
+                            <CatalogImage
+                                src={image}
+                                alt=""
+                                width={56}
+                                height={56}
+                                className="h-full w-full object-cover"
+                            />
+                        </button>
+                    ))}
+                </div>
+            ) : null}
+        </div>
+    )
 }
 
 export function DetailSection({ title, children }) {

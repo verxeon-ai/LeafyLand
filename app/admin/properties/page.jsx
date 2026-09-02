@@ -16,7 +16,7 @@ import {
   brandDangerCtaClass,
   BRAND_GREEN,
 } from '@/lib/brand-ui'
-import { DetailFields, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
+import { DetailFields, DetailGallery, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
 
 const STATUS_OPTIONS = ['All', 'pending', 'approved', 'rejected']
 
@@ -181,11 +181,7 @@ export default function PropertiesPage() {
       >
         {selectedProperty && (
           <>
-            <img
-              src={selectedProperty.images?.[0] || 'https://via.placeholder.com/400'}
-              alt=""
-              className="h-48 w-full rounded-xl object-cover"
-            />
+            <DetailGallery key={selectedProperty.id} images={selectedProperty.images} alt={selectedProperty.title} />
 
             <div>
               <StatusBadge status={selectedProperty.status || 'pending'} />

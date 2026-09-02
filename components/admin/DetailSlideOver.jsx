@@ -12,6 +12,8 @@ export default function DetailSlideOver({
     eyebrow = 'Details',
     subtitle,
     footer,
+    wide = false,
+    compact = false,
     children,
 }) {
     useEffect(() => {
@@ -36,7 +38,13 @@ export default function DetailSlideOver({
             onClick={onClose}
         >
             <div
-                className="flex max-h-[min(88vh,760px)] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-[#e4eee6] bg-white shadow-[0_20px_50px_rgba(47,125,74,0.16)]"
+                className={`flex w-full flex-col overflow-hidden rounded-xl border border-[#e4eee6] bg-white shadow-[0_20px_50px_rgba(47,125,74,0.16)] ${
+                    compact
+                        ? 'max-h-[min(72vh,420px)] max-w-lg'
+                        : wide
+                          ? 'max-h-[min(90vh,820px)] max-w-4xl'
+                          : 'max-h-[min(90vh,820px)] max-w-2xl'
+                }`}
                 onClick={(event) => event.stopPropagation()}
                 role="dialog"
                 aria-modal="true"

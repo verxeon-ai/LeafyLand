@@ -1,6 +1,6 @@
 'use client'
 
-import { useId } from 'react'
+import { useId, useState } from 'react'
 import {
     AreaChart,
     Area,
@@ -13,11 +13,12 @@ import {
     ResponsiveContainer,
     Cell,
 } from 'recharts'
-import { Minus, TrendingDown, TrendingUp } from 'lucide-react'
-import { brandCardClass, brandLabelClass, BRAND_GREEN, BRAND_MUTED, BRAND_TEXT } from '@/lib/brand-ui'
+import { LineChart, Minus, TrendingDown, TrendingUp } from 'lucide-react'
+import DetailSlideOver from '@/components/admin/DetailSlideOver'
+import { brandCardClass, brandLabelClass, brandSecondaryCtaClass, BRAND_GREEN, BRAND_MUTED, BRAND_TEXT } from '@/lib/brand-ui'
 
 const AXIS_TICK = { fontSize: 11, fill: '#6b7280' }
-const CHART_MARGIN = { top: 16, right: 8, left: 0, bottom: 0 }
+const CHART_MARGIN = { top: 20, right: 16, left: 4, bottom: 12 }
 
 function formatINR(value) {
     const n = Math.round(Number(value) || 0)
@@ -164,7 +165,9 @@ function AxisTick({ x, y, payload, highlight }) {
     )
 }
 
-function ChartCard({ eyebrow, title, value, hint, trend, children, stats }) {
+function ChartCard({ eyebrow, title, value, hint, trend, children, stats, emptyLabel }) {
+    const [showChart, setShowChart] = useState(false)
+
     return (
         <div className={brandCardClass}>
             <div className="flex items-start justify-between gap-3 px-5 pt-5">
@@ -175,17 +178,40 @@ function ChartCard({ eyebrow, title, value, hint, trend, children, stats }) {
                     </p>
                     <p className="mt-1.5 text-sm font-medium text-slate-500">{title}</p>
                     {hint && <p className="mt-0.5 text-xs text-slate-400">{hint}</p>}
+                    {emptyLabel && <p className="mt-2 text-sm text-slate-500">{emptyLabel}</p>}
                 </div>
                 {trend}
             </div>
-            <div className="relative mx-4 mt-4 rounded-xl bg-[#f4f8f5] px-1 pb-1 pt-3">
-                {children}
+            <div className="flex items-center justify-end px-5 py-3">
+                <button
+                    type="button"
+                    onClick={() => setShowChart(true)}
+                    className={brandSecondaryCtaClass}
+                    style={{ color: BRAND_GREEN }}
+                >
+                    <LineChart size={16} />
+                    Show chart
+                </button>
             </div>
-            <div className="grid grid-cols-3 divide-x divide-[#e4eee6] px-2 py-3.5">
+            <div className="grid grid-cols-3 divide-x divide-[#e4eee6] border-t border-[#e4eee6] px-2 py-3.5">
                 {stats.map((stat) => (
                     <FootStat key={stat.label} {...stat} />
                 ))}
             </div>
+            {showChart ? (
+                <DetailSlideOver
+                    isOpen
+                    onClose={() => setShowChart(false)}
+                    eyebrow={eyebrow}
+                    title={title}
+                    subtitle={typeof value === 'string' || typeof value === 'number' ? String(value) : undefined}
+                    compact
+                >
+                    <div className="h-52 w-full">
+                        {children}
+                    </div>
+                </DetailSlideOver>
+            ) : null}
         </div>
     )
 }
@@ -248,13 +274,9 @@ export default function AdminDashboardCharts({
                         value: ordersPreviousTotal == null ? '—' : String(ordersPreviousTotal),
                     },
                 ]}
+                emptyLabel={ordersEmpty ? 'No orders in the last 7 days' : undefined}
             >
-                {ordersEmpty && (
-                    <p className="pointer-events-none absolute inset-x-0 top-[42%] z-10 text-center text-xs font-medium text-slate-400">
-                        No orders in the last 7 days
-                    </p>
-                )}
-                <ResponsiveContainer width="100%" height={248}>
+                <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={orders} margin={CHART_MARGIN}>
                         <defs>
                             <linearGradient id={ordersFill} x1="0" y1="0" x2="0" y2="1">
@@ -275,7 +297,7 @@ export default function AdminDashboardCharts({
                             tick={AXIS_TICK}
                             axisLine={false}
                             tickLine={false}
-                            width={28}
+                            width={36}
                             allowDecimals={false}
                             domain={[0, orderDomain]}
                         />
@@ -321,9 +343,10 @@ export default function AdminDashboardCharts({
                     { label: 'Monthly avg', value: formatINR(revenueAvg) },
                     { label: 'This month', value: formatINR(lastMonth) },
                 ]}
+                emptyLabel={revenueTotal === 0 ? 'No revenue in the last 6 months' : undefined}
             >
-                <ResponsiveContainer width="100%" height={248}>
-                    <BarChart data={revenue} margin={CHART_MARGIN} barCategoryGap="36%">
+                <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={revenue} margin={CHART_MARGIN} barCategoryGap="28%">
                         <CartesianGrid strokeDasharray="4 8" stroke="#e4eee6" vertical={false} />
                         <XAxis
                             dataKey="name"
@@ -337,7 +360,7 @@ export default function AdminDashboardCharts({
                             tick={AXIS_TICK}
                             axisLine={false}
                             tickLine={false}
-                            width={40}
+                            width={48}
                             tickFormatter={axisINR}
                             domain={[0, revenueDomain]}
                         />
