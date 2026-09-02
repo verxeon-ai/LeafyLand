@@ -9,6 +9,7 @@ import {
     findBatchByRazorpayOrderId,
     fulfillCheckoutBatch,
 } from '@/lib/payments/fulfill'
+import { notifyPaidOrders } from '@/lib/payments/notify'
 
 function validateVerifyBody(body) {
     const razorpay_order_id = body?.razorpay_order_id?.trim?.() || body?.razorpayOrderId?.trim?.()
@@ -70,6 +71,10 @@ export async function POST(req) {
                 expectedAmountPaise: batch.totalPaise,
             }),
         )
+
+        if (!result.alreadyProcessed) {
+            await notifyPaidOrders(result.batch)
+        }
 
         const orders = result.batch.orders.map(serializeOrder)
 

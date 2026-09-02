@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { error, json, requireUser, handleApiError } from '@/lib/api'
 import { sanitizeImageUrl } from '@/lib/images'
+import { notifyAllAdmins } from '@/lib/payments/notify'
 
 export async function GET() {
     try {
@@ -41,6 +42,16 @@ export async function POST(req) {
                 isActive: false,
             },
         })
+        try {
+            await notifyAllAdmins({
+                type: 'STORE_PENDING',
+                title: 'New store application',
+                body: `${store.name} asked to join LeafyLand.`,
+                link: '/admin/approve',
+            })
+        } catch (e) {
+            console.error('Store application notification failed:', e?.message || e)
+        }
         return json(store, 201)
     } catch (e) {
         return handleApiError(e)

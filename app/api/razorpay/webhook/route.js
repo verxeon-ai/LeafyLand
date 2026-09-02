@@ -3,6 +3,7 @@ import { json, error } from '@/lib/api'
 import { verifyWebhookSignature, isRazorpayConfigured } from '@/lib/razorpay'
 import { findBatchByRazorpayOrderId, fulfillCheckoutBatch } from '@/lib/payments/fulfill'
 import { markPayoutProcessed, markPayoutFailed } from '@/lib/payments/release'
+import { notifyPaidOrders } from '@/lib/payments/notify'
 
 export const runtime = 'nodejs'
 
@@ -19,13 +20,16 @@ async function processPaymentCaptured(payload) {
     }
     if (payment.currency !== 'INR') return
 
-    await prisma.$transaction(async (tx) =>
+    const result = await prisma.$transaction(async (tx) =>
         fulfillCheckoutBatch(tx, {
             batchId: batch.id,
             razorpayPaymentId: payment.id,
             expectedAmountPaise: batch.totalPaise,
         }),
     )
+    if (!result.alreadyProcessed) {
+        await notifyPaidOrders(result.batch)
+    }
 }
 
 async function processPaymentFailed(payload) {

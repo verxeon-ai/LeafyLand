@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { error, json, requireStore, handleApiError } from '@/lib/api'
 import { sanitizeImageUrls } from '@/lib/images'
+import { notifyAllAdmins } from '@/lib/payments/notify'
 
 export async function GET() {
     try {
@@ -43,6 +44,16 @@ export async function POST(req) {
                 storeId: store.id,
             },
         })
+        try {
+            await notifyAllAdmins({
+                type: 'SERVICE_PENDING',
+                title: 'New service listing',
+                body: `"${service.name}" from ${store.name} needs review.`,
+                link: '/admin/services',
+            })
+        } catch (e) {
+            console.error('Service notification failed:', e?.message || e)
+        }
         return json(service, 201)
     } catch (e) {
         return handleApiError(e)

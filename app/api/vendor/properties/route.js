@@ -1,6 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { error, json, requireStore, handleApiError } from '@/lib/api'
 import { sanitizeImageUrls } from '@/lib/images'
+import { notifyAllAdmins } from '@/lib/payments/notify'
 
 export async function GET() {
     try {
@@ -52,6 +53,16 @@ export async function POST(req) {
                 storeId: store.id,
             },
         })
+        try {
+            await notifyAllAdmins({
+                type: 'PROPERTY_PENDING',
+                title: 'New property listing',
+                body: `"${property.title}" from ${store.name} needs review.`,
+                link: '/admin/properties',
+            })
+        } catch (e) {
+            console.error('Property notification failed:', e?.message || e)
+        }
         return json(property, 201)
     } catch (e) {
         return handleApiError(e)
