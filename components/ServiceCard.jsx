@@ -14,10 +14,9 @@ const ServiceCard = ({ service }) => {
         <Link href={`/services/${service.id}`} className="group block w-48 sm:w-52 flex-shrink-0">
             <div className="relative bg-slate-50 rounded-2xl overflow-hidden aspect-[4/3]">
                 <CatalogImage
-                    width={208}
-                    height={156}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    src={service.images?.[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=208&h=156&fit=crop'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition duration-300"
+                    src={service.images?.[0] || 'https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=800&h=600&fit=crop&crop=entropy'}
                     alt={service.name}
                     sizes="208px"
                 />

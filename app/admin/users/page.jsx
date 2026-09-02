@@ -1,26 +1,43 @@
 'use client'
 
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo } from 'react'
 import { UserPlus } from 'lucide-react'
 import toast from 'react-hot-toast'
 import PageHeader from '@/components/admin/PageHeader'
 import DataTable from '@/components/admin/DataTable'
 import DetailSlideOver from '@/components/admin/DetailSlideOver'
+import FilterChips from '@/components/admin/FilterChips'
+import { AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { setCachedJson } from '@/lib/cachedJson'
+import {
+  brandCardClass,
+  brandPrimaryCtaClass,
+  brandGhostCtaClass,
+  brandInputClass,
+  brandLinkClass,
+  BRAND_GREEN,
+  BRAND_GREEN_LIGHT,
+} from '@/lib/brand-ui'
+import { DetailFields, DetailSection, formatAdminDate } from '@/components/admin/AdminDetail'
 
 const ROLE_FILTERS = ['All', 'Buyer', 'Seller', 'Admin']
 
 const ROLE_STYLES = {
-  admin: 'bg-slate-800 text-white',
-  seller: 'bg-emerald-100 text-emerald-700',
-  buyer: 'bg-blue-100 text-blue-700',
+  admin: { backgroundColor: BRAND_GREEN, color: '#fff' },
+  seller: { backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN },
+  buyer: {},
 }
 
 function RoleBadge({ role }) {
   const key = (role || 'buyer').toLowerCase()
-  const style = ROLE_STYLES[key] || 'bg-slate-100 text-slate-600'
+  const style = ROLE_STYLES[key]
   const label = key.charAt(0).toUpperCase() + key.slice(1)
   return (
-    <span className={`inline-flex items-center text-xs font-semibold px-2.5 py-0.5 rounded-full ${style}`}>
+    <span
+      className={`inline-flex items-center rounded-xl px-2.5 py-0.5 text-xs font-semibold ${key === 'buyer' ? 'bg-slate-100 text-slate-600' : ''}`}
+      style={style}
+    >
       {label}
     </span>
   )
@@ -37,18 +54,10 @@ function formatDate(dateStr) {
 export default function UsersPage() {
   const [roleFilter, setRoleFilter] = useState('All')
   const [selectedUser, setSelectedUser] = useState(null)
-  const [users, setUsers] = useState([])
+  const { data: users, setData: setUsers, loading } = useCachedJson('/api/admin/users', 'list')
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', confirmPassword: '' })
-
-  const loadUsers = useCallback(() => {
-    return fetch('/api/admin/users')
-      .then((r) => r.json())
-      .then((data) => { if (Array.isArray(data)) setUsers(data) })
-  }, [])
-
-  useEffect(() => { loadUsers() }, [loadUsers])
 
   const filteredData = useMemo(() => {
     if (roleFilter === 'All') return users
@@ -80,7 +89,11 @@ export default function UsersPage() {
         return
       }
       toast.success(`Admin account created for ${data.email}`)
-      setUsers((prev) => [data, ...prev])
+      setUsers((prev) => {
+        const next = [data, ...prev]
+        setCachedJson('/api/admin/users', next)
+        return next
+      })
       setNewAdmin({ name: '', email: '', password: '', confirmPassword: '' })
       setShowCreateForm(false)
     } catch {
@@ -96,7 +109,10 @@ export default function UsersPage() {
       label: 'Name',
       render: (_, row) => (
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-sm font-bold shrink-0">
+          <div
+            className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold"
+            style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
+          >
             {(row.name || '?').split(' ').map((n) => n[0]).join('')}
           </div>
           <span className="font-semibold text-slate-800">{row.name}</span>
@@ -127,8 +143,10 @@ export default function UsersPage() {
       label: 'View',
       render: (_, row) => (
         <button
+          type="button"
           onClick={() => setSelectedUser(row)}
-          className="text-sm font-semibold text-emerald-600 hover:text-emerald-700 transition-colors"
+          className={brandLinkClass}
+          style={{ color: BRAND_GREEN }}
         >
           View
         </button>
@@ -145,7 +163,8 @@ export default function UsersPage() {
           <button
             type="button"
             onClick={() => setShowCreateForm((v) => !v)}
-            className="inline-flex items-center gap-2 bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-emerald-800 transition-colors"
+            className={brandPrimaryCtaClass}
+            style={{ backgroundColor: BRAND_GREEN }}
           >
             <UserPlus size={16} />
             Create Admin Account
@@ -156,19 +175,19 @@ export default function UsersPage() {
       {showCreateForm && (
         <form
           onSubmit={handleCreateAdmin}
-          className="bg-white border border-slate-200 rounded-xl p-5 space-y-4"
+          className={`${brandCardClass} space-y-4 p-5`}
         >
           <h2 className="text-sm font-bold text-slate-800">Create new admin account</h2>
           <p className="text-xs text-slate-500">
             Only create accounts for trusted team members. The email must not already be registered on the platform.
           </p>
-          <div className="grid sm:grid-cols-2 gap-3">
+          <div className="grid gap-3 sm:grid-cols-2">
             <input
               type="text"
               placeholder="Full name"
               value={newAdmin.name}
               onChange={(e) => setNewAdmin({ ...newAdmin, name: e.target.value })}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className={brandInputClass}
             />
             <input
               type="email"
@@ -176,7 +195,7 @@ export default function UsersPage() {
               placeholder="Admin email"
               value={newAdmin.email}
               onChange={(e) => setNewAdmin({ ...newAdmin, email: e.target.value })}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className={brandInputClass}
             />
             <input
               type="password"
@@ -185,7 +204,7 @@ export default function UsersPage() {
               placeholder="Password (min 6 characters)"
               value={newAdmin.password}
               onChange={(e) => setNewAdmin({ ...newAdmin, password: e.target.value })}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className={brandInputClass}
             />
             <input
               type="password"
@@ -194,21 +213,22 @@ export default function UsersPage() {
               placeholder="Confirm password"
               value={newAdmin.confirmPassword}
               onChange={(e) => setNewAdmin({ ...newAdmin, confirmPassword: e.target.value })}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+              className={brandInputClass}
             />
           </div>
           <div className="flex gap-2">
             <button
               type="submit"
               disabled={creating}
-              className="bg-emerald-700 text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-emerald-800 disabled:opacity-60"
+              className={`${brandPrimaryCtaClass} disabled:opacity-60`}
+              style={{ backgroundColor: BRAND_GREEN }}
             >
               {creating ? 'Creating…' : 'Create admin account'}
             </button>
             <button
               type="button"
               onClick={() => setShowCreateForm(false)}
-              className="text-sm font-medium text-slate-600 px-4 py-2 rounded-lg hover:bg-slate-100"
+              className={brandGhostCtaClass}
             >
               Cancel
             </button>
@@ -216,68 +236,72 @@ export default function UsersPage() {
         </form>
       )}
 
-      <div className="flex items-center gap-3">
-        <select
-          value={roleFilter}
-          onChange={(e) => setRoleFilter(e.target.value)}
-          className="text-sm font-medium border border-slate-200 rounded-lg px-3 py-2 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          {ROLE_FILTERS.map((r) => (
-            <option key={r} value={r}>
-              {r === 'All' ? 'All Roles' : r}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={filteredData}
-        searchKeys={['name', 'email']}
-        emptyMessage="No users found"
+      <FilterChips
+        options={ROLE_FILTERS}
+        value={roleFilter}
+        onChange={setRoleFilter}
+        getLabel={(r) => (r === 'All' ? 'All Roles' : r)}
       />
+
+      {loading && users.length === 0 ? (
+        <AdminTableSkeleton />
+      ) : (
+        <DataTable
+          columns={columns}
+          data={filteredData}
+          searchKeys={['name', 'email']}
+          emptyMessage="No users found"
+        />
+      )}
 
       <DetailSlideOver
         isOpen={!!selectedUser}
         onClose={() => setSelectedUser(null)}
-        title={selectedUser?.name ?? 'User Details'}
+        eyebrow="User"
+        title={selectedUser?.name ?? 'User details'}
+        subtitle={selectedUser?.email}
       >
         {selectedUser && (
-          <div className="space-y-5">
+          <>
             <div className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center text-xl font-bold">
+              <div
+                className="flex h-14 w-14 items-center justify-center rounded-xl text-lg font-bold"
+                style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
+              >
                 {(selectedUser.name || '?').split(' ').map((n) => n[0]).join('')}
               </div>
               <div>
-                <p className="text-lg font-bold text-slate-800">{selectedUser.name}</p>
-                <RoleBadge role={selectedUser.role} />
+                <p className="text-base font-bold text-slate-800">{selectedUser.name}</p>
+                <div className="mt-1.5">
+                  <RoleBadge role={selectedUser.role} />
+                </div>
               </div>
             </div>
 
-            <div className="space-y-3">
-              <DetailRow label="Email" value={selectedUser.email} />
-              <DetailRow label="Role" value={selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1)} />
-              <DetailRow label="Join Date" value={formatDate(selectedUser.joinDate)} />
-              <DetailRow label="Total Orders" value={selectedUser.totalOrders} />
-              {selectedUser.storeName && (
-                <>
-                  <DetailRow label="Store Name" value={selectedUser.storeName} />
-                  <DetailRow label="Store Status" value={selectedUser.storeStatus || '—'} />
-                </>
-              )}
-            </div>
-          </div>
+            <DetailSection title="Account">
+              <DetailFields
+                items={[
+                  { label: 'Email', value: selectedUser.email },
+                  { label: 'Role', value: selectedUser.role ? selectedUser.role.charAt(0).toUpperCase() + selectedUser.role.slice(1) : '—' },
+                  { label: 'Joined', value: formatAdminDate(selectedUser.joinDate) },
+                  { label: 'Orders', value: selectedUser.totalOrders },
+                ]}
+              />
+            </DetailSection>
+
+            {selectedUser.storeName && (
+              <DetailSection title="Store">
+                <DetailFields
+                  items={[
+                    { label: 'Name', value: selectedUser.storeName },
+                    { label: 'Status', value: selectedUser.storeStatus },
+                  ]}
+                />
+              </DetailSection>
+            )}
+          </>
         )}
       </DetailSlideOver>
-    </div>
-  )
-}
-
-function DetailRow({ label, value }) {
-  return (
-    <div className="flex items-start justify-between py-2 border-b border-slate-50">
-      <span className="text-sm text-slate-500">{label}</span>
-      <span className="text-sm font-medium text-slate-800">{value}</span>
     </div>
   )
 }

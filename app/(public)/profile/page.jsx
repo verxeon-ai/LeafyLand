@@ -11,6 +11,7 @@ import {
 import toast from 'react-hot-toast'
 import WishlistSection from '@/components/WishlistSection'
 import ConfirmLogoutModal from '@/components/ConfirmLogoutModal'
+import ChangePasswordForm from '@/components/ChangePasswordForm'
 
 export default function BuyerProfilePage() {
     const { data: session, status: sessionStatus, update } = useSession()
@@ -148,6 +149,14 @@ export default function BuyerProfilePage() {
                             {saving ? 'Saving…' : 'Save changes'}
                         </button>
                     </form>
+
+                    <div className="p-6 border-b border-slate-100 space-y-3">
+                        <h2 className="text-sm font-semibold text-slate-800">
+                            {profile?.hasPassword === false ? 'Set password' : 'Change password'}
+                        </h2>
+                        <p className="text-xs text-slate-500">Use a password that is at least 6 characters.</p>
+                        <ChangePasswordForm hasPassword={profile?.hasPassword !== false} />
+                    </div>
 
                     <div className="p-4 sm:p-6 space-y-2">
                         <h2 className="text-sm font-semibold text-slate-800 px-2 mb-2">Quick links</h2>

@@ -57,9 +57,8 @@ const ProductCard = ({ product, fluid = false }) => {
                 <div className="relative aspect-square bg-slate-50 overflow-hidden">
                     {product.images?.[0] ? (
                         <CatalogImage
-                            width={188}
-                            height={188}
-                            className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                            fill
+                            className="object-cover group-hover:scale-105 transition duration-300"
                             src={product.images[0]}
                             alt={product.name}
                             sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 188px"

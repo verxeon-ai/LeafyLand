@@ -51,9 +51,9 @@ const ProductDetails = ({ product }) => {
                         </div>
                     ))}
                 </div>
-                <div className="flex justify-center items-center w-full aspect-square max-h-72 sm:max-h-96 sm:max-w-md bg-slate-100 rounded-2xl overflow-hidden">
+                <div className="relative flex justify-center items-center w-full aspect-square max-h-72 sm:max-h-96 sm:max-w-md bg-slate-100 rounded-2xl overflow-hidden">
                     {mainImage ? (
-                        <CatalogImage src={mainImage} alt={product.name} width={300} height={300} className="object-cover w-full h-full" priority />
+                        <CatalogImage src={mainImage} alt={product.name} fill className="object-cover" priority />
                     ) : null}
                 </div>
             </div>

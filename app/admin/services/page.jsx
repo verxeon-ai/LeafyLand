@@ -1,32 +1,27 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import PageHeader from '@/components/admin/PageHeader'
 import DataTable from '@/components/admin/DataTable'
 import StatusBadge from '@/components/admin/StatusBadge'
 import DetailSlideOver from '@/components/admin/DetailSlideOver'
+import FilterChips from '@/components/admin/FilterChips'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import toast from 'react-hot-toast'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { setCachedJson } from '@/lib/cachedJson'
+import {
+  brandLinkClass,
+  brandPrimaryCtaClass,
+  brandDangerCtaClass,
+  BRAND_GREEN,
+} from '@/lib/brand-ui'
+import { DetailFields, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
 
 export default function ServicesPage() {
-  const [services, setServices] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { data: services, setData: setServices, loading, error, reload: load } = useCachedJson('/api/admin/services', 'list')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [selectedService, setSelectedService] = useState(null)
-
-  const load = () => {
-    setLoading(true)
-    fetch('/api/admin/services')
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to load services')
-        return res.json()
-      })
-      .then(setServices)
-      .catch((e) => setError(e.message || 'Something went wrong'))
-      .finally(() => setLoading(false))
-  }
-
-  useEffect(() => { load() }, [])
 
   const updateStatus = async (id, status) => {
     const res = await fetch('/api/admin/services', {
@@ -36,7 +31,11 @@ export default function ServicesPage() {
     })
     if (!res.ok) return toast.error(`${status === 'approved' ? 'Approve' : 'Reject'} failed`)
     toast.success(status === 'approved' ? 'Service approved' : 'Service rejected')
-    setServices((prev) => prev.map((s) => (s.id === id ? { ...s, status } : s)))
+    setServices((prev) => {
+      const next = prev.map((s) => (s.id === id ? { ...s, status } : s))
+      setCachedJson('/api/admin/services', next)
+      return next
+    })
     setSelectedService((prev) => (prev?.id === id ? { ...prev, status } : prev))
   }
 
@@ -85,7 +84,8 @@ export default function ServicesPage() {
           <button
             type="button"
             onClick={() => setSelectedService(row)}
-            className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+            className={brandLinkClass}
+            style={{ color: BRAND_GREEN }}
           >
             View
           </button>
@@ -94,14 +94,15 @@ export default function ServicesPage() {
               <button
                 type="button"
                 onClick={() => updateStatus(row.id, 'approved')}
-                className="text-emerald-700 hover:text-emerald-800 text-sm font-medium"
+                className={brandLinkClass}
+                style={{ color: BRAND_GREEN }}
               >
                 Approve
               </button>
               <button
                 type="button"
                 onClick={() => updateStatus(row.id, 'rejected')}
-                className="text-red-600 hover:text-red-700 text-sm font-medium"
+                className="text-sm font-semibold text-red-600 transition-colors hover:opacity-80"
               >
                 Reject
               </button>
@@ -116,22 +117,17 @@ export default function ServicesPage() {
     <div className="space-y-6">
       <PageHeader title="Services" description="Manage all service listings" />
 
-      <div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
-          ))}
-        </select>
-      </div>
+      <FilterChips
+        options={categories}
+        value={categoryFilter}
+        onChange={setCategoryFilter}
+        getLabel={(cat) => (cat === 'All' ? 'All Categories' : cat)}
+      />
 
-      {loading ? (
-        <p className="text-slate-500">Loading services…</p>
-      ) : error ? (
-        <p className="text-red-600">{error}</p>
+      {loading && services.length === 0 ? (
+        <AdminTableSkeleton />
+      ) : error && services.length === 0 ? (
+        <AdminError message={error} onRetry={load} />
       ) : (
         <DataTable
           columns={columns}
@@ -144,65 +140,51 @@ export default function ServicesPage() {
       <DetailSlideOver
         isOpen={!!selectedService}
         onClose={() => setSelectedService(null)}
-        title={selectedService?.name || 'Service Details'}
+        eyebrow="Service"
+        title={selectedService?.name || 'Service details'}
+        subtitle={selectedService?.store?.name}
+        footer={(selectedService?.status || 'pending') === 'pending' ? (
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => updateStatus(selectedService.id, 'approved')}
+              className={brandPrimaryCtaClass}
+              style={{ backgroundColor: BRAND_GREEN }}
+            >
+              Approve
+            </button>
+            <button
+              type="button"
+              onClick={() => updateStatus(selectedService.id, 'rejected')}
+              className={brandDangerCtaClass}
+            >
+              Reject
+            </button>
+          </div>
+        ) : null}
       >
         {selectedService && (
-          <div className="space-y-4">
+          <>
             <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Description</h3>
-              <p className="text-sm text-slate-700 mt-1">{selectedService.description || 'N/A'}</p>
+              <StatusBadge status={selectedService.status || 'pending'} />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Category</h3>
-                <p className="text-sm text-slate-700 mt-1">{selectedService.category || 'N/A'}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Price</h3>
-                <p className="text-sm text-slate-700 mt-1">
-                  ₹{(selectedService.startingPrice || 0).toLocaleString('en-IN')}
-                </p>
-              </div>
-            </div>
+            <DetailSection title="About">
+              <DetailNote>{displayValue(selectedService.description)}</DetailNote>
+            </DetailSection>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Duration</h3>
-                <p className="text-sm text-slate-700 mt-1">{selectedService.duration || 'N/A'}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Location</h3>
-                <p className="text-sm text-slate-700 mt-1">{selectedService.location || 'N/A'}</p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</h3>
-              <div className="mt-1">
-                <StatusBadge status={selectedService.status || 'pending'} />
-              </div>
-            </div>
-
-            {(selectedService.status || 'pending') === 'pending' && (
-              <div className="flex items-center gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => updateStatus(selectedService.id, 'approved')}
-                  className="bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
-                >
-                  Approve
-                </button>
-                <button
-                  type="button"
-                  onClick={() => updateStatus(selectedService.id, 'rejected')}
-                  className="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-xl text-sm font-medium hover:bg-red-100 transition-colors"
-                >
-                  Reject
-                </button>
-              </div>
-            )}
-          </div>
+            <DetailSection title="Details">
+              <DetailFields
+                items={[
+                  { label: 'Category', value: selectedService.category },
+                  { label: 'Price', value: formatAdminMoney(selectedService.startingPrice) },
+                  { label: 'Duration', value: selectedService.duration ? `${selectedService.duration} hrs` : '—' },
+                  { label: 'Location', value: selectedService.location },
+                  { label: 'Store', value: selectedService.store?.name },
+                ]}
+              />
+            </DetailSection>
+          </>
         )}
       </DetailSlideOver>
     </div>

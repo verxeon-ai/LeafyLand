@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { Bell } from 'lucide-react'
 import { useLiveData } from '@/lib/useLiveData'
 
-export default function NotificationBell() {
+export default function NotificationBell({ nav = false }) {
     const { data, refresh } = useLiveData('/api/notifications', 15000)
     const [open, setOpen] = useState(false)
     const wrapRef = useRef(null)
@@ -33,12 +33,21 @@ export default function NotificationBell() {
         <div className="relative" ref={wrapRef}>
             <button
                 onClick={toggle}
-                className="relative p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors"
+                className={nav
+                    ? "relative flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1 text-slate-800 transition-colors hover:bg-[#eef4ef] sm:px-2"
+                    : "relative rounded-lg p-2 text-slate-700 transition-colors hover:bg-[#eef4ef]"
+                }
                 aria-label="Notifications"
             >
-                <Bell size={18} />
+                <Bell size={nav ? 20 : 18} strokeWidth={1.75} />
+                {nav && (
+                    <span className="hidden text-[10px] font-medium text-[#6b7280] lg:block">Alerts</span>
+                )}
                 {unread > 0 && (
-                    <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                    <span
+                        className={`absolute flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-bold text-white ${nav ? 'right-0.5 top-0' : '-right-0.5 -top-0.5'}`}
+                        style={{ backgroundColor: '#2f7d4a' }}
+                    >
                         {unread > 9 ? '9+' : unread}
                     </span>
                 )}

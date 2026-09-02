@@ -1,12 +1,14 @@
 'use client'
 
-export default function EmptyState({ icon: Icon, title, description }) {
+import { brandCardClass } from '@/lib/brand-ui'
+
+export default function EmptyState({ icon: Icon, title, description, embedded = false }) {
   return (
-    <div className="flex flex-col items-center justify-center py-12">
-      <Icon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-      <p className="text-sm font-semibold text-slate-500">{title}</p>
+    <div className={embedded ? 'px-6 py-12 text-center' : `${brandCardClass} border-dashed px-6 py-16 text-center`}>
+      {Icon && <Icon className="mx-auto mb-3 h-10 w-10 text-slate-300" />}
+      <p className="text-sm font-medium text-slate-700 sm:text-base">{title}</p>
       {description && (
-        <p className="text-xs text-slate-400 mt-1">{description}</p>
+        <p className="mt-1 text-xs text-slate-400 sm:text-sm">{description}</p>
       )}
     </div>
   )

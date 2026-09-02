@@ -20,8 +20,10 @@ async function readAuthToken(req) {
         '__Secure-next-auth.session-token',
         'next-auth.session-token',
     ]
+    const present = cookieNames.filter((name) => req.cookies.get(name)?.value)
+    const toTry = present.length ? present : cookieNames
 
-    for (const cookieName of cookieNames) {
+    for (const cookieName of toTry) {
         const token = await getToken({
             req,
             secret,

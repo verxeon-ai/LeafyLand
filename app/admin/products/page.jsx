@@ -1,28 +1,20 @@
 'use client'
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo } from 'react'
 import PageHeader from '@/components/admin/PageHeader'
 import DataTable from '@/components/admin/DataTable'
 import StatusBadge from '@/components/admin/StatusBadge'
 import DetailSlideOver from '@/components/admin/DetailSlideOver'
+import FilterChips from '@/components/admin/FilterChips'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { brandLinkClass, BRAND_GREEN } from '@/lib/brand-ui'
+import { DetailFields, DetailNote, DetailSection, displayValue, formatAdminMoney } from '@/components/admin/AdminDetail'
 
 export default function ProductsPage() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const { data: products, loading, error, reload: load } = useCachedJson('/api/admin/products', 'list')
   const [categoryFilter, setCategoryFilter] = useState('All')
   const [selectedProduct, setSelectedProduct] = useState(null)
-
-  useEffect(() => {
-    fetch('/api/admin/products')
-      .then(async (res) => {
-        if (!res.ok) throw new Error('Failed to load products')
-        return res.json()
-      })
-      .then(setProducts)
-      .catch((e) => setError(e.message || 'Something went wrong'))
-      .finally(() => setLoading(false))
-  }, [])
 
   const categories = useMemo(() => {
     const set = new Set(products.map((p) => p.category).filter(Boolean))
@@ -42,7 +34,7 @@ export default function ProductsPage() {
         <img
           src={val?.[0] || 'https://via.placeholder.com/40'}
           alt={row.name || ''}
-          className="w-12 h-12 rounded-lg object-cover"
+          className="h-12 w-12 rounded-xl object-cover"
         />
       ),
     },
@@ -68,8 +60,10 @@ export default function ProductsPage() {
       label: 'View',
       render: (_val, row) => (
         <button
+          type="button"
           onClick={() => setSelectedProduct(row)}
-          className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
+          className={brandLinkClass}
+          style={{ color: BRAND_GREEN }}
         >
           View
         </button>
@@ -81,22 +75,17 @@ export default function ProductsPage() {
     <div className="space-y-6">
       <PageHeader title="Products" description="Manage all products across stores" />
 
-      <div>
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>{cat === 'All' ? 'All Categories' : cat}</option>
-          ))}
-        </select>
-      </div>
+      <FilterChips
+        options={categories}
+        value={categoryFilter}
+        onChange={setCategoryFilter}
+        getLabel={(cat) => (cat === 'All' ? 'All Categories' : cat)}
+      />
 
-      {loading ? (
-        <p className="text-slate-500">Loading products…</p>
-      ) : error ? (
-        <p className="text-red-600">{error}</p>
+      {loading && products.length === 0 ? (
+        <AdminTableSkeleton />
+      ) : error && products.length === 0 ? (
+        <AdminError message={error} onRetry={load} />
       ) : (
         <DataTable
           columns={columns}
@@ -109,54 +98,34 @@ export default function ProductsPage() {
       <DetailSlideOver
         isOpen={!!selectedProduct}
         onClose={() => setSelectedProduct(null)}
-        title={selectedProduct?.name || 'Product Details'}
+        eyebrow="Product"
+        title={selectedProduct?.name || 'Product details'}
+        subtitle={selectedProduct?.storeName}
       >
         {selectedProduct && (
-          <div className="space-y-4">
+          <>
             <img
               src={selectedProduct.images?.[0] || 'https://via.placeholder.com/400'}
-              alt={selectedProduct.name || ''}
-              className="w-full h-48 rounded-lg object-cover"
+              alt=""
+              className="h-48 w-full rounded-xl object-cover"
             />
 
-            <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Description</h3>
-              <p className="text-sm text-slate-700 mt-1">{selectedProduct.description || 'N/A'}</p>
-            </div>
+            <DetailSection title="About">
+              <DetailNote>{displayValue(selectedProduct.description)}</DetailNote>
+            </DetailSection>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Category</h3>
-                <p className="text-sm text-slate-700 mt-1">{selectedProduct.category || 'N/A'}</p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Store</h3>
-                <p className="text-sm text-slate-700 mt-1">{selectedProduct.storeName || 'N/A'}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">MRP</h3>
-                <p className="text-sm text-slate-700 mt-1">
-                  ₹{(selectedProduct.mrp || 0).toLocaleString('en-IN')}
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Price</h3>
-                <p className="text-sm text-slate-700 mt-1">
-                  ₹{(selectedProduct.price || 0).toLocaleString('en-IN')}
-                </p>
-              </div>
-            </div>
-
-            <div>
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Stock</h3>
-              <div className="mt-1">
-                <StatusBadge status={selectedProduct.stock > 0 ? 'active' : 'inactive'} />
-              </div>
-            </div>
-          </div>
+            <DetailSection title="Details">
+              <DetailFields
+                items={[
+                  { label: 'Category', value: selectedProduct.category },
+                  { label: 'Store', value: selectedProduct.storeName },
+                  { label: 'MRP', value: formatAdminMoney(selectedProduct.mrp) },
+                  { label: 'Price', value: formatAdminMoney(selectedProduct.price) },
+                  { label: 'Stock', value: selectedProduct.stock },
+                ]}
+              />
+            </DetailSection>
+          </>
         )}
       </DetailSlideOver>
     </div>

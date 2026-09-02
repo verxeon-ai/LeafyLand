@@ -3,72 +3,121 @@
 import { useState } from "react"
 import { usePathname } from "next/navigation"
 import { useSession } from "next-auth/react"
-import { LogOut, Menu, Search } from "lucide-react"
-import NotificationBell from "@/components/NotificationBell";
-import ConfirmLogoutModal from "@/components/ConfirmLogoutModal";
+import Link from "next/link"
+import Image from "next/image"
+import { ExternalLink, LogOut, Menu, Search, User } from "lucide-react"
+import NotificationBell from "@/components/NotificationBell"
+import ConfirmLogoutModal from "@/components/ConfirmLogoutModal"
+import { assets } from "@/assets/assets"
+import { BRAND_GREEN, BRAND_GREEN_LIGHT, BRAND_MUTED, BRAND_TEXT } from "@/lib/brand-ui"
 
-const routeTitles = {
-    "/admin": "Dashboard",
-    "/admin/stores": "Stores",
-    "/admin/approve": "Approvals",
-    "/admin/users": "Users",
-    "/admin/orders": "Orders",
-    "/admin/products": "Products",
-    "/admin/properties": "Properties",
-    "/admin/services": "Services",
-    "/admin/coupons": "Coupons",
-}
+const navBtnClass =
+    "flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
 
 const AdminNavbar = ({ onMenuToggle }) => {
     const [showLogout, setShowLogout] = useState(false)
+    const [query, setQuery] = useState("")
     const pathname = usePathname()
     const { data: session } = useSession()
-    const title = routeTitles[pathname] || "Dashboard"
-    const initials = (session?.user?.name || "Admin")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .slice(0, 2)
-        .toUpperCase()
+    const accountName = session?.user?.name?.trim() || "Admin"
+    const accountEmail = session?.user?.email || ""
+    const profileActive = pathname === "/admin/profile"
+
+    const submitSearch = (e) => {
+        e.preventDefault()
+        window.dispatchEvent(new CustomEvent("leafyland-admin-search", { detail: query }))
+    }
 
     return (
-        <header className="fixed top-0 left-0 right-0 h-16 bg-white/80 backdrop-blur-md border-b border-slate-100 z-20 flex items-center justify-between px-4 lg:px-6">
-            <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-50 shrink-0 border-b border-gray-200 bg-white">
+            <div className="flex h-14 min-w-0 items-center gap-2 px-3 sm:h-[4.25rem] sm:gap-3 sm:px-4 lg:px-6">
                 <button
+                    type="button"
                     onClick={onMenuToggle}
-                    className="lg:hidden p-2 rounded-xl text-slate-500 hover:bg-slate-100 transition-colors"
+                    className="-ml-1 shrink-0 rounded-lg p-1.5 text-slate-700 transition-colors hover:bg-[#eef4ef] lg:hidden"
+                    aria-label="Open menu"
                 >
-                    <Menu size={20} />
+                    <Menu size={22} />
                 </button>
-                <h1 className="text-lg font-semibold text-slate-800">{title}</h1>
-            </div>
 
-            <div className="flex items-center gap-3">
-                <div className="hidden sm:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2 text-sm text-slate-500 w-56">
-                    <Search size={16} />
-                    <input
-                        type="text"
-                        placeholder="Search..."
-                        className="bg-transparent outline-none flex-1 text-slate-700 placeholder:text-slate-400"
+                <Link href="/admin" className="shrink-0 transition-opacity hover:opacity-90">
+                    <Image
+                        src={assets.logo}
+                        alt="LeafyLand"
+                        width={150}
+                        height={38}
+                        className="h-6 w-auto object-contain sm:h-7 md:h-9"
+                        priority
                     />
-                </div>
+                </Link>
+                <span
+                    className="hidden rounded-lg px-2 py-0.5 text-[10px] font-semibold sm:inline"
+                    style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
+                >
+                    Admin
+                </span>
 
-                <NotificationBell />
+                <form
+                    onSubmit={submitSearch}
+                    className="hidden h-11 min-w-0 max-w-xl flex-1 items-stretch overflow-hidden rounded-xl border border-gray-200 bg-white focus-within:border-[#2f7d4a] focus-within:ring-1 focus-within:ring-[#2f7d4a]/20 lg:flex"
+                >
+                    <input
+                        className="min-w-0 flex-1 px-3 text-sm outline-none placeholder:text-gray-400"
+                        style={{ color: BRAND_TEXT }}
+                        type="text"
+                        placeholder="Search this page..."
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                    />
+                    <button
+                        type="submit"
+                        className="flex w-12 shrink-0 items-center justify-center text-white transition-colors hover:opacity-90"
+                        style={{ backgroundColor: BRAND_GREEN }}
+                        aria-label="Search"
+                    >
+                        <Search size={18} />
+                    </button>
+                </form>
 
-                <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-sm font-bold">
-                        {initials}
-                    </div>
-                    <span className="bg-emerald-100 text-emerald-700 text-xs font-semibold px-2 py-0.5 rounded-full hidden sm:inline">
-                        Admin
-                    </span>
+                <div className="ml-auto flex shrink-0 items-center">
+                    <Link
+                        href="/"
+                        className={navBtnClass}
+                        style={{ color: BRAND_TEXT }}
+                        title="Back to site"
+                        aria-label="Back to site"
+                    >
+                        <ExternalLink size={20} strokeWidth={1.75} />
+                        <span className="hidden whitespace-nowrap text-[10px] font-medium lg:block" style={{ color: BRAND_MUTED }}>
+                            Back to site
+                        </span>
+                    </Link>
+
+                    <NotificationBell nav />
+
+                    <Link
+                        href="/admin/profile"
+                        className={`${navBtnClass} ${profileActive ? "bg-[#eef4ef]" : ""}`}
+                        style={{ color: BRAND_TEXT }}
+                        title={accountEmail ? `${accountName} · ${accountEmail}` : accountName}
+                        aria-label="Open profile"
+                    >
+                        <User size={20} strokeWidth={1.75} />
+                        <span className="hidden whitespace-nowrap text-[10px] font-medium lg:block" style={{ color: BRAND_MUTED }}>
+                            {accountName}
+                        </span>
+                    </Link>
+
                     <button
                         type="button"
                         onClick={() => setShowLogout(true)}
-                        className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:text-red-600 hover:bg-red-50 transition-colors"
+                        className={navBtnClass}
+                        style={{ color: BRAND_TEXT }}
                     >
-                        <LogOut size={16} />
-                        <span className="hidden sm:inline">Logout</span>
+                        <LogOut size={20} strokeWidth={1.75} />
+                        <span className="hidden text-[10px] font-medium lg:block" style={{ color: BRAND_MUTED }}>
+                            Logout
+                        </span>
                     </button>
                 </div>
             </div>

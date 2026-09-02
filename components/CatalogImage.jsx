@@ -1,13 +1,16 @@
 'use client'
+import { useState } from 'react'
 import Image from 'next/image'
 
-function isRemoteOptimized(src) {
-    if (!src || typeof src !== 'string') return false
-    if (src.startsWith('data:') || src.startsWith('blob:')) return false
-    return true
+function isLocalPath(src) {
+    return typeof src === 'string' && src.startsWith('/') && !src.startsWith('//')
 }
 
-/** Product/property/service photos — lazy by default, Next optimizer when the URL allows. */
+function isInlineSrc(src) {
+    return typeof src === 'string' && (src.startsWith('data:') || src.startsWith('blob:'))
+}
+
+/** Product/property/service photos. Remote URLs skip the optimizer so Unsplash (and uploads) actually paint. */
 export default function CatalogImage({
     src,
     alt = '',
@@ -18,20 +21,29 @@ export default function CatalogImage({
     priority = false,
     fill = false,
 }) {
-    if (!src) return <div className={className} aria-hidden />
+    const [failed, setFailed] = useState(false)
 
-    if (!isRemoteOptimized(src)) {
+    if (!src || failed) {
+        return <div className={fill ? `absolute inset-0 bg-slate-100 ${className || ''}` : className} aria-hidden />
+    }
+
+    const imgClass = fill
+        ? `absolute inset-0 h-full w-full object-cover ${className || ''}`.trim()
+        : className
+
+    if (isInlineSrc(src) || !isLocalPath(src)) {
         return (
             <img
                 src={src}
                 alt={alt}
                 width={fill ? undefined : width}
                 height={fill ? undefined : height}
-                className={className}
+                className={imgClass}
                 loading={priority ? 'eager' : 'lazy'}
                 decoding="async"
                 fetchPriority={priority ? 'high' : 'low'}
                 draggable={false}
+                onError={() => setFailed(true)}
             />
         )
     }
@@ -39,11 +51,12 @@ export default function CatalogImage({
     const common = {
         src,
         alt,
-        className,
+        className: imgClass,
         sizes,
         priority,
-        quality: 70,
+        quality: 75,
         draggable: false,
+        onError: () => setFailed(true),
     }
 
     if (fill) {

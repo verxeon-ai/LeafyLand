@@ -2,8 +2,17 @@
 
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
+import Image from 'next/image'
 import { LogOut } from 'lucide-react'
 import { signOut } from 'next-auth/react'
+import { assets } from '@/assets/assets'
+import {
+    BRAND_GREEN,
+    BRAND_MINT,
+    brandLabelClass,
+    brandPrimaryCtaClass,
+    brandSecondaryCtaClass,
+} from '@/lib/brand-ui'
 
 export default function ConfirmLogoutModal({ open, onClose }) {
     useEffect(() => {
@@ -24,44 +33,61 @@ export default function ConfirmLogoutModal({ open, onClose }) {
 
     return createPortal(
         <div
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#1f2937]/25 backdrop-blur-[6px]"
             onClick={onClose}
         >
             <div
-                className="w-full max-w-sm bg-white rounded-2xl shadow-xl p-6"
+                className="w-full max-w-[400px] overflow-hidden rounded-xl border border-[#e4eee6] bg-white shadow-[0_20px_50px_rgba(47,125,74,0.18)]"
                 onClick={(e) => e.stopPropagation()}
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="logout-modal-title"
             >
-                <div className="flex items-start gap-3 mb-5">
-                    <div className="w-11 h-11 shrink-0 rounded-xl bg-red-100 text-red-600 flex items-center justify-center">
-                        <LogOut size={20} />
-                    </div>
-                    <div>
-                        <h2 id="logout-modal-title" className="text-lg font-semibold text-slate-800">
-                            Sign out of LeafyLand?
-                        </h2>
-                        <p className="mt-1 text-sm text-slate-500">
-                            You&apos;ll need to sign in again to get back to your dashboard.
-                        </p>
-                    </div>
+                <div
+                    className="border-b border-[#e4eee6] px-6 pb-5 pt-6 text-center"
+                    style={{ backgroundColor: BRAND_MINT }}
+                >
+                    <Image
+                        src={assets.logo}
+                        alt="LeafyLand"
+                        width={140}
+                        height={36}
+                        className="mx-auto h-8 w-auto object-contain"
+                    />
                 </div>
-                <div className="flex justify-end gap-3">
-                    <button
-                        type="button"
-                        onClick={onClose}
-                        className="px-4 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors"
+
+                <div className="px-6 pb-6 pt-5 text-center">
+                    <p className={`${brandLabelClass} mb-2`} style={{ color: BRAND_GREEN }}>
+                        Account
+                    </p>
+                    <h2
+                        id="logout-modal-title"
+                        className="text-[22px] font-bold leading-snug text-slate-800"
                     >
-                        Cancel
-                    </button>
-                    <button
-                        type="button"
-                        onClick={() => signOut({ callbackUrl: '/' })}
-                        className="px-4 py-2 rounded-xl text-sm font-semibold text-white bg-red-600 hover:bg-red-700 transition-colors"
-                    >
-                        Sign out
-                    </button>
+                        Sign out of LeafyLand?
+                    </h2>
+                    <p className="mx-auto mt-2 max-w-[280px] text-sm leading-relaxed text-slate-500">
+                        You&apos;ll need to sign in again to get back to your dashboard.
+                    </p>
+
+                    <div className="mt-6 grid grid-cols-2 gap-3">
+                        <button
+                            type="button"
+                            onClick={onClose}
+                            className={`${brandSecondaryCtaClass} py-2.5`}
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => signOut({ callbackUrl: '/' })}
+                            className={`${brandPrimaryCtaClass} py-2.5`}
+                            style={{ backgroundColor: BRAND_GREEN }}
+                        >
+                            <LogOut size={15} />
+                            Sign out
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>,

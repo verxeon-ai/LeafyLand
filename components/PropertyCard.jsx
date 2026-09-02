@@ -18,10 +18,9 @@ const PropertyCard = ({ property, fluid = false }) => {
         <Link href={`/properties/${property.id}`} className={`group block ${fluid ? 'w-full min-w-0' : 'w-52 sm:w-56 flex-shrink-0'}`}>
             <div className="relative bg-slate-50 rounded-2xl overflow-hidden aspect-[4/3]">
                 <CatalogImage
-                    width={224}
-                    height={168}
-                    className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                    src={property.images?.[0] || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=224&h=168&fit=crop'}
+                    fill
+                    className="object-cover group-hover:scale-105 transition duration-300"
+                    src={property.images?.[0] || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&crop=entropy'}
                     alt={property.title}
                     sizes="(max-width: 640px) 100vw, 224px"
                 />
