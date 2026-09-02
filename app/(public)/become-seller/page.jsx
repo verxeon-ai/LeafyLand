@@ -4,7 +4,7 @@ import {
     ArrowRight, ShieldCheck, TrendingUp, Store, Leaf,
     CheckCircle2, IndianRupee, HeadphonesIcon, BarChart3,
 } from 'lucide-react'
-import { BRAND_GREEN } from '@/lib/brand-ui'
+import { brandPrimaryCtaClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export const metadata = {
     title: 'Sell on LeafyLand',
@@ -90,41 +90,129 @@ const categories = [
 const heroCtaClass =
     'inline-flex items-center justify-center gap-1.5 px-5 py-2.5 text-sm font-semibold rounded-xl transition-colors whitespace-nowrap'
 
+const heroShowcase = [
+    {
+        label: 'Products',
+        hint: 'Plants & tools',
+        art: '/icons/services/plant.png',
+        className: 'left-0 top-2 md:top-4',
+    },
+    {
+        label: 'Services',
+        hint: 'Care at the door',
+        art: '/icons/services/garden-design.png',
+        className: 'right-0 top-[46%]',
+    },
+    {
+        label: 'Properties',
+        hint: 'Land & farmhouses',
+        art: '/icons/services/maintenance.png',
+        className: 'bottom-1 left-1 md:left-4',
+    },
+]
+
 export default function BecomeSeller() {
     return (
         <div className="bg-slate-50/50">
             {/* Hero — same language as the homepage carousel */}
             <section className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2">
-                <div className="relative overflow-hidden rounded-xl bg-white shadow-sm min-h-[240px] sm:min-h-[300px] lg:min-h-[340px]">
-                    <img
-                        src="/bgs1.png"
-                        alt=""
-                        className="absolute inset-0 hidden sm:block h-full w-full object-cover object-center"
+                <div className="relative overflow-hidden rounded-xl shadow-sm h-[200px] sm:h-[260px] md:h-[300px] lg:h-[340px]">
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            background:
+                                'linear-gradient(118deg, #edf7f0 0%, #f7fbf8 42%, #d7eadc 72%, #c5dfcc 100%)',
+                        }}
                     />
-                    <div className="absolute inset-0 bg-[#f4f8f5] sm:bg-gradient-to-r sm:from-white sm:via-white/85 sm:to-transparent" />
-                    <div className="relative z-10 flex h-full min-h-[240px] sm:min-h-[300px] lg:min-h-[340px] items-center px-5 sm:px-10 lg:px-14 py-10">
-                        <div className="max-w-lg">
-                            <p
-                                className="text-[11px] font-semibold uppercase tracking-[0.14em]"
-                                style={{ color: BRAND.green }}
-                            >
-                                Sell on LeafyLand
-                            </p>
-                            <h1 className="mt-2 text-2xl sm:text-3xl lg:text-[2.15rem] font-semibold text-slate-800 leading-snug">
-                                Grow your green business with India&apos;s plant marketplace
+                    <div
+                        className="pointer-events-none absolute -right-16 -top-24 h-72 w-72 rounded-full blur-3xl"
+                        style={{ backgroundColor: 'rgba(47,125,74,0.22)' }}
+                    />
+                    <div
+                        className="pointer-events-none absolute right-24 -bottom-20 h-56 w-56 rounded-full blur-3xl"
+                        style={{ backgroundColor: 'rgba(16,185,129,0.18)' }}
+                    />
+                    <svg
+                        className="pointer-events-none absolute -left-8 bottom-0 h-32 w-32 opacity-[0.12]"
+                        viewBox="0 0 120 120"
+                        fill="none"
+                        aria-hidden
+                    >
+                        <path
+                            d="M18 102c28-8 46-32 52-62 18 8 32 28 36 52-22 4-58 8-88 10Z"
+                            fill={BRAND.green}
+                        />
+                        <path
+                            d="M58 18c8 22 6 44-8 64 22 2 40-8 52-24-12-18-28-32-44-40Z"
+                            fill={BRAND.green}
+                        />
+                    </svg>
+
+                    <div className="relative z-10 h-full flex items-center px-4 sm:px-8 md:px-12 lg:px-14">
+                        <div className="relative z-10 max-w-[min(100%,12.5rem)] sm:max-w-[50%] md:max-w-[55%] lg:max-w-lg pr-2 sm:pr-0">
+                            <h1 className="text-base sm:text-2xl md:text-3xl lg:text-[2rem] font-bold text-slate-800 leading-snug">
+                                Grow your green business with{' '}
+                                <span style={{ color: BRAND.green }}>India&apos;s plant marketplace</span>
                             </h1>
-                            <p className="mt-2 text-sm sm:text-base text-slate-600 leading-relaxed">
+                            <p className="mt-1 sm:mt-1.5 text-[11px] sm:text-sm md:text-base text-slate-600 leading-relaxed line-clamp-2 sm:line-clamp-none">
                                 List plants, tools, services and properties. Reach buyers who are already looking for what you sell.
                             </p>
-                            <div className="mt-5">
-                                <Link
-                                    href="/create-store"
-                                    className={`${heroCtaClass} text-white hover:opacity-90`}
-                                    style={{ backgroundColor: BRAND.green }}
+                            <Link
+                                href="/create-store"
+                                className={`mt-2.5 sm:mt-4 ${brandPrimaryCtaClass}`}
+                                style={{ backgroundColor: BRAND.green }}
+                            >
+                                Start selling
+                                <ArrowRight size={15} strokeWidth={2} />
+                            </Link>
+                        </div>
+
+                        <div className="absolute right-1 sm:right-3 md:right-8 lg:right-12 top-1/2 -translate-y-1/2 w-[46%] sm:w-[46%] max-w-[400px] h-[90%] sm:h-[88%] pointer-events-none">
+                            <div
+                                className="absolute left-1/2 top-1/2 h-28 w-28 sm:h-36 sm:w-36 md:h-44 md:w-44 lg:h-52 lg:w-52 -translate-x-1/2 -translate-y-1/2 rounded-full blur-2xl"
+                                style={{ backgroundColor: 'rgba(47,125,74,0.18)' }}
+                            />
+                            <div
+                                className="absolute left-1/2 top-1/2 h-[5.5rem] w-[5.5rem] sm:h-28 sm:w-28 md:h-36 md:w-36 lg:h-40 lg:w-40 -translate-x-1/2 -translate-y-1/2 rounded-full border bg-white/55"
+                                style={{ borderColor: 'rgba(47,125,74,0.16)' }}
+                            />
+                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+                                <div className="h-[5.25rem] w-[5.25rem] sm:h-24 sm:w-24 md:h-32 md:w-32 lg:h-36 lg:w-36 overflow-hidden rounded-full shadow-[0_12px_28px_rgba(47,125,74,0.18)] ring-2 sm:ring-4 ring-white/80">
+                                    <Image
+                                        src="/icons/services/plant.png"
+                                        alt=""
+                                        width={176}
+                                        height={176}
+                                        priority
+                                        className="h-full w-full scale-[1.18] object-cover object-center"
+                                    />
+                                </div>
+                            </div>
+                            {heroShowcase.map((card) => (
+                                <div
+                                    key={card.label}
+                                    className={`absolute z-10 hidden md:flex pointer-events-auto w-[138px] items-center gap-2 rounded-xl bg-white/95 px-2 py-1.5 shadow-[0_10px_22px_rgba(15,23,42,0.12)] ring-1 ring-white ${card.className}`}
                                 >
-                                    Start selling
-                                    <ArrowRight size={15} strokeWidth={2} />
-                                </Link>
+                                    <span
+                                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg"
+                                        style={{ backgroundColor: BRAND.greenLight }}
+                                    >
+                                        <Image src={card.art} alt="" width={28} height={28} className="h-7 w-7 object-contain" />
+                                    </span>
+                                    <div className="min-w-0">
+                                        <p className="text-[11px] font-semibold text-slate-800 leading-tight truncate">{card.label}</p>
+                                        <p className="text-[10px] text-slate-500 truncate">{card.hint}</p>
+                                    </div>
+                                </div>
+                            ))}
+                            <div
+                                className="hidden sm:block absolute top-1 right-0 z-20 rounded-xl bg-white px-2.5 py-1.5 shadow-md border pointer-events-auto"
+                                style={{ borderColor: BRAND.mintBorder }}
+                            >
+                                <p className="text-[9px] uppercase tracking-wider font-semibold" style={{ color: BRAND.green }}>
+                                    New sellers
+                                </p>
+                                <p className="text-xs font-bold text-slate-800">Go live this week</p>
                             </div>
                         </div>
                     </div>
