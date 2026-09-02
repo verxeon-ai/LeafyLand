@@ -26,7 +26,7 @@ export default function StoreLogo({ src, name = 'Store', className = 'w-8 h-8 ro
     }
 
     return (
-        <div className={`${className} bg-emerald-100 flex items-center justify-center font-bold text-emerald-700`}>
+        <div className={`${className} flex items-center justify-center font-bold`} style={{ backgroundColor: '#eef4ef', color: '#2f7d4a' }}>
             {name?.charAt(0)?.toUpperCase() || 'S'}
         </div>
     )

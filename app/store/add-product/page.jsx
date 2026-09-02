@@ -1,10 +1,11 @@
 'use client'
 import { useState } from 'react'
-import { Upload, X, Plus, Image as ImageIcon } from 'lucide-react'
+import { X, Plus } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import PageHeader from '@/components/admin/PageHeader'
 import { uploadImages } from '@/components/store/StoreLogo'
 import { LEAFY_CATEGORIES, MARKETPLACE_CATEGORIES } from '@/lib/categories'
+import { brandCardClass, brandInputClass, brandSelectClass, brandPrimaryCtaClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export default function StoreAddProduct() {
     const [images, setImages] = useState([])
@@ -55,19 +56,19 @@ export default function StoreAddProduct() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="Add New Product" description="Create a new product listing for your store" />
+            <PageHeader title="Add New Product" description="Create a new product listing for your store" eyebrow="Vendor" />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Form */}
                 <div className="lg:col-span-2 space-y-6">
-                    <form onSubmit={onSubmitHandler} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5">
+                    <form onSubmit={onSubmitHandler} className={`${brandCardClass} p-6 space-y-5`}>
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1.5">Product Name</label>
                             <input
                                 type="text" name="name" value={productInfo.name} onChange={onChangeHandler}
                                 placeholder="e.g. Areca Palm Giant"
                                 required
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                className={brandInputClass}
                             />
                         </div>
 
@@ -77,7 +78,7 @@ export default function StoreAddProduct() {
                                 name="description" value={productInfo.description} onChange={onChangeHandler}
                                 placeholder="Describe your product..."
                                 rows={4} required
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition resize-none"
+                                className={`${brandInputClass} resize-none`}
                             />
                         </div>
 
@@ -87,7 +88,7 @@ export default function StoreAddProduct() {
                                 <input
                                     type="number" name="mrp" value={productInfo.mrp} onChange={onChangeHandler}
                                     placeholder="0" min={0} required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                             <div>
@@ -95,7 +96,7 @@ export default function StoreAddProduct() {
                                 <input
                                     type="number" name="price" value={productInfo.price} onChange={onChangeHandler}
                                     placeholder="0" min={0} required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                             <div>
@@ -103,7 +104,7 @@ export default function StoreAddProduct() {
                                 <input
                                     type="number" name="stock" value={productInfo.stock} onChange={onChangeHandler}
                                     placeholder="0" min={0} required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                         </div>
@@ -114,7 +115,7 @@ export default function StoreAddProduct() {
                                 onChange={(e) => setProductInfo({ ...productInfo, category: e.target.value })}
                                 value={productInfo.category}
                                 required
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 outline-none transition"
+                                className={`w-full ${brandSelectClass}`}
                             >
                                 <option value="">Select a category</option>
                                 <optgroup label="🌿 LeafyLand Categories">
@@ -126,14 +127,14 @@ export default function StoreAddProduct() {
                             </select>
                         </div>
 
-                        <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-xl text-sm font-semibold transition-colors">
+                        <button type="submit" disabled={loading} className={`w-full ${brandPrimaryCtaClass} py-3`} style={{ backgroundColor: BRAND_GREEN }}>
                             Add Product
                         </button>
                     </form>
                 </div>
 
                 {/* Image Upload */}
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                <div className={`${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Product Images</h2>
                     <p className="text-xs text-slate-500 mb-4">Upload up to 5 images. First image will be the cover.</p>
 
@@ -149,12 +150,12 @@ export default function StoreAddProduct() {
                                     <X size={12} />
                                 </button>
                                 {i === 0 && (
-                                    <span className="absolute bottom-1.5 left-1.5 bg-emerald-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">COVER</span>
+                                    <span className="absolute bottom-1.5 left-1.5 bg-[#2f7d4a] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">COVER</span>
                                 )}
                             </div>
                         ))}
                         {images.length < 5 && (
-                            <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors">
+                            <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#2f7d4a] hover:bg-[#eef4ef]/50 transition-colors">
                                 <Plus size={20} className="text-slate-400" />
                                 <span className="text-[10px] text-slate-400 mt-1">Add Image</span>
                                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />

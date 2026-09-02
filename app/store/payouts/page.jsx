@@ -1,8 +1,13 @@
 'use client'
 import Link from 'next/link'
-import { AlertTriangle } from 'lucide-react'
-import { Wallet, Clock3, Hourglass, BadgeCheck } from 'lucide-react'
+import { AlertTriangle, Wallet, Clock3, Hourglass, BadgeCheck } from 'lucide-react'
+import PageHeader from '@/components/admin/PageHeader'
+import StatCard from '@/components/admin/StatCard'
+import DataTable from '@/components/admin/DataTable'
+import EmptyState from '@/components/admin/EmptyState'
+import { AdminStatSkeleton } from '@/components/admin/AdminStates'
 import { useLiveData } from '@/lib/useLiveData'
+import { brandCardClass } from '@/lib/brand-ui'
 
 function fmt(paise) {
     return `₹${(Math.round(paise || 0) / 100).toLocaleString('en-IN')}`
@@ -11,15 +16,15 @@ function fmt(paise) {
 const STATUS_STYLES = {
     DUE: 'bg-slate-100 text-slate-600',
     PROCESSING: 'bg-amber-100 text-amber-700',
-    PAID: 'bg-emerald-100 text-emerald-700',
-    PROCESSED: 'bg-emerald-100 text-emerald-700',
+    PAID: 'bg-[#eef4ef] text-[#2f7d4a]',
+    PROCESSED: 'bg-[#eef4ef] text-[#2f7d4a]',
     FAILED: 'bg-red-100 text-red-700',
 }
 
 function Chip({ status }) {
     const label = status === 'PROCESSED' ? 'Completed' : status === 'PROCESSING' ? 'Processing' : status
     return (
-        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_STYLES[status] || 'bg-slate-100 text-slate-600'}`}>
+        <span className={`rounded-xl px-2 py-0.5 text-xs font-semibold ${STATUS_STYLES[status] || 'bg-slate-100 text-slate-600'}`}>
             {label}
         </span>
     )
@@ -32,25 +37,37 @@ export default function VendorPayouts() {
     const earnings = data?.earnings || []
     const payouts = data?.payouts || []
 
-    const cards = [
-        { icon: Wallet, label: 'Available to receive', value: fmt(wallet?.dueNowPaise), color: 'bg-emerald-100', text: 'text-emerald-600' },
-        { icon: Hourglass, label: 'In transit', value: fmt(wallet?.processingPaise), color: 'bg-amber-100', text: 'text-amber-600' },
-        { icon: Clock3, label: 'Upcoming (within 7 days)', value: fmt(wallet?.upcomingPaise), color: 'bg-blue-100', text: 'text-blue-600' },
-        { icon: BadgeCheck, label: 'Total received', value: fmt(wallet?.lifetimePaidPaise), color: 'bg-emerald-600/20', text: 'text-emerald-700' },
+    const earningColumns = [
+        { key: 'orderId', label: 'Order', render: (val) => <span className="font-mono text-xs text-slate-600">{String(val || '').slice(-8)}</span> },
+        { key: 'createdAt', label: 'Sale date', render: (val) => new Date(val).toLocaleDateString('en-IN') },
+        { key: 'grossPaise', label: 'Gross', render: (val) => fmt(val) },
+        { key: 'commissionPaise', label: 'Commission', render: (val) => `-${fmt(val)}` },
+        { key: 'eligibleAt', label: 'Unlocks', render: (val) => new Date(val).toLocaleDateString('en-IN') },
+        { key: 'status', label: 'Status', render: (val) => <Chip status={val} /> },
+    ]
+
+    const payoutColumns = [
+        { key: 'reference', label: 'Reference', render: (val, row) => <span className="font-mono text-xs text-slate-600">{val || row.id?.slice(-8)}</span> },
+        { key: 'netPaise', label: 'Net paid', render: (val) => <span className="font-semibold text-slate-800">{fmt(val)}</span> },
+        { key: 'method', label: 'Method', render: (val) => (val === 'RAZORPAYX' ? 'RazorpayX' : 'Bank Transfer') },
+        { key: 'status', label: 'Status', render: (val) => <Chip status={val} /> },
+        {
+            key: 'processedAt',
+            label: 'Date',
+            render: (val, row) => new Date(val || row.createdAt).toLocaleDateString('en-IN'),
+        },
     ]
 
     return (
         <div className="space-y-6">
-            <h1 className="text-2xl font-semibold text-slate-800">
-                Store <span className="font-bold">Wallet</span>
-            </h1>
+            <PageHeader eyebrow="Vendor" title="Wallet" description="Earnings, payouts and bank details" />
 
             {data && !data.bankDetailsComplete && (
                 <Link
                     href="/store/settings"
-                    className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-2xl p-4 hover:bg-amber-100 transition-colors"
+                    className={`${brandCardClass} flex items-start gap-3 border-amber-200 bg-amber-50 p-4 transition-colors hover:bg-amber-100`}
                 >
-                    <AlertTriangle size={18} className="text-amber-600 mt-0.5 shrink-0" />
+                    <AlertTriangle size={18} className="mt-0.5 shrink-0 text-amber-600" />
                     <span className="text-sm text-amber-800">
                         Your bank details are incomplete. Add your account number and IFSC in Store Settings so
                         LeafyLand can release your payouts.
@@ -58,92 +75,41 @@ export default function VendorPayouts() {
                 </Link>
             )}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                {cards.map((c) => (
-                    <div key={c.label} className="bg-white rounded-2xl border border-slate-100 p-5">
-                        <div className={`w-10 h-10 ${c.color} rounded-xl flex items-center justify-center mb-3`}>
-                            <c.icon size={18} className={c.text} />
-                        </div>
-                        <p className="text-xs text-slate-500">{c.label}</p>
-                        <p className={`text-2xl font-bold mt-0.5 ${c.text}`}>
-                            {loading ? '…' : c.value}
-                        </p>
-                    </div>
-                ))}
-            </div>
+            {loading && !data ? (
+                <AdminStatSkeleton />
+            ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+                    <StatCard icon={Wallet} label="Available to receive" value={fmt(wallet?.dueNowPaise)} />
+                    <StatCard icon={Hourglass} label="In transit" value={fmt(wallet?.processingPaise)} />
+                    <StatCard icon={Clock3} label="Upcoming (within 7 days)" value={fmt(wallet?.upcomingPaise)} />
+                    <StatCard icon={BadgeCheck} label="Total received" value={fmt(wallet?.lifetimePaidPaise)} />
+                </div>
+            )}
 
-            <div className="bg-white rounded-2xl border border-slate-100 p-5">
-                <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-lg font-semibold text-slate-800">Order earnings</h2>
+            <div className="space-y-4">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#2f7d4a' }}>Earnings</p>
+                    <h2 className="mt-1 text-lg font-bold text-slate-800">Order earnings</h2>
                     {data && (
-                        <span className="text-xs text-slate-400">
-                            Commission rate: {data.commissionRate}% · funds unlock 7 days after each sale
-                        </span>
+                        <p className="mt-1 text-sm text-slate-500">Commission {data.commissionRate}% · funds unlock 7 days after each sale</p>
                     )}
                 </div>
                 {!loading && earnings.length === 0 ? (
-                    <p className="text-sm text-slate-500">No earnings yet. They appear automatically when customers pay.</p>
+                    <EmptyState title="No earnings yet" description="They appear automatically when customers pay" />
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-xs sm:text-sm min-w-[640px]">
-                            <thead>
-                                <tr className="text-left text-slate-500 border-b border-slate-100">
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Order</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Sale date</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Gross</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Commission</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Unlocks</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {earnings.map((e) => (
-                                    <tr key={e.id} className="border-b border-slate-50 last:border-0">
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 font-mono text-xs text-slate-600">{e.orderId.slice(-8)}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-500">{new Date(e.createdAt).toLocaleDateString()}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-700">{fmt(e.grossPaise)}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-500">-{fmt(e.commissionPaise)}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-500">{new Date(e.eligibleAt).toLocaleDateString()}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3"><Chip status={e.status} /></td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <DataTable columns={earningColumns} data={earnings} searchKeys={['orderId', 'status']} emptyMessage="No earnings yet" />
                 )}
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 p-5">
-                <h2 className="text-lg font-semibold text-slate-800 mb-4">Payout history</h2>
+            <div className="space-y-4">
+                <div>
+                    <p className="text-[11px] font-semibold uppercase tracking-[0.14em]" style={{ color: '#2f7d4a' }}>History</p>
+                    <h2 className="mt-1 text-lg font-bold text-slate-800">Payout history</h2>
+                </div>
                 {!loading && payouts.length === 0 ? (
-                    <p className="text-sm text-slate-500">No payouts yet.</p>
+                    <EmptyState title="No payouts yet" description="Completed payouts will show here" />
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-xs sm:text-sm min-w-[560px]">
-                            <thead>
-                                <tr className="text-left text-slate-500 border-b border-slate-100">
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Reference</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Net paid</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Method</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Status</th>
-                                    <th className="pb-3 px-2 sm:px-3 font-medium">Date</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {payouts.map((p) => (
-                                    <tr key={p.id} className="border-b border-slate-50 last:border-0">
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 font-mono text-xs text-slate-600">{p.reference || p.id.slice(-8)}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 font-semibold text-slate-800">{fmt(p.netPaise)}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-600">{p.method === 'RAZORPAYX' ? 'RazorpayX' : 'Bank Transfer'}</td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3"><Chip status={p.status} /></td>
-                                        <td className="py-2 sm:py-3 px-2 sm:px-3 text-slate-500">
-                                            {new Date(p.processedAt || p.createdAt).toLocaleDateString()}
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <DataTable columns={payoutColumns} data={payouts} searchKeys={['reference', 'method', 'status']} emptyMessage="No payouts yet" />
                 )}
             </div>
         </div>

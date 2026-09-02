@@ -1,27 +1,38 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Search, Plus, Eye, Edit, Trash2, Package } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Plus, Edit, Trash2, Package } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import PageHeader from '@/components/admin/PageHeader'
+import EmptyState from '@/components/admin/EmptyState'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { useVendorPageSearch } from '@/components/store/useVendorPageSearch'
+import {
+    brandCardClass,
+    brandInputClass,
+    brandSelectClass,
+    brandPrimaryCtaClass,
+    BRAND_GREEN,
+} from '@/lib/brand-ui'
 
 export default function VendorProducts() {
+    const { data: vendorProducts, loading, error, reload } = useCachedJson('/api/vendor/products', 'list')
     const [search, setSearch] = useState('')
     const [categoryFilter, setCategoryFilter] = useState('All')
     const [stockFilter, setStockFilter] = useState('All')
-    const [vendorProducts, setVendorProducts] = useState([])
+    const [deleting, setDeleting] = useState(null)
 
-    const load = () => {
-        fetch('/api/vendor/products')
-            .then((r) => r.json())
-            .then((data) => { if (Array.isArray(data)) setVendorProducts(data) })
-    }
+    useVendorPageSearch(setSearch)
 
-    useEffect(() => { load() }, [])
+    const categories = useMemo(
+        () => ['All', ...new Set(vendorProducts.map((p) => p.category).filter(Boolean))],
+        [vendorProducts],
+    )
 
-    const categories = ['All', ...new Set(vendorProducts.map(p => p.category))]
-
-    const filtered = vendorProducts.filter(p => {
-        const matchSearch = p.name.toLowerCase().includes(search.toLowerCase())
+    const filtered = vendorProducts.filter((p) => {
+        const matchSearch = (p.name || '').toLowerCase().includes(search.toLowerCase())
         const matchCategory = categoryFilter === 'All' || p.category === categoryFilter
         const matchStock = stockFilter === 'All' ||
             (stockFilter === 'In Stock' && p.inStock && p.stock > 3) ||
@@ -30,47 +41,42 @@ export default function VendorProducts() {
         return matchSearch && matchCategory && matchStock
     })
 
+    const handleDelete = async () => {
+        if (!deleting) return
+        const res = await fetch(`/api/vendor/products/${deleting.id}`, { method: 'DELETE' })
+        if (!res.ok) {
+            toast.error('Could not delete')
+            throw new Error('delete')
+        }
+        toast.success('Product deleted')
+        reload({ silent: true })
+    }
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-800">
-                        My <span className="font-bold">Products</span>
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">{vendorProducts.length} products listed</p>
-                </div>
-                <Link
-                    href="/store/add-product"
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                >
-                    <Plus size={16} /> Add Product
-                </Link>
-            </div>
+            <PageHeader
+                eyebrow="Vendor"
+                title="Products"
+                description={`${vendorProducts.length} products listed`}
+                action={
+                    <Link href="/store/add-product" className={brandPrimaryCtaClass} style={{ backgroundColor: BRAND_GREEN }}>
+                        <Plus size={16} /> Add Product
+                    </Link>
+                }
+            />
 
-            {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search products..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition"
-                    />
-                </div>
-                <select
-                    value={categoryFilter}
-                    onChange={(e) => setCategoryFilter(e.target.value)}
-                    className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-emerald-500"
-                >
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            <div className="flex flex-col gap-3 sm:flex-row">
+                <input
+                    type="text"
+                    placeholder="Search products..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    className={brandInputClass}
+                />
+                <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className={brandSelectClass}>
+                    {categories.map((cat) => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
-                <select
-                    value={stockFilter}
-                    onChange={(e) => setStockFilter(e.target.value)}
-                    className="px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-700 focus:outline-none focus:border-emerald-500"
-                >
+                <select value={stockFilter} onChange={(e) => setStockFilter(e.target.value)} className={brandSelectClass}>
                     <option value="All">All Stock</option>
                     <option value="In Stock">In Stock</option>
                     <option value="Low Stock">Low Stock</option>
@@ -78,66 +84,55 @@ export default function VendorProducts() {
                 </select>
             </div>
 
-            {/* Product Grid */}
-            {filtered.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-slate-100">
-                    <Package size={40} className="text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 text-sm">No products found</p>
-                    <Link href="/store/add-product" className="mt-3 inline-flex items-center gap-1 text-emerald-600 text-sm font-medium hover:underline">
-                        <Plus size={14} /> Add your first product
-                    </Link>
-                </div>
+            {loading && vendorProducts.length === 0 ? (
+                <AdminTableSkeleton />
+            ) : error && vendorProducts.length === 0 ? (
+                <AdminError message={error} onRetry={reload} />
+            ) : filtered.length === 0 ? (
+                <EmptyState icon={Package} title="No products found" description="Add a product or adjust your filters" />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    {filtered.map(product => (
-                        <div key={product.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow group">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {filtered.map((product) => (
+                        <div key={product.id} className={`${brandCardClass} group overflow-hidden`}>
                             <div className="relative aspect-square bg-slate-50">
                                 {product.images?.[0] ? (
                                     <img
                                         src={product.images[0]}
                                         alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                    <div className="flex h-full w-full items-center justify-center text-slate-300">
                                         <Package size={32} />
                                     </div>
                                 )}
-                                <span className={`absolute top-2 left-2 text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                                    product.stock <= 3 ? 'bg-red-500 text-white' :
-                                    product.stock <= 10 ? 'bg-amber-500 text-white' :
-                                    'bg-emerald-500 text-white'
+                                <span className={`absolute top-2 left-2 rounded-xl px-2 py-0.5 text-[9px] font-bold text-white ${
+                                    product.stock <= 3 ? 'bg-red-500' : product.stock <= 10 ? 'bg-amber-500' : 'bg-[#2f7d4a]'
                                 }`}>
                                     {product.stock <= 3 ? 'LOW STOCK' : `${product.stock} in stock`}
                                 </span>
                             </div>
                             <div className="p-4">
-                                <h3 className="text-sm font-semibold text-slate-800 truncate">{product.name}</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">{product.category}</p>
-                                <div className="flex items-baseline gap-2 mt-2">
-                                    <span className="text-lg font-bold text-slate-800">₹{product.price.toLocaleString()}</span>
+                                <h3 className="truncate text-sm font-semibold text-slate-800">{product.name}</h3>
+                                <p className="mt-0.5 text-xs text-slate-500">{product.category}</p>
+                                <div className="mt-2 flex items-baseline gap-2">
+                                    <span className="text-lg font-bold text-slate-800">₹{(product.price || 0).toLocaleString('en-IN')}</span>
                                     {product.mrp > product.price && (
-                                        <span className="text-xs text-slate-400 line-through">₹{product.mrp.toLocaleString()}</span>
+                                        <span className="text-xs text-slate-400 line-through">₹{product.mrp.toLocaleString('en-IN')}</span>
                                     )}
                                 </div>
-                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
+                                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
                                     <div className="text-xs text-slate-500">
                                         <span className="font-semibold text-slate-700">{product.totalSales}</span> sold
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <button className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors">
+                                        <Link href={`/store/manage-product?id=${product.id}`} className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]">
                                             <Edit size={14} />
-                                        </button>
+                                        </Link>
                                         <button
                                             type="button"
-                                            onClick={async () => {
-                                                if (!confirm('Delete this product?')) return
-                                                const res = await fetch(`/api/vendor/products/${product.id}`, { method: 'DELETE' })
-                                                if (!res.ok) return toast.error('Could not delete')
-                                                toast.success('Product deleted')
-                                                load()
-                                            }}
-                                            className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                            onClick={() => setDeleting(product)}
+                                            className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
                                         >
                                             <Trash2 size={14} />
                                         </button>
@@ -148,6 +143,17 @@ export default function VendorProducts() {
                     ))}
                 </div>
             )}
+
+            <ConfirmDialog
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                danger
+                eyebrow="Catalog"
+                title="Delete this product?"
+                description={deleting ? `"${deleting.name}" will be removed from your store.` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleDelete}
+            />
         </div>
     )
 }

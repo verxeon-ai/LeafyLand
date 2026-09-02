@@ -1,38 +1,30 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Search, Eye } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { Eye } from 'lucide-react'
 import StatusBadge from '@/components/admin/StatusBadge'
+import PageHeader from '@/components/admin/PageHeader'
+import FilterChips from '@/components/admin/FilterChips'
+import DataTable from '@/components/admin/DataTable'
+import DetailSlideOver from '@/components/admin/DetailSlideOver'
+import { DetailFields, DetailSection, formatAdminMoney } from '@/components/admin/AdminDetail'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { brandSelectClass, brandLinkClass, BRAND_GREEN } from '@/lib/brand-ui'
 import toast from 'react-hot-toast'
 
 const STATUS_OPTIONS = ['ORDER_PLACED', 'PROCESSING', 'SHIPPED', 'DELIVERED', 'CANCELLED']
 const FILTERS = ['All', ...STATUS_OPTIONS]
 
 export default function VendorOrders() {
-    const [search, setSearch] = useState('')
+    const { data: vendorOrders, setData, loading, error, reload } = useCachedJson('/api/vendor/orders', 'list')
     const [statusFilter, setStatusFilter] = useState('All')
-    const [vendorOrders, setVendorOrders] = useState([])
     const [selectedOrder, setSelectedOrder] = useState(null)
     const [updating, setUpdating] = useState(false)
 
-    const load = () => {
-        fetch('/api/vendor/orders')
-            .then((r) => r.json())
-            .then((data) => {
-                if (Array.isArray(data)) setVendorOrders(data)
-            })
-    }
-
-    useEffect(() => {
-        load()
-    }, [])
-
-    const filtered = vendorOrders.filter((o) => {
-        const matchSearch =
-            (o.customer || '').toLowerCase().includes(search.toLowerCase()) ||
-            (o.id || '').toLowerCase().includes(search.toLowerCase())
-        const matchStatus = statusFilter === 'All' || o.status === statusFilter
-        return matchSearch && matchStatus
-    })
+    const filtered = useMemo(() => {
+        if (statusFilter === 'All') return vendorOrders
+        return vendorOrders.filter((o) => o.status === statusFilter)
+    }, [vendorOrders, statusFilter])
 
     const updateStatus = async (status) => {
         if (!selectedOrder) return
@@ -45,8 +37,8 @@ export default function VendorOrders() {
             })
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || 'Update failed')
-            toast.success(`Status updated to ${status}`)
-            setVendorOrders((prev) => prev.map((o) => (o.id === data.id ? { ...o, ...data } : o)))
+            toast.success(`Status updated to ${status.replaceAll('_', ' ')}`)
+            setData((prev) => prev.map((o) => (o.id === data.id ? { ...o, ...data } : o)))
             setSelectedOrder(null)
         } catch (err) {
             toast.error(err.message)
@@ -55,156 +47,134 @@ export default function VendorOrders() {
         }
     }
 
+    const columns = [
+        {
+            key: 'id',
+            label: 'Order',
+            render: (val) => (
+                <span className="font-mono text-xs font-semibold text-slate-700">{String(val || '').slice(-8).toUpperCase()}</span>
+            ),
+        },
+        {
+            key: 'customer',
+            label: 'Customer',
+            render: (val, row) => (
+                <div>
+                    <p className="font-medium text-slate-700">{val}</p>
+                    <p className="text-xs text-slate-400">{row.email}</p>
+                </div>
+            ),
+        },
+        {
+            key: 'items',
+            label: 'Items',
+            render: (val) => `${val?.length || 0} item(s)`,
+        },
+        {
+            key: 'total',
+            label: 'Amount',
+            render: (val) => <span className="font-semibold text-slate-800">₹{Number(val || 0).toLocaleString('en-IN')}</span>,
+        },
+        {
+            key: 'payment',
+            label: 'Payment',
+            render: (val, row) => val || row.paymentMethod || '—',
+        },
+        {
+            key: 'status',
+            label: 'Status',
+            render: (val) => <StatusBadge status={val} />,
+        },
+        {
+            key: 'date',
+            label: 'Date',
+            render: (val) => (val ? new Date(val).toLocaleDateString('en-IN') : '—'),
+        },
+        {
+            key: 'view',
+            label: 'View',
+            render: (_val, row) => (
+                <button type="button" onClick={() => setSelectedOrder(row)} className={brandLinkClass} style={{ color: BRAND_GREEN }}>
+                    <Eye size={16} />
+                </button>
+            ),
+        },
+    ]
+
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-2xl font-semibold text-slate-800">
-                    Store <span className="font-bold">Orders</span>
-                </h1>
-                <p className="text-sm text-slate-500 mt-1">{vendorOrders.length} total orders</p>
-            </div>
+            <PageHeader eyebrow="Vendor" title="Orders" description={`${vendorOrders.length} total orders`} />
 
-            <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search orders or customers..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition"
-                    />
-                </div>
-                <div className="flex flex-wrap gap-2">
-                    {FILTERS.map((status) => (
-                        <button
-                            key={status}
-                            onClick={() => setStatusFilter(status)}
-                            className={`px-3 py-2 rounded-xl text-xs font-medium transition ${
-                                statusFilter === status
-                                    ? 'bg-emerald-600 text-white'
-                                    : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
-                            }`}
-                        >
-                            {status === 'All' ? 'All' : status.replace('_', ' ')}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            <FilterChips
+                options={FILTERS}
+                value={statusFilter}
+                onChange={setStatusFilter}
+                getLabel={(status) => (status === 'All' ? 'All' : status.replaceAll('_', ' '))}
+            />
 
-            <div className="bg-white rounded-2xl border border-slate-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full text-xs sm:text-sm min-w-[700px]">
-                        <thead>
-                            <tr className="text-left text-slate-500 border-b border-slate-100">
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Order ID</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Customer</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Items</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Amount</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Payment</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Status</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Date</th>
-                                <th className="px-2 py-2 sm:px-5 sm:py-3 font-medium">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filtered.map((order) => (
-                                <tr key={order.id} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3 font-mono text-xs font-semibold text-slate-700">
-                                        {(order.id || '').slice(-8).toUpperCase()}
-                                    </td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3">
-                                        <p className="font-medium text-slate-700">{order.customer}</p>
-                                        <p className="text-xs text-slate-400">{order.email}</p>
-                                    </td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3 text-slate-600">{order.items?.length || 0} item(s)</td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3 font-semibold text-slate-800">
-                                        ₹{Number(order.total || 0).toLocaleString()}
-                                    </td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3 text-slate-600">{order.payment || order.paymentMethod}</td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3">
-                                        <StatusBadge status={order.status} />
-                                    </td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3 text-slate-500 text-xs">
-                                        {order.date ? new Date(order.date).toLocaleDateString('en-IN') : '—'}
-                                    </td>
-                                    <td className="px-2 py-2 sm:px-5 sm:py-3">
-                                        <button
-                                            onClick={() => setSelectedOrder(order)}
-                                            className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors"
-                                        >
-                                            <Eye size={16} />
-                                        </button>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-                {filtered.length === 0 && (
-                    <div className="text-center py-16">
-                        <p className="text-slate-500 text-sm">No orders found</p>
-                    </div>
-                )}
-            </div>
+            {loading && vendorOrders.length === 0 ? (
+                <AdminTableSkeleton />
+            ) : error && vendorOrders.length === 0 ? (
+                <AdminError message={error} onRetry={reload} />
+            ) : (
+                <DataTable
+                    columns={columns}
+                    data={filtered}
+                    searchKeys={['id', 'customer', 'email']}
+                    emptyMessage="No orders found"
+                />
+            )}
 
-            {selectedOrder && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setSelectedOrder(null)} />
-                    <div className="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full mx-4 p-6 max-h-[80vh] overflow-y-auto">
-                        <h2 className="text-lg font-bold text-slate-800 mb-4">
-                            Order {(selectedOrder.id || '').slice(-8).toUpperCase()}
-                        </h2>
-                        <div className="space-y-4">
-                            <div>
-                                <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Customer</p>
-                                <p className="text-sm font-medium text-slate-700">{selectedOrder.customer}</p>
-                                <p className="text-xs text-slate-500">{selectedOrder.email}</p>
-                                <p className="text-xs text-slate-500 mt-1">{selectedOrder.address}</p>
-                            </div>
-                            <div>
-                                <p className="text-xs font-semibold text-slate-400 uppercase mb-1">Items</p>
+            <DetailSlideOver
+                isOpen={!!selectedOrder}
+                onClose={() => setSelectedOrder(null)}
+                eyebrow="Order"
+                title={selectedOrder ? String(selectedOrder.id || '').slice(-8).toUpperCase() : 'Order'}
+                subtitle={selectedOrder?.customer}
+                footer={selectedOrder ? (
+                    <select
+                        value={selectedOrder.status}
+                        disabled={updating}
+                        onChange={(e) => updateStatus(e.target.value)}
+                        className={`w-full ${brandSelectClass}`}
+                    >
+                        {STATUS_OPTIONS.map((s) => (
+                            <option key={s} value={s}>{s.replaceAll('_', ' ')}</option>
+                        ))}
+                    </select>
+                ) : null}
+            >
+                {selectedOrder && (
+                    <>
+                        <DetailSection title="Customer">
+                            <DetailFields
+                                items={[
+                                    { label: 'Name', value: selectedOrder.customer },
+                                    { label: 'Email', value: selectedOrder.email },
+                                    { label: 'Address', value: selectedOrder.address },
+                                    { label: 'Payment', value: selectedOrder.payment || selectedOrder.paymentMethod },
+                                ]}
+                            />
+                        </DetailSection>
+                        <DetailSection title="Items">
+                            <div className="overflow-hidden rounded-xl border border-[#e4eee6]">
                                 {(selectedOrder.items || []).map((item, i) => (
-                                    <div key={i} className="flex justify-between text-sm py-1">
-                                        <span className="text-slate-600">
-                                            {item.name} × {item.qty || item.quantity}
-                                        </span>
-                                        <span className="font-medium text-slate-700">
-                                            ₹{(item.price * (item.qty || item.quantity || 1)).toLocaleString()}
+                                    <div key={i} className="flex items-center justify-between border-b border-[#e4eee6] px-4 py-3 last:border-0">
+                                        <span className="text-sm text-slate-700">{item.name} × {item.qty || item.quantity}</span>
+                                        <span className="text-sm font-semibold text-slate-800">
+                                            {formatAdminMoney(item.price * (item.qty || item.quantity || 1))}
                                         </span>
                                     </div>
                                 ))}
                             </div>
-                            <div className="pt-3 border-t border-slate-100 flex justify-between">
-                                <span className="font-semibold text-slate-700">Total</span>
-                                <span className="font-bold text-slate-800">
-                                    ₹{Number(selectedOrder.total || 0).toLocaleString()}
-                                </span>
-                            </div>
-                            <div className="flex gap-3">
-                                <select
-                                    value={selectedOrder.status}
-                                    disabled={updating}
-                                    onChange={(e) => updateStatus(e.target.value)}
-                                    className="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500"
-                                >
-                                    {STATUS_OPTIONS.map((s) => (
-                                        <option key={s} value={s}>
-                                            {s.replace('_', ' ')}
-                                        </option>
-                                    ))}
-                                </select>
-                                <button
-                                    onClick={() => setSelectedOrder(null)}
-                                    className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-medium hover:bg-slate-200 transition-colors"
-                                >
-                                    Close
-                                </button>
-                            </div>
+                        </DetailSection>
+                        <div className="flex items-center justify-between rounded-xl bg-[#f4f8f5] px-4 py-3">
+                            <span className="text-sm font-medium text-slate-500">Total</span>
+                            <span className="text-base font-bold text-slate-800">{formatAdminMoney(selectedOrder.total)}</span>
                         </div>
-                    </div>
-                </div>
-            )}
+                    </>
+                )}
+            </DetailSlideOver>
         </div>
     )
 }

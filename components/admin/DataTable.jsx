@@ -33,11 +33,15 @@ export default function DataTable({ columns, data, searchKeys = [], emptyMessage
   }
 
   useEffect(() => {
-    const onAdminSearch = (event) => {
+    const onSearch = (event) => {
       if (typeof event.detail === 'string') handleSearch(event.detail)
     }
-    window.addEventListener('leafyland-admin-search', onAdminSearch)
-    return () => window.removeEventListener('leafyland-admin-search', onAdminSearch)
+    window.addEventListener('leafyland-admin-search', onSearch)
+    window.addEventListener('leafyland-vendor-search', onSearch)
+    return () => {
+      window.removeEventListener('leafyland-admin-search', onSearch)
+      window.removeEventListener('leafyland-vendor-search', onSearch)
+    }
   }, [])
 
   return (

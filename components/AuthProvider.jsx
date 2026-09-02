@@ -1,9 +1,15 @@
 'use client'
 import { SessionProvider } from 'next-auth/react'
 
-export default function AuthProvider({ children }) {
+export default function AuthProvider({ children, session }) {
     return (
-        <SessionProvider refetchOnWindowFocus={false} refetchInterval={0} refetchWhenOffline={false}>
+        <SessionProvider
+            session={session}
+            refetchOnWindowFocus={false}
+            refetchOnMount={false}
+            refetchInterval={0}
+            refetchWhenOffline={false}
+        >
             {children}
         </SessionProvider>
     )

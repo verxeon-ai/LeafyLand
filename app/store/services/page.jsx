@@ -1,76 +1,76 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Search, Plus, Trash2, Wrench } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash2, Wrench } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import StatusBadge from '@/components/admin/StatusBadge'
+import PageHeader from '@/components/admin/PageHeader'
+import EmptyState from '@/components/admin/EmptyState'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { useVendorPageSearch } from '@/components/store/useVendorPageSearch'
+import { brandPrimaryCtaClass, brandCardClass, brandInputClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export default function VendorServices() {
+    const { data: services, loading, error, reload } = useCachedJson('/api/vendor/services', 'list')
     const [search, setSearch] = useState('')
-    const [services, setServices] = useState([])
+    const [deleting, setDeleting] = useState(null)
 
-    const load = () => {
-        fetch('/api/vendor/services')
-            .then((r) => r.json())
-            .then((data) => { if (Array.isArray(data)) setServices(data) })
-    }
-
-    useEffect(() => { load() }, [])
+    useVendorPageSearch(setSearch)
 
     const filtered = services.filter((s) =>
         (s.name || '').toLowerCase().includes(search.toLowerCase()) ||
         (s.category || '').toLowerCase().includes(search.toLowerCase())
     )
 
+    const handleDelete = async () => {
+        if (!deleting) return
+        const res = await fetch(`/api/vendor/services/${deleting.id}`, { method: 'DELETE' })
+        if (!res.ok) {
+            toast.error('Could not delete')
+            throw new Error('delete')
+        }
+        toast.success('Service deleted')
+        reload({ silent: true })
+    }
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-800">
-                        My <span className="font-bold">Services</span>
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">{services.length} services listed</p>
-                </div>
-                <Link
-                    href="/store/add-service"
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                >
-                    <Plus size={16} /> Add Service
-                </Link>
-            </div>
-
-            <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="Search services..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition"
-                />
-            </div>
-
-            {filtered.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-slate-100">
-                    <Wrench size={40} className="text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 text-sm">No services found</p>
-                    <Link href="/store/add-service" className="mt-3 inline-flex items-center gap-1 text-emerald-600 text-sm font-medium hover:underline">
-                        <Plus size={14} /> Add your first service
+            <PageHeader
+                eyebrow="Vendor"
+                title="Services"
+                description={`${services.length} services listed`}
+                action={
+                    <Link href="/store/add-service" className={brandPrimaryCtaClass} style={{ backgroundColor: BRAND_GREEN }}>
+                        <Plus size={16} /> Add Service
                     </Link>
-                </div>
+                }
+            />
+
+            <input
+                type="text"
+                placeholder="Search services..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={brandInputClass}
+            />
+
+            {loading && services.length === 0 ? (
+                <AdminTableSkeleton />
+            ) : error && services.length === 0 ? (
+                <AdminError message={error} onRetry={reload} />
+            ) : filtered.length === 0 ? (
+                <EmptyState icon={Wrench} title="No services found" description="Add a service or adjust your search" />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filtered.map((service) => (
-                        <div key={service.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow group">
+                        <div key={service.id} className={`${brandCardClass} group overflow-hidden`}>
                             <div className="relative aspect-[4/3] bg-slate-50">
                                 {service.images?.[0] ? (
-                                    <img
-                                        src={service.images[0]}
-                                        alt={service.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                    />
+                                    <img src={service.images[0]} alt={service.name} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                    <div className="flex h-full w-full items-center justify-center text-slate-300">
                                         <Wrench size={32} />
                                     </div>
                                 )}
@@ -79,21 +79,15 @@ export default function VendorServices() {
                                 </span>
                             </div>
                             <div className="p-4">
-                                <h3 className="text-sm font-semibold text-slate-800 truncate">{service.name}</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">{service.category}</p>
-                                <p className="text-xs text-slate-400 mt-1 truncate">{service.location}</p>
-                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                                    <span className="text-lg font-bold text-slate-800">₹{(service.startingPrice || 0).toLocaleString()}</span>
+                                <h3 className="truncate text-sm font-semibold text-slate-800">{service.name}</h3>
+                                <p className="mt-0.5 text-xs text-slate-500">{service.category}</p>
+                                <p className="mt-1 truncate text-xs text-slate-400">{service.location}</p>
+                                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                                    <span className="text-lg font-bold text-slate-800">₹{(service.startingPrice || 0).toLocaleString('en-IN')}</span>
                                     <button
                                         type="button"
-                                        onClick={async () => {
-                                            if (!confirm('Delete this service?')) return
-                                            const res = await fetch(`/api/vendor/services/${service.id}`, { method: 'DELETE' })
-                                            if (!res.ok) return toast.error('Could not delete')
-                                            toast.success('Service deleted')
-                                            load()
-                                        }}
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        onClick={() => setDeleting(service)}
+                                        className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -103,6 +97,17 @@ export default function VendorServices() {
                     ))}
                 </div>
             )}
+
+            <ConfirmDialog
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                danger
+                eyebrow="Listings"
+                title="Delete this service?"
+                description={deleting ? `"${deleting.name}" will be removed from your listings.` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleDelete}
+            />
         </div>
     )
 }

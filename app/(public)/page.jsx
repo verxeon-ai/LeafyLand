@@ -5,22 +5,18 @@ import ExploreCategories from "@/components/ExploreCategories";
 import FeaturedSection from "@/components/FeaturedSection";
 import ProductCard from "@/components/ProductCard";
 import PropertyCard from "@/components/PropertyCard";
-import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
+import { cachedJson } from '@/lib/cachedJson'
 import { isMarketplaceCategory } from '@/lib/categories'
 import { ChevronRight } from "lucide-react";
 import Link from "next/link";
 import ServiceCategoryCard from "@/components/ServiceCategoryCard";
 import { ProductGridSkeleton } from "@/components/CatalogSkeleton";
 
-function asList(value) {
-    return Array.isArray(value) ? value : []
-}
-
 export default function Home() {
-    const [products, setProducts] = useState(() => asList(peekCachedJson('/api/products')))
-    const [services, setServices] = useState(() => asList(peekCachedJson('/api/services')))
-    const [properties, setProperties] = useState(() => asList(peekCachedJson('/api/properties')))
-    const [catalogReady, setCatalogReady] = useState(() => peekCachedJson('/api/products') !== undefined)
+    const [products, setProducts] = useState([])
+    const [services, setServices] = useState([])
+    const [properties, setProperties] = useState([])
+    const [catalogReady, setCatalogReady] = useState(false)
 
     useEffect(() => {
         let cancelled = false

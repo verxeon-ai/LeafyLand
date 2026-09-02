@@ -4,6 +4,7 @@ import { X, Plus } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import PageHeader from '@/components/admin/PageHeader'
 import { uploadImages } from '@/components/store/StoreLogo'
+import { brandCardClass, brandInputClass, brandSelectClass, brandPrimaryCtaClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 const serviceCategories = [
     'Landscaping', 'Irrigation', 'Garden Maintenance', 'Tree Care',
@@ -64,18 +65,18 @@ export default function StoreAddService() {
 
     return (
         <div className="space-y-6">
-            <PageHeader title="Add New Service" description="Create a bookable service listing for your store" />
+            <PageHeader title="Add New Service" description="Create a bookable service listing for your store" eyebrow="Vendor" />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
-                    <form onSubmit={onSubmit} className="bg-white rounded-2xl border border-slate-200 p-6 space-y-5">
+                    <form onSubmit={onSubmit} className={`${brandCardClass} p-6 space-y-5`}>
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1.5">Service Name</label>
                             <input
                                 type="text" name="name" value={form.name} onChange={onChange}
                                 placeholder="e.g. Full Garden Makeover"
                                 required
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                className={brandInputClass}
                             />
                         </div>
 
@@ -85,7 +86,7 @@ export default function StoreAddService() {
                                 name="description" value={form.description} onChange={onChange}
                                 placeholder="Describe your service..."
                                 rows={4} required
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition resize-none"
+                                className={`${brandInputClass} resize-none`}
                             />
                         </div>
 
@@ -94,7 +95,7 @@ export default function StoreAddService() {
                                 <label className="block text-xs font-medium text-slate-500 mb-1.5">Category</label>
                                 <select
                                     name="category" value={form.category} onChange={onChange} required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 outline-none transition"
+                                    className={`w-full ${brandSelectClass}`}
                                 >
                                     <option value="">Select category</option>
                                     {serviceCategories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -105,7 +106,7 @@ export default function StoreAddService() {
                                 <input
                                     type="number" name="startingPrice" value={form.startingPrice} onChange={onChange}
                                     placeholder="0" min={0} required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                             <div>
@@ -113,7 +114,7 @@ export default function StoreAddService() {
                                 <input
                                     type="text" name="duration" value={form.duration} onChange={onChange}
                                     placeholder="e.g. 2-3 hours"
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                             <div>
@@ -121,18 +122,18 @@ export default function StoreAddService() {
                                 <input
                                     type="text" name="location" value={form.location} onChange={onChange}
                                     placeholder="Service area" required
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                         </div>
 
-                        <button type="submit" disabled={loading} className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white py-3 rounded-xl text-sm font-semibold transition-colors">
+                        <button type="submit" disabled={loading} className={`w-full ${brandPrimaryCtaClass} py-3 disabled:opacity-60`} style={{ backgroundColor: BRAND_GREEN }}>
                             {loading ? 'Submitting…' : 'Add Service'}
                         </button>
                     </form>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-200 p-6">
+                <div className={`${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Service Images</h2>
                     <p className="text-xs text-slate-500 mb-4">Upload up to 5 images. First image will be the cover.</p>
 
@@ -148,12 +149,12 @@ export default function StoreAddService() {
                                     <X size={12} />
                                 </button>
                                 {i === 0 && (
-                                    <span className="absolute bottom-1.5 left-1.5 bg-emerald-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded">COVER</span>
+                                    <span className="absolute bottom-1.5 left-1.5 bg-[#2f7d4a] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">COVER</span>
                                 )}
                             </div>
                         ))}
                         {images.length < 5 && (
-                            <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-emerald-400 hover:bg-emerald-50/50 transition-colors">
+                            <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#2f7d4a] hover:bg-[#eef4ef]/50 transition-colors">
                                 <Plus size={20} className="text-slate-400" />
                                 <span className="text-[10px] text-slate-400 mt-1">Add Image</span>
                                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />

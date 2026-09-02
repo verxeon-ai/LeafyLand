@@ -4,6 +4,7 @@ import StoreProvider from "@/app/StoreProvider";
 import AuthProvider from "@/components/AuthProvider";
 import CartSync from "@/components/CartSync";
 import WishlistSync from "@/components/WishlistSync";
+import { auth } from "@/lib/auth";
 import "./globals.css";
 
 const outfit = Outfit({
@@ -29,11 +30,12 @@ export const viewport = {
     viewportFit: "cover",
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+    const session = await auth()
     return (
         <html lang="en">
             <body className={`${outfit.className} antialiased`}>
-                <AuthProvider>
+                <AuthProvider session={session}>
                     <StoreProvider>
                         <Toaster />
                         <CartSync />

@@ -35,7 +35,7 @@ async function readAuthToken(req) {
     return null
 }
 
-export async function middleware(req) {
+export async function proxy(req) {
     const { pathname } = req.nextUrl
     const token = await readAuthToken(req)
 

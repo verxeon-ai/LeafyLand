@@ -4,6 +4,9 @@ import { Save, Camera } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useVendorStore } from '@/components/store/VendorStoreContext'
 import StoreLogo, { fileToDataUrl } from '@/components/store/StoreLogo'
+import PageHeader from '@/components/admin/PageHeader'
+import { AdminStatSkeleton } from '@/components/admin/AdminStates'
+import { brandPrimaryCtaClass, brandCardClass, brandInputClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export default function StoreSettings() {
     const { store, loading, setStore } = useVendorStore()
@@ -36,31 +39,34 @@ export default function StoreSettings() {
             ? 'Pending review'
             : info.status || '—'
 
-    if (loading) return <p className="text-sm text-slate-500">Loading store profile…</p>
+    if (loading) {
+        return (
+            <div className="space-y-6">
+                <PageHeader eyebrow="Vendor" title="Store profile" description="Manage your store information and settings" />
+                <AdminStatSkeleton count={3} />
+            </div>
+        )
+    }
 
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-800">
-                        Store <span className="font-bold">Profile</span>
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">Manage your store information and settings</p>
-                </div>
-                <button
-                    onClick={handleSave}
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                >
-                    <Save size={16} /> Save Changes
-                </button>
-            </div>
+            <PageHeader
+                eyebrow="Vendor"
+                title="Store profile"
+                description="Manage your store information and settings"
+                action={
+                    <button type="button" onClick={handleSave} className={brandPrimaryCtaClass} style={{ backgroundColor: BRAND_GREEN }}>
+                        <Save size={16} /> Save Changes
+                    </button>
+                }
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="bg-white rounded-2xl border border-slate-100 p-6">
+                <div className={`${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Store photo</h2>
                     <div className="flex flex-col items-center gap-4">
-                        <StoreLogo src={info.logo} name={info.name} className="w-24 h-24 rounded-2xl text-3xl" />
-                        <label className="flex items-center gap-2 text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors cursor-pointer">
+                        <StoreLogo src={info.logo} name={info.name} className="w-24 h-24 rounded-xl text-3xl" />
+                        <label className="flex items-center gap-2 text-xs font-medium text-[#2f7d4a] hover:opacity-80 transition-colors cursor-pointer">
                             <Camera size={14} /> Upload photo
                             <input
                                 type="file"
@@ -93,7 +99,7 @@ export default function StoreSettings() {
                     <div className="mt-6 space-y-3">
                         <div>
                             <label className="block text-xs font-medium text-slate-500 mb-1">Status</label>
-                            <span className="inline-flex items-center px-3 py-1 bg-emerald-100 text-emerald-700 text-xs font-semibold rounded-full">
+                            <span className="inline-flex items-center px-3 py-1 bg-[#eef4ef] text-[#2f7d4a] text-xs font-semibold rounded-full">
                                 {statusLabel}
                             </span>
                         </div>
@@ -108,7 +114,7 @@ export default function StoreSettings() {
                     </div>
                 </div>
 
-                <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 p-6">
+                <div className={`lg:col-span-2 ${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Store Details</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         {[
@@ -129,7 +135,7 @@ export default function StoreSettings() {
                                     value={info[field.name] || ''}
                                     onChange={handleChange}
                                     disabled={field.disabled}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition disabled:text-slate-400"
+                                    className={`${brandInputClass} disabled:bg-slate-50 disabled:text-slate-400`}
                                 />
                             </div>
                         ))}
@@ -140,7 +146,7 @@ export default function StoreSettings() {
                                 value={info.description || ''}
                                 onChange={handleChange}
                                 rows={3}
-                                className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition resize-none"
+                                className={`${brandInputClass} resize-none`}
                             />
                         </div>
                     </div>
@@ -148,7 +154,7 @@ export default function StoreSettings() {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="bg-white rounded-2xl border border-slate-100 p-6">
+                <div className={`${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Business Details</h2>
                     <div className="space-y-4">
                         {[
@@ -162,14 +168,14 @@ export default function StoreSettings() {
                                     name={field.name}
                                     value={info[field.name] || ''}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                         ))}
                     </div>
                 </div>
 
-                <div className="bg-white rounded-2xl border border-slate-100 p-6">
+                <div className={`${brandCardClass} p-6`}>
                     <h2 className="text-sm font-semibold text-slate-800 mb-4">Payment Details</h2>
                     <div className="space-y-4">
                         {[
@@ -184,7 +190,7 @@ export default function StoreSettings() {
                                     name={field.name}
                                     value={info[field.name] || ''}
                                     onChange={handleChange}
-                                    className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition"
+                                    className={brandInputClass}
                                 />
                             </div>
                         ))}
@@ -192,7 +198,7 @@ export default function StoreSettings() {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl border border-slate-100 p-6">
+            <div className={`${brandCardClass} p-6`}>
                 <h2 className="text-sm font-semibold text-slate-800 mb-4">Store Policies</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
@@ -202,7 +208,7 @@ export default function StoreSettings() {
                             value={info.shippingPolicy || ''}
                             onChange={handleChange}
                             rows={3}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition resize-none"
+                            className={`${brandInputClass} resize-none`}
                         />
                     </div>
                     <div>
@@ -212,7 +218,7 @@ export default function StoreSettings() {
                             value={info.returnPolicy || ''}
                             onChange={handleChange}
                             rows={3}
-                            className="w-full bg-slate-50 border border-slate-200 rounded-xl text-sm px-4 py-2.5 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500/20 outline-none transition resize-none"
+                            className={`${brandInputClass} resize-none`}
                         />
                     </div>
                 </div>

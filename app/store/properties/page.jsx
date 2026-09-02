@@ -1,76 +1,76 @@
 'use client'
-import { useEffect, useState } from 'react'
-import { Search, Plus, Trash2, Home } from 'lucide-react'
+import { useState } from 'react'
+import { Plus, Trash2, Home } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import StatusBadge from '@/components/admin/StatusBadge'
+import PageHeader from '@/components/admin/PageHeader'
+import EmptyState from '@/components/admin/EmptyState'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
+import { useCachedJson } from '@/lib/useCachedJson'
+import { useVendorPageSearch } from '@/components/store/useVendorPageSearch'
+import { brandPrimaryCtaClass, brandCardClass, brandInputClass, BRAND_GREEN } from '@/lib/brand-ui'
 
 export default function VendorProperties() {
+    const { data: properties, loading, error, reload } = useCachedJson('/api/vendor/properties', 'list')
     const [search, setSearch] = useState('')
-    const [properties, setProperties] = useState([])
+    const [deleting, setDeleting] = useState(null)
 
-    const load = () => {
-        fetch('/api/vendor/properties')
-            .then((r) => r.json())
-            .then((data) => { if (Array.isArray(data)) setProperties(data) })
-    }
-
-    useEffect(() => { load() }, [])
+    useVendorPageSearch(setSearch)
 
     const filtered = properties.filter((p) =>
         (p.title || '').toLowerCase().includes(search.toLowerCase()) ||
         (p.location || '').toLowerCase().includes(search.toLowerCase())
     )
 
+    const handleDelete = async () => {
+        if (!deleting) return
+        const res = await fetch(`/api/vendor/properties/${deleting.id}`, { method: 'DELETE' })
+        if (!res.ok) {
+            toast.error('Could not delete')
+            throw new Error('delete')
+        }
+        toast.success('Property deleted')
+        reload({ silent: true })
+    }
+
     return (
         <div className="space-y-6">
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-semibold text-slate-800">
-                        My <span className="font-bold">Properties</span>
-                    </h1>
-                    <p className="text-sm text-slate-500 mt-1">{properties.length} properties listed</p>
-                </div>
-                <Link
-                    href="/store/add-property"
-                    className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-sm font-semibold transition-colors"
-                >
-                    <Plus size={16} /> Add Property
-                </Link>
-            </div>
-
-            <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                <input
-                    type="text"
-                    placeholder="Search properties..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 transition"
-                />
-            </div>
-
-            {filtered.length === 0 ? (
-                <div className="text-center py-20 bg-white rounded-2xl border border-slate-100">
-                    <Home size={40} className="text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-500 text-sm">No properties found</p>
-                    <Link href="/store/add-property" className="mt-3 inline-flex items-center gap-1 text-emerald-600 text-sm font-medium hover:underline">
-                        <Plus size={14} /> Add your first property
+            <PageHeader
+                eyebrow="Vendor"
+                title="Properties"
+                description={`${properties.length} properties listed`}
+                action={
+                    <Link href="/store/add-property" className={brandPrimaryCtaClass} style={{ backgroundColor: BRAND_GREEN }}>
+                        <Plus size={16} /> Add Property
                     </Link>
-                </div>
+                }
+            />
+
+            <input
+                type="text"
+                placeholder="Search properties..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className={brandInputClass}
+            />
+
+            {loading && properties.length === 0 ? (
+                <AdminTableSkeleton />
+            ) : error && properties.length === 0 ? (
+                <AdminError message={error} onRetry={reload} />
+            ) : filtered.length === 0 ? (
+                <EmptyState icon={Home} title="No properties found" description="Add a property or adjust your search" />
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filtered.map((property) => (
-                        <div key={property.id} className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow group">
+                        <div key={property.id} className={`${brandCardClass} group overflow-hidden`}>
                             <div className="relative aspect-[4/3] bg-slate-50">
                                 {property.images?.[0] ? (
-                                    <img
-                                        src={property.images[0]}
-                                        alt={property.title}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-300"
-                                    />
+                                    <img src={property.images[0]} alt={property.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                                    <div className="flex h-full w-full items-center justify-center text-slate-300">
                                         <Home size={32} />
                                     </div>
                                 )}
@@ -79,21 +79,15 @@ export default function VendorProperties() {
                                 </span>
                             </div>
                             <div className="p-4">
-                                <h3 className="text-sm font-semibold text-slate-800 truncate">{property.title}</h3>
-                                <p className="text-xs text-slate-500 mt-0.5">{property.propertyType} · {property.listingType}</p>
-                                <p className="text-xs text-slate-400 mt-1 truncate">{property.location}</p>
-                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-slate-100">
-                                    <span className="text-lg font-bold text-slate-800">₹{(property.price || 0).toLocaleString()}</span>
+                                <h3 className="truncate text-sm font-semibold text-slate-800">{property.title}</h3>
+                                <p className="mt-0.5 text-xs text-slate-500">{property.propertyType} · {property.listingType}</p>
+                                <p className="mt-1 truncate text-xs text-slate-400">{property.location}</p>
+                                <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                                    <span className="text-lg font-bold text-slate-800">₹{(property.price || 0).toLocaleString('en-IN')}</span>
                                     <button
                                         type="button"
-                                        onClick={async () => {
-                                            if (!confirm('Delete this property?')) return
-                                            const res = await fetch(`/api/vendor/properties/${property.id}`, { method: 'DELETE' })
-                                            if (!res.ok) return toast.error('Could not delete')
-                                            toast.success('Property deleted')
-                                            load()
-                                        }}
-                                        className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                        onClick={() => setDeleting(property)}
+                                        className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
                                     >
                                         <Trash2 size={14} />
                                     </button>
@@ -103,6 +97,17 @@ export default function VendorProperties() {
                     ))}
                 </div>
             )}
+
+            <ConfirmDialog
+                open={!!deleting}
+                onClose={() => setDeleting(null)}
+                danger
+                eyebrow="Listings"
+                title="Delete this property?"
+                description={deleting ? `"${deleting.title}" will be removed from your listings.` : ''}
+                confirmLabel="Delete"
+                onConfirm={handleDelete}
+            />
         </div>
     )
 }
