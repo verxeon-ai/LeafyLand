@@ -4,6 +4,7 @@ import { ShoppingCart, Star } from 'lucide-react'
 import Link from 'next/link'
 import { useDispatch, useSelector } from 'react-redux'
 import { addToCart } from '@/lib/features/cart/cartSlice'
+import { toastAddedToCart } from '@/components/cart/toastAddedToCart'
 import toast from 'react-hot-toast'
 import WishlistButton from '@/components/WishlistButton'
 import CatalogImage from '@/components/CatalogImage'
@@ -48,7 +49,7 @@ const ProductCard = ({ product, fluid = false }) => {
             return
         }
         dispatch(addToCart({ productId: product.id }))
-        toast.success(inCart ? 'Updated cart' : 'Added to cart')
+        toastAddedToCart({ name: product.name, alreadyInCart: inCart })
     }
 
     return (
@@ -88,7 +89,7 @@ const ProductCard = ({ product, fluid = false }) => {
                     <button
                         type="button"
                         onClick={handleAdd}
-                        className="absolute bottom-2 right-2 z-10 rounded-xl border bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm transition-colors hover:bg-emerald-50"
+                        className="absolute bottom-2 right-2 z-10 rounded-xl border bg-white px-3 py-1 text-[10px] font-bold uppercase tracking-wide shadow-sm transition-colors hover:bg-[#eef4ef]"
                         style={{ borderColor: BRAND_GREEN, color: BRAND_GREEN }}
                     >
                         ADD
@@ -139,7 +140,7 @@ const ProductCard = ({ product, fluid = false }) => {
                 <button
                     type="button"
                     onClick={handleAdd}
-                    className="shrink-0 flex items-center justify-center w-9 rounded-xl border border-slate-200 bg-white transition-colors hover:bg-emerald-50"
+                    className="shrink-0 flex items-center justify-center w-9 rounded-xl border border-slate-200 bg-white transition-colors hover:bg-[#eef4ef]"
                     style={{ color: BRAND_GREEN }}
                     aria-label="Add to cart"
                 >

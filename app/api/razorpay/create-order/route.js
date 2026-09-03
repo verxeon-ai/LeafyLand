@@ -23,7 +23,14 @@ export async function POST(req) {
         const { address, storeTotals, totalPaise, coupon } = checkout
         const batchCouponUsed = storeTotals.some((s) => s.applyCoupon)
 
-        const batchId = await prisma.$transaction(async (tx) => {
+        const receipt = `ll_${Date.now().toString(36)}_${user.id.slice(-8)}`.slice(0, 40)
+        const rzOrder = await createRazorpayOrder({
+            amountPaise: totalPaise,
+            receipt,
+            notes: { userId: user.id },
+        })
+
+        const batch = await prisma.$transaction(async (tx) => {
             const createdBatch = await tx.checkoutBatch.create({
                 data: {
                     userId: user.id,
@@ -32,6 +39,7 @@ export async function POST(req) {
                     currency: 'INR',
                     paymentStatus: 'PENDING',
                     paymentMethod: 'RAZORPAY',
+                    razorpayOrderId: rzOrder.id,
                     isCouponUsed: batchCouponUsed,
                     coupon: batchCouponUsed && coupon
                         ? { code: coupon.code, discount: coupon.discount }
@@ -65,24 +73,12 @@ export async function POST(req) {
                 })
             }
 
-            return createdBatch.id
-        })
-
-        const receipt = `batch_${batchId}`.slice(0, 40)
-        const rzOrder = await createRazorpayOrder({
-            amountPaise: totalPaise,
-            receipt,
-            notes: { checkoutBatchId: batchId, userId: user.id },
-        })
-
-        const batch = await prisma.checkoutBatch.update({
-            where: { id: batchId },
-            data: { razorpayOrderId: rzOrder.id },
+            return createdBatch
         })
 
         const orderIds = (
             await prisma.order.findMany({
-                where: { checkoutBatchId: batchId },
+                where: { checkoutBatchId: batch.id },
                 select: { id: true },
             })
         ).map((o) => o.id)

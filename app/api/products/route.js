@@ -12,6 +12,7 @@ const LIST_SELECT = {
     category: true,
     images: true,
     inStock: true,
+    stock: true,
     featured: true,
     storeId: true,
     store: { select: { name: true, username: true } },
@@ -55,22 +56,23 @@ export async function GET(req) {
     }
 
     const products = await prisma.product.findMany({
-        where: {
-            inStock: true,
-            ...(ids.length ? { id: { in: ids } } : {}),
-            store: { status: 'approved', isActive: true },
-            ...(storeId ? { storeId } : {}),
-            ...(cityStoreIds ? { storeId: { in: cityStoreIds } } : {}),
-            ...(category && category !== 'All' ? { category } : {}),
-            ...(q
-                ? {
-                    OR: [
-                        { name: { contains: q, mode: 'insensitive' } },
-                        { category: { contains: q, mode: 'insensitive' } },
-                    ],
-                }
-                : {}),
-        },
+        where: ids.length
+            ? { id: { in: ids } }
+            : {
+                inStock: true,
+                store: { status: 'approved', isActive: true },
+                ...(storeId ? { storeId } : {}),
+                ...(cityStoreIds ? { storeId: { in: cityStoreIds } } : {}),
+                ...(category && category !== 'All' ? { category } : {}),
+                ...(q
+                    ? {
+                        OR: [
+                            { name: { contains: q, mode: 'insensitive' } },
+                            { category: { contains: q, mode: 'insensitive' } },
+                        ],
+                    }
+                    : {}),
+            },
         select: LIST_SELECT,
         orderBy: [{ featured: 'desc' }, { createdAt: 'desc' }],
         ...(take ? { take } : {}),

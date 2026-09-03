@@ -37,7 +37,21 @@ export default async function RootLayout({ children }) {
             <body className={`${outfit.className} antialiased`}>
                 <AuthProvider session={session}>
                     <StoreProvider>
-                        <Toaster />
+                        <Toaster
+                            position="top-center"
+                            toastOptions={{
+                                duration: 2800,
+                                style: {
+                                    borderRadius: '12px',
+                                    border: '1px solid #e4eee6',
+                                    color: '#1f2937',
+                                    boxShadow: '0 8px 24px rgba(47,125,74,0.12)',
+                                },
+                                success: {
+                                    iconTheme: { primary: '#2f7d4a', secondary: '#ffffff' },
+                                },
+                            }}
+                        />
                         <CartSync />
                         <WishlistSync />
                         {children}

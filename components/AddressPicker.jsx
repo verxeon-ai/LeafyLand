@@ -1,20 +1,25 @@
 'use client'
+
 import { useEffect, useState } from 'react'
 import { Plus, Star, Trash2, Pencil } from 'lucide-react'
 import { toast } from 'react-hot-toast'
 import { useSession } from 'next-auth/react'
 import AddressFormModal from './AddressFormModal'
+import ConfirmDialog from '@/components/ConfirmDialog'
+import { BRAND_GREEN, BRAND_GREEN_LIGHT, brandSecondaryCtaClass } from '@/lib/brand-ui'
 
-const AddressPicker = ({ value, onChange }) => {
+const AddressPicker = ({ value, onChange, contactDefaults, onAddressesChange }) => {
     const { status } = useSession()
     const [addresses, setAddresses] = useState([])
     const [loading, setLoading] = useState(true)
     const [showForm, setShowForm] = useState(false)
     const [editing, setEditing] = useState(null)
+    const [deleteId, setDeleteId] = useState(null)
 
     const load = () => {
         if (status !== 'authenticated') {
             setAddresses([])
+            onAddressesChange?.([])
             setLoading(false)
             return
         }
@@ -27,12 +32,16 @@ const AddressPicker = ({ value, onChange }) => {
             })
             .then((list) => {
                 setAddresses(list)
+                onAddressesChange?.(list)
                 if (!value && list.length) {
                     const def = list.find((a) => a.isDefault) || list[0]
                     onChange?.(def.id)
                 }
             })
-            .catch(() => setAddresses([]))
+            .catch(() => {
+                setAddresses([])
+                onAddressesChange?.([])
+            })
             .finally(() => setLoading(false))
     }
 
@@ -44,7 +53,11 @@ const AddressPicker = ({ value, onChange }) => {
     if (status === 'unauthenticated') {
         return (
             <p className="text-sm text-slate-500">
-                Please <a href="/login?callbackUrl=/checkout" className="text-emerald-700 font-medium hover:underline">sign in</a> to choose a delivery address.
+                Please{' '}
+                <a href="/login?callbackUrl=/checkout" className="font-semibold hover:underline" style={{ color: BRAND_GREEN }}>
+                    sign in
+                </a>{' '}
+                to choose a delivery address.
             </p>
         )
     }
@@ -64,78 +77,142 @@ const AddressPicker = ({ value, onChange }) => {
     }
 
     const remove = async (id) => {
-        if (!confirm('Delete this address? Orders using it will keep a record without the address.')) return
         const res = await fetch(`/api/addresses/${id}`, { method: 'DELETE' })
-        if (!res.ok) return toast.error('Could not delete address')
+        if (!res.ok) throw new Error('Could not delete address')
         toast.success('Address deleted')
         const next = addresses.filter((a) => a.id !== id)
         setAddresses(next)
+        onAddressesChange?.(next)
         if (value === id) onChange?.(next.find((a) => a.isDefault)?.id || next[0]?.id || null)
     }
+
+    const form = showForm && (
+        <AddressFormModal
+            initial={editing}
+            defaults={!editing ? contactDefaults : undefined}
+            onClose={() => { setShowForm(false); setEditing(null) }}
+            onSaved={(saved) => {
+                setShowForm(false)
+                setEditing(null)
+                if (saved?.id) onChange?.(saved.id)
+                load()
+            }}
+        />
+    )
 
     if (!addresses.length) {
         return (
             <div className="text-sm text-slate-500">
-                <p>No saved addresses yet.</p>
-                <button onClick={() => setShowForm(true)} className="mt-2 inline-flex items-center gap-1 text-emerald-700 font-medium hover:underline">
-                    <Plus size={16} /> Add Address
+                <p>No saved addresses yet. Add one to continue.</p>
+                <button
+                    type="button"
+                    onClick={() => setShowForm(true)}
+                    className={`${brandSecondaryCtaClass} mt-3`}
+                    style={{ color: BRAND_GREEN }}
+                >
+                    <Plus size={16} /> Add address
                 </button>
-                {showForm && <AddressFormModal onClose={() => setShowForm(false)} onSaved={() => { setShowForm(false); load() }} />}
+                {form}
             </div>
         )
     }
 
     return (
         <div className="space-y-3">
-            {addresses.map((a) => (
-                <div
-                    key={a.id}
-                    className={`rounded-xl border p-4 flex gap-3 ${value === a.id ? 'border-emerald-500 bg-emerald-50/40' : 'border-slate-200 bg-white'}`}
-                >
-                    <input
-                        type="radio"
-                        name="address"
-                        checked={value === a.id}
-                        onChange={() => onChange?.(a.id)}
-                        className="mt-1 accent-emerald-700"
-                    />
-                    <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                            {a.label && <span className="text-xs font-semibold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">{a.label}</span>}
-                            {a.isDefault && (
-                                <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-700">
-                                    <Star size={12} className="fill-emerald-700" /> Default
-                                </span>
+            {addresses.map((a) => {
+                const selected = value === a.id
+                return (
+                    <div
+                        key={a.id}
+                        className="flex min-w-0 cursor-pointer gap-2.5 rounded-xl border p-3 sm:gap-3 sm:p-4"
+                        style={
+                            selected
+                                ? { borderColor: BRAND_GREEN, backgroundColor: BRAND_GREEN_LIGHT }
+                                : { borderColor: '#e4eee6', backgroundColor: '#fff' }
+                        }
+                        onClick={() => onChange?.(a.id)}
+                    >
+                        <input
+                            type="radio"
+                            name="address"
+                            checked={selected}
+                            onChange={() => onChange?.(a.id)}
+                            className="mt-1 shrink-0 accent-[#2f7d4a]"
+                        />
+                        <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
+                                <div className="flex min-w-0 flex-wrap items-center gap-2">
+                                    {a.label && (
+                                        <span className="rounded-xl bg-white/80 px-2 py-0.5 text-xs font-semibold text-slate-700">
+                                            {a.label}
+                                        </span>
+                                    )}
+                                    {a.isDefault && (
+                                        <span className="inline-flex items-center gap-1 text-xs font-medium" style={{ color: BRAND_GREEN }}>
+                                            <Star size={12} className="fill-current" /> Default
+                                        </span>
+                                    )}
+                                </div>
+                                <div className="flex shrink-0 items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                                    {!a.isDefault && (
+                                        <button type="button" onClick={() => setDefault(a.id)} className="hidden text-xs font-medium hover:underline sm:inline" style={{ color: BRAND_GREEN }}>
+                                            Set default
+                                        </button>
+                                    )}
+                                    <button
+                                        type="button"
+                                        onClick={() => { setEditing(a); setShowForm(true) }}
+                                        className="rounded-xl p-1.5 text-slate-400 hover:bg-white hover:text-slate-600"
+                                        title="Edit"
+                                    >
+                                        <Pencil size={16} />
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setDeleteId(a.id)}
+                                        className="rounded-xl p-1.5 text-slate-400 hover:bg-white hover:text-red-500"
+                                        title="Delete"
+                                    >
+                                        <Trash2 size={16} />
+                                    </button>
+                                </div>
+                            </div>
+                            <p className="mt-1 break-words text-sm text-slate-700">{a.name}, {a.phone}</p>
+                            <p className="mt-0.5 break-words text-xs leading-relaxed text-slate-500">
+                                {a.street}, {a.city}, {a.state} {a.zip}, {a.country}
+                            </p>
+                            {!a.isDefault && (
+                                <button
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setDefault(a.id) }}
+                                    className="mt-2 text-xs font-medium hover:underline sm:hidden"
+                                    style={{ color: BRAND_GREEN }}
+                                >
+                                    Set default
+                                </button>
                             )}
                         </div>
-                        <p className="text-sm text-slate-700 mt-1 truncate">{a.name}, {a.phone}</p>
-                        <p className="text-xs text-slate-500 truncate">{a.street}, {a.city}, {a.state} {a.zip}, {a.country}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-2">
-                        {!a.isDefault && (
-                            <button onClick={() => setDefault(a.id)} className="text-xs text-emerald-700 hover:underline">Set default</button>
-                        )}
-                        <div className="flex gap-2">
-                            <button onClick={() => { setEditing(a); setShowForm(true) }} className="text-slate-400 hover:text-slate-600" title="Edit">
-                                <Pencil size={16} />
-                            </button>
-                            <button onClick={() => remove(a.id)} className="text-slate-400 hover:text-red-500" title="Delete">
-                                <Trash2 size={16} />
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            ))}
-            <button onClick={() => { setEditing(null); setShowForm(true) }} className="inline-flex items-center gap-1 text-emerald-700 font-medium hover:underline text-sm">
-                <Plus size={16} /> Add Address
+                )
+            })}
+            <button
+                type="button"
+                onClick={() => { setEditing(null); setShowForm(true) }}
+                className="inline-flex items-center gap-1 text-sm font-semibold hover:underline"
+                style={{ color: BRAND_GREEN }}
+            >
+                <Plus size={16} /> Add address
             </button>
-            {showForm && (
-                <AddressFormModal
-                    initial={editing}
-                    onClose={() => { setShowForm(false); setEditing(null) }}
-                    onSaved={() => { setShowForm(false); setEditing(null); load() }}
-                />
-            )}
+            {form}
+            <ConfirmDialog
+                open={Boolean(deleteId)}
+                onClose={() => setDeleteId(null)}
+                onConfirm={() => remove(deleteId)}
+                danger
+                title="Delete this address?"
+                description="Orders that already used it will keep a record without the live address."
+                confirmLabel="Delete address"
+            />
         </div>
     )
 }

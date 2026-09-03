@@ -15,9 +15,9 @@ export default function PublicLayout({ children }) {
     }, [hideChrome])
 
     return (
-        <div className={`${hideChrome ? 'min-h-dvh' : 'min-h-screen'} flex flex-col`}>
+        <div className={`${hideChrome ? 'min-h-dvh' : 'min-h-screen'} flex min-w-0 flex-col overflow-x-hidden`}>
             {!hideChrome && <Navbar />}
-            <main className="flex-1 flex flex-col">{children}</main>
+            <main className="flex min-w-0 flex-1 flex-col overflow-x-hidden">{children}</main>
             {!hideChrome && <Footer />}
         </div>
     );

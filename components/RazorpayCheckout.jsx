@@ -1,7 +1,6 @@
 'use client'
 
-import { useCallback, useState } from 'react'
-import toast from 'react-hot-toast'
+import { useCallback, useRef, useState } from 'react'
 
 function loadRazorpayScript() {
     return new Promise((resolve, reject) => {
@@ -29,9 +28,11 @@ function loadRazorpayScript() {
  */
 export function useRazorpayCheckout() {
     const [paying, setPaying] = useState(false)
+    const payingRef = useRef(false)
 
     const pay = useCallback(async (opts) => {
-        if (paying) return null
+        if (payingRef.current) return null
+        payingRef.current = true
         setPaying(true)
         try {
             const createRes = await fetch('/api/razorpay/create-order', {
@@ -62,7 +63,7 @@ export function useRazorpayCheckout() {
                         name: opts.user?.name || '',
                         email: opts.user?.email || '',
                     },
-                    theme: { color: '#059669' },
+                    theme: { color: '#2f7d4a' },
                     handler: async (response) => {
                         try {
                             const verifyRes = await fetch('/api/razorpay/verify', {
@@ -98,9 +99,10 @@ export function useRazorpayCheckout() {
 
             return verified
         } finally {
+            payingRef.current = false
             setPaying(false)
         }
-    }, [paying])
+    }, [])
 
     return { pay, paying }
 }
