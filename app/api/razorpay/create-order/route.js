@@ -3,6 +3,8 @@ import { error, json, requireUser, handleApiError } from '@/lib/api'
 import { buildCheckoutFromCart, storeTotalRupees } from '@/lib/checkout'
 import { createRazorpayOrder, getPublicKeyId, isRazorpayConfigured } from '@/lib/razorpay'
 
+export const runtime = 'nodejs'
+
 export async function POST(req) {
     try {
         if (!isRazorpayConfigured()) {
@@ -29,6 +31,9 @@ export async function POST(req) {
             receipt,
             notes: { userId: user.id },
         })
+        if (!rzOrder?.id) {
+            return error('Could not create Razorpay order', 502)
+        }
 
         const batch = await prisma.$transaction(async (tx) => {
             const createdBatch = await tx.checkoutBatch.create({
@@ -88,9 +93,9 @@ export async function POST(req) {
                 success: true,
                 checkoutBatchId: batch.id,
                 orderIds,
-                razorpayOrderId: batch.razorpayOrderId,
-                amount: totalPaise,
-                currency: 'INR',
+                razorpayOrderId: rzOrder.id,
+                amount: Number(rzOrder.amount),
+                currency: rzOrder.currency || 'INR',
                 keyId: getPublicKeyId(),
             },
             201,

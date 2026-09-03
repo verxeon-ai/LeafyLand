@@ -231,7 +231,7 @@ export default function CheckoutFlow() {
                 addressId,
                 couponCode: coupon ? coupon.code : undefined,
                 cartItems: cartItemsPayload,
-                user: { name: name.trim(), email: email.trim() },
+                user: { name: name.trim(), email: email.trim(), contact: phone.trim() },
             })
             if (!verified) return
             dispatch(clearCart())

@@ -11,6 +11,8 @@ import {
 } from '@/lib/payments/fulfill'
 import { notifyPaidOrders } from '@/lib/payments/notify'
 
+export const runtime = 'nodejs'
+
 function validateVerifyBody(body) {
     const razorpay_order_id = body?.razorpay_order_id?.trim?.() || body?.razorpayOrderId?.trim?.()
     const razorpay_payment_id = body?.razorpay_payment_id?.trim?.() || body?.razorpayPaymentId?.trim?.()
