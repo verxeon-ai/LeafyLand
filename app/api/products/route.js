@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { serializeProductList } from '@/lib/api'
+import { storeMatchesCity } from '@/lib/location'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,11 +18,22 @@ const LIST_SELECT = {
     rating: { select: { rating: true } },
 }
 
+async function storeIdsInCity(city) {
+    const needle = String(city || '').trim()
+    if (!needle) return null
+    const stores = await prisma.store.findMany({
+        where: { status: 'approved', isActive: true },
+        select: { id: true, address: true, settings: true },
+    })
+    return stores.filter((s) => storeMatchesCity(s, needle)).map((s) => s.id)
+}
+
 export async function GET(req) {
     const { searchParams } = new URL(req.url)
     const q = searchParams.get('search') || ''
     const category = searchParams.get('category')
     const storeId = searchParams.get('storeId')
+    const city = searchParams.get('city') || ''
     const ids = (searchParams.get('ids') || '')
         .split(',')
         .map((s) => s.trim())
@@ -31,12 +43,24 @@ export async function GET(req) {
         ? undefined
         : Math.min(Math.max(searchParams.has('limit') && Number.isFinite(parsedLimit) ? parsedLimit : 120, 1), 200)
 
+    const cityStoreIds = city ? await storeIdsInCity(city) : null
+    if (cityStoreIds && cityStoreIds.length === 0) {
+        return new Response(JSON.stringify([]), {
+            status: 200,
+            headers: {
+                'Content-Type': 'application/json',
+                'Cache-Control': 'public, max-age=0, s-maxage=30, stale-while-revalidate=120',
+            },
+        })
+    }
+
     const products = await prisma.product.findMany({
         where: {
             inStock: true,
             ...(ids.length ? { id: { in: ids } } : {}),
             store: { status: 'approved', isActive: true },
             ...(storeId ? { storeId } : {}),
+            ...(cityStoreIds ? { storeId: { in: cityStoreIds } } : {}),
             ...(category && category !== 'All' ? { category } : {}),
             ...(q
                 ? {

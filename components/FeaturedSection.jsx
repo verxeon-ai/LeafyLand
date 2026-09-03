@@ -3,7 +3,7 @@ import { ChevronRight, ChevronLeft } from 'lucide-react'
 import { useRef } from 'react'
 import Link from 'next/link'
 
-const FeaturedSection = ({ title, items, renderItem, viewAllLink, viewAllText = "See All" }) => {
+const FeaturedSection = ({ title, subtitle, items, renderItem, viewAllLink, viewAllText = "See All" }) => {
     const scrollRef = useRef(null)
 
     const scroll = (direction) => {
@@ -20,7 +20,12 @@ const FeaturedSection = ({ title, items, renderItem, viewAllLink, viewAllText = 
         <section className="py-5">
             {/* Section header — Zepto style */}
             <div className="flex items-center justify-between mb-3">
-                <h2 className="text-base sm:text-lg font-bold text-slate-800">{title}</h2>
+                <div className="min-w-0">
+                    <h2 className="text-base sm:text-lg font-bold text-slate-800">{title}</h2>
+                    {subtitle && (
+                        <p className="text-xs text-slate-500 mt-0.5 truncate">{subtitle}</p>
+                    )}
+                </div>
                 <div className="flex items-center gap-2">
                     {viewAllLink && (
                         <Link href={viewAllLink} className="text-emerald-600 text-xs font-semibold hover:text-emerald-700 flex items-center gap-0.5 transition-colors">

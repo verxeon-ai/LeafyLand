@@ -18,6 +18,7 @@ import { useSession } from 'next-auth/react'
 import { cachedJson } from '@/lib/cachedJson'
 import { splitProductNiches } from '@/lib/product-niches'
 import { brandPrimaryCtaClass } from '@/lib/brand-ui'
+import { LOCATION_KEY, setSavedLocation } from '@/lib/location'
 import {
     MAIN_NAV_MENUS,
     SEARCH_SCOPES,
@@ -155,8 +156,6 @@ const cities = [
     { name: 'Surat', lat: 21.1702, lng: 72.8311 },
 ]
 
-const LOCATION_KEY = 'leafyland_location'
-
 /* Collapsing the bottom row shortens the page by its own height, which can move
    the scroll position back across a single threshold and leave the navbar
    flipping between states. globals.css stops the browser from compensating for
@@ -289,7 +288,7 @@ const Navbar = () => {
             return
         }
         if (typeof window === 'undefined' || !navigator.geolocation) {
-            localStorage.setItem(LOCATION_KEY, 'Mumbai')
+            setSavedLocation('Mumbai')
             return
         }
         const locate = () => {
@@ -297,9 +296,12 @@ const Navbar = () => {
                 (pos) => {
                     const city = nearestCity(pos.coords.latitude, pos.coords.longitude)
                     setLocation(city)
-                    localStorage.setItem(LOCATION_KEY, city)
+                    setSavedLocation(city)
                 },
-                () => { localStorage.setItem(LOCATION_KEY, 'Mumbai') },
+                () => {
+                    setLocation('Mumbai')
+                    setSavedLocation('Mumbai')
+                },
                 { timeout: 4000, maximumAge: 600_000 },
             )
         }
@@ -316,7 +318,7 @@ const Navbar = () => {
         setLocation(city)
         setLocationOpen(false)
         setLocationSearch('')
-        try { localStorage.setItem(LOCATION_KEY, city) } catch {}
+        setSavedLocation(city)
     }
 
     useEffect(() => {

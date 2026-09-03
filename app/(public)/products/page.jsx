@@ -5,18 +5,23 @@ import Link from 'next/link'
 import ProductCard from "@/components/ProductCard"
 import { Search, Leaf, Store, Package } from 'lucide-react'
 import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
-import { isMarketplaceCategory } from '@/lib/categories'
+import { isMarketplaceCategory, getHomeProductGroup } from '@/lib/categories'
 import { ProductGridSkeleton } from '@/components/CatalogSkeleton'
 
-function productListUrl(urlSearch) {
-    if (!urlSearch) return '/api/products'
-    return `/api/products?search=${encodeURIComponent(urlSearch)}`
+function productListUrl(urlSearch, city) {
+    const params = new URLSearchParams()
+    if (urlSearch) params.set('search', urlSearch)
+    if (city) params.set('city', city)
+    const qs = params.toString()
+    return qs ? `/api/products?${qs}` : '/api/products'
 }
 
-function productsPageHref(category, search) {
+function productsPageHref(category, search, city, group) {
     const params = new URLSearchParams()
     if (search) params.set('search', search)
     if (category && category !== 'All') params.set('category', category)
+    if (city) params.set('city', city)
+    if (group) params.set('group', group)
     const qs = params.toString()
     return qs ? `/products?${qs}` : '/products'
 }
@@ -25,7 +30,10 @@ function ProductsContent() {
     const searchParams = useSearchParams()
     const selectedCategory = searchParams.get('category') || 'All'
     const urlSearch = searchParams.get('search') || ''
-    const listUrl = productListUrl(urlSearch)
+    const city = searchParams.get('city') || ''
+    const groupId = searchParams.get('group') || ''
+    const homeGroup = getHomeProductGroup(groupId)
+    const listUrl = productListUrl(urlSearch, city)
 
     const cached = peekCachedJson(listUrl)
     const [search, setSearch] = useState(urlSearch)
@@ -35,7 +43,7 @@ function ProductsContent() {
 
     useEffect(() => {
         let cancelled = false
-        const url = productListUrl(urlSearch)
+        const url = productListUrl(urlSearch, city)
         const hit = peekCachedJson(url)
         if (Array.isArray(hit)) {
             setProducts(hit)
@@ -47,22 +55,26 @@ function ProductsContent() {
             .then((data) => { if (!cancelled && Array.isArray(data)) setProducts(data) })
             .finally(() => { if (!cancelled) setLoading(false) })
         return () => { cancelled = true }
-    }, [urlSearch])
+    }, [urlSearch, city])
 
     useEffect(() => {
         setSearch(urlSearch)
     }, [urlSearch])
 
     const categories = useMemo(() => {
-        const set = new Set(products.map((p) => p.category).filter(Boolean))
+        const source = homeGroup
+            ? products.filter((p) => homeGroup.categories.includes(p.category))
+            : products
+        const set = new Set(source.map((p) => p.category).filter(Boolean))
         if (selectedCategory && selectedCategory !== 'All') set.add(selectedCategory)
         return ['All', ...Array.from(set)]
-    }, [products, selectedCategory])
+    }, [products, selectedCategory, homeGroup])
 
     const allFiltered = products.filter(p => {
         const matchSearch = p.name.toLowerCase().includes(search.toLowerCase()) || p.category.toLowerCase().includes(search.toLowerCase())
         const matchCategory = selectedCategory === 'All' || p.category === selectedCategory
-        return matchSearch && matchCategory
+        const matchGroup = !homeGroup || homeGroup.categories.includes(p.category)
+        return matchSearch && matchCategory && matchGroup
     }).sort((a, b) => {
         if (sortBy === 'price-low') return a.price - b.price
         if (sortBy === 'price-high') return b.price - a.price
@@ -76,8 +88,16 @@ function ProductsContent() {
 
     const leafyCount = filtered.filter(p => !isMarketplaceCategory(p.category)).length
     const marketplaceCount = filtered.filter(p => isMarketplaceCategory(p.category)).length
-    const pageTitle = selectedCategory !== 'All' ? selectedCategory : 'Products'
-    const emptyMessage = selectedCategory !== 'All'
+    const pageTitle = city
+        ? `Fast delivery in ${city}`
+        : selectedCategory !== 'All'
+            ? selectedCategory
+            : homeGroup
+                ? homeGroup.title
+                : 'Products'
+    const emptyMessage = city
+        ? `No vendors in ${city} yet. Try another city from the navbar.`
+        : selectedCategory !== 'All'
         ? `No products found in ${selectedCategory}`
         : search
             ? 'No products found matching your search.'
@@ -129,7 +149,7 @@ function ProductsContent() {
                 {categories.map(cat => (
                     <Link
                         key={cat}
-                        href={productsPageHref(cat, search)}
+                        href={productsPageHref(cat, search, city, groupId)}
                         className={`flex-shrink-0 px-4 py-2 rounded-xl text-xs font-medium transition ${
                             selectedCategory === cat
                                 ? 'bg-[#2f7d4a] text-white'

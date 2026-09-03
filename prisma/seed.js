@@ -52,21 +52,34 @@ async function main() {
         },
     })
 
+    const existingStore = await prisma.store.findUnique({ where: { username: 'freshroots' } })
+    const existingSettings = existingStore?.settings && typeof existingStore.settings === 'object' && !Array.isArray(existingStore.settings)
+        ? existingStore.settings
+        : {}
+
     const store = await prisma.store.upsert({
         where: { username: 'freshroots' },
-        update: { status: 'approved', isActive: true, isVerified: true, userId: seller.id },
+        update: {
+            status: 'approved',
+            isActive: true,
+            isVerified: true,
+            userId: seller.id,
+            address: '12 MG Road, Mumbai',
+            settings: { ...existingSettings, city: 'Mumbai' },
+        },
         create: {
             userId: seller.id,
             name: 'Fresh Roots Nursery',
             username: 'freshroots',
             description: 'Premium nursery for indoor plants, tools, and landscaping.',
-            address: '12 MG Road, Bangalore',
+            address: '12 MG Road, Mumbai',
             email: 'seller@leafyland.com',
             contact: '+91 98765 43210',
             logo: '/logo.png',
             status: 'approved',
             isActive: true,
             isVerified: true,
+            settings: { city: 'Mumbai' },
         },
     })
 
