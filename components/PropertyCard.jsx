@@ -33,9 +33,9 @@ const PropertyCard = ({ property, fluid = false }) => {
                 <div className="absolute top-2 right-2 z-10">
                     <WishlistButton itemId={property.id} itemType="property" />
                 </div>
-                <button className="absolute bottom-2 right-2 bg-white/90 hover:bg-amber-500 hover:text-white text-amber-700 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-md transition-all active:scale-95 border border-amber-200 hover:border-amber-500">
+                <span className="absolute bottom-2 right-2 bg-white/90 text-amber-700 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-md border border-amber-200 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-500 transition-all">
                     ENQUIRE
-                </button>
+                </span>
             </div>
             <div className="pt-2 px-0.5">
                 <p className="text-sm font-bold text-slate-800 truncate">{property.title}</p>

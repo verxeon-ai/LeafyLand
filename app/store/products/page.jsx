@@ -44,11 +44,12 @@ export default function VendorProducts() {
     const handleDelete = async () => {
         if (!deleting) return
         const res = await fetch(`/api/vendor/products/${deleting.id}`, { method: 'DELETE' })
+        const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-            toast.error('Could not delete')
+            toast.error(data.error || 'Could not delete')
             throw new Error('delete')
         }
-        toast.success('Product deleted')
+        toast.success(data.message || (data.softDeleted ? 'Marked out of stock (used in past orders)' : 'Product deleted'))
         reload({ silent: true })
     }
 
@@ -126,7 +127,7 @@ export default function VendorProducts() {
                                         <span className="font-semibold text-slate-700">{product.totalSales}</span> sold
                                     </div>
                                     <div className="flex items-center gap-1">
-                                        <Link href={`/store/manage-product?id=${product.id}`} className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]">
+                                        <Link href={`/store/add-product?id=${product.id}`} className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]" title="Edit product">
                                             <Edit size={14} />
                                         </Link>
                                         <button

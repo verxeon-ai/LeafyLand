@@ -26,9 +26,9 @@ const ServiceCard = ({ service }) => {
                 <div className="absolute top-2 right-2 z-10">
                     <WishlistButton itemId={service.id} itemType="service" />
                 </div>
-                <button className="absolute bottom-2 right-2 bg-white/90 hover:bg-blue-600 hover:text-white text-blue-700 text-[11px] font-bold px-4 py-1.5 rounded-lg shadow-md transition-all active:scale-95 border border-blue-200 hover:border-blue-600">
+                <span className="absolute bottom-2 right-2 bg-white/90 text-blue-700 text-[11px] font-bold px-4 py-1.5 rounded-lg shadow-md border border-blue-200 group-hover:bg-blue-600 group-hover:text-white group-hover:border-blue-600 transition-all">
                     GET QUOTE
-                </button>
+                </span>
             </div>
             <div className="pt-2 px-0.5">
                 <p className="text-sm font-bold text-slate-800 truncate">{service.name}</p>

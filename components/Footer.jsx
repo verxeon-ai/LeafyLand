@@ -28,6 +28,7 @@ const marketplaceLinks = [
 const companyLinks = [
     { text: 'About LeafyLand', path: '/about', icon: Leaf },
     { text: 'How It Works', path: '/how-it-works', icon: CircleHelp },
+    { text: 'Seller Pricing', path: '/pricing', icon: Tag },
     { text: 'Seller Policy', path: '/seller-policy', icon: Shield },
     { text: 'Terms & Conditions', path: '/terms', icon: FileText },
     { text: 'Privacy Policy', path: '/privacy', icon: Lock },

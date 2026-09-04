@@ -8,14 +8,14 @@ export default function Banner() {
 
     const handleClaim = () => {
         setIsOpen(false);
-        toast.success('Coupon copied to clipboard!');
-        navigator.clipboard.writeText('NEW20'); // TODO: confirm real launch coupon code with client
+        toast.success('Coupon LEAFY10 copied — 10% off at checkout');
+        navigator.clipboard.writeText('LEAFY10');
     };
 
     return isOpen && (
         <div className="w-full px-3 sm:px-6 py-1.5 font-medium text-xs sm:text-sm text-white text-center bg-gradient-to-r from-green-600 via-green-500 to-emerald-500">
             <div className='flex items-center justify-between gap-2 max-w-7xl mx-auto min-w-0'>
-                <p className="min-w-0 truncate text-left">Get 20% OFF on Your First Order!</p>
+                <p className="min-w-0 truncate text-left">Get 10% OFF with code LEAFY10</p>
                 <div className="flex items-center space-x-6">
                     <button onClick={handleClaim} type="button" className="font-normal text-slate-800 bg-white px-7 py-2 rounded-full max-sm:hidden">Claim Offer</button>
                     <button onClick={() => setIsOpen(false)} type="button" className="font-normal text-white py-2 rounded-full">
