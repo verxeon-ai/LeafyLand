@@ -7,7 +7,7 @@ import { prefetchCatalog } from '@/lib/cachedJson'
 
 export default function PublicLayout({ children }) {
     const pathname = usePathname()
-    const hideChrome = pathname === '/login'
+    const hideChrome = pathname === '/login' || pathname === '/forgot-password' || pathname === '/reset-password'
 
     useEffect(() => {
         if (hideChrome) return

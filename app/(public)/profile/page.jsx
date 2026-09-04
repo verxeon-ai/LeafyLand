@@ -3,15 +3,32 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { useSession, signOut } from 'next-auth/react'
+import { useSession } from 'next-auth/react'
 import {
-    User, Package, ShoppingCart, Store, MapPin, LogOut,
-    ChevronRight, Mail, Shield, MessageSquare, Calendar, Home, Heart,
+    User, Package, Store, LogOut, Mail, Shield, MessageSquare, Calendar, Home,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
-import WishlistSection from '@/components/WishlistSection'
 import ConfirmLogoutModal from '@/components/ConfirmLogoutModal'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
+import {
+    brandCardClass,
+    brandInputClass,
+    brandLabelClass,
+    brandPrimaryCtaClass,
+    brandDangerCtaClass,
+    BRAND_GREEN,
+    BRAND_GREEN_LIGHT,
+    BRAND_MINT,
+    BRAND_MINT_BORDER,
+    BRAND_TEXT,
+    BRAND_MUTED,
+} from '@/lib/brand-ui'
+
+function initialsFromName(name) {
+    const parts = String(name || '').trim().split(/\s+/).filter(Boolean)
+    if (!parts.length) return 'U'
+    return parts.slice(0, 2).map((p) => p[0]).join('').toUpperCase()
+}
 
 export default function BuyerProfilePage() {
     const { data: session, status: sessionStatus, update } = useSession()
@@ -38,14 +55,14 @@ export default function BuyerProfilePage() {
 
     if (waiting || (sessionStatus === 'loading' && !display)) {
         return (
-            <div className="min-h-[70vh] bg-slate-50/60">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-                    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden animate-pulse">
-                        <div className="h-32 bg-emerald-700/40" />
-                        <div className="p-6 space-y-3">
-                            <div className="h-4 w-40 bg-slate-100 rounded" />
-                            <div className="h-10 w-full bg-slate-100 rounded-xl" />
-                            <div className="h-10 w-full bg-slate-100 rounded-xl" />
+            <div className="flex-1" style={{ backgroundColor: BRAND_MINT }}>
+                <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+                    <div className="h-7 w-36 bg-white rounded-xl mb-6 animate-pulse" />
+                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5">
+                        <div className={`${brandCardClass} h-64 animate-pulse`} />
+                        <div className="space-y-5">
+                            <div className={`${brandCardClass} h-56 animate-pulse`} />
+                            <div className={`${brandCardClass} h-56 animate-pulse`} />
                         </div>
                     </div>
                 </div>
@@ -75,134 +92,192 @@ export default function BuyerProfilePage() {
     }
 
     const store = profile?.store
-    const links = [
-        { href: '/orders', label: 'My Orders', desc: 'Track purchases and past orders', icon: Package },
-        { href: '/bookings', label: 'My Bookings', desc: 'Service bookings you requested', icon: Calendar },
-        { href: '/visits', label: 'Property Visits', desc: 'Scheduled property visits', icon: Home },
-        { href: '/messages', label: 'Messages', desc: 'Conversations with sellers', icon: MessageSquare },
-        { href: '/cart', label: 'My Cart', desc: 'Items waiting to be checked out', icon: ShoppingCart },
-        { href: '#wishlist', label: 'My Wishlist', desc: 'Saved products, services & properties', icon: Heart },
-        {
-            href: store?.status === 'approved' ? '/store' : store ? '/create-store' : '/become-seller',
-            label: store?.status === 'approved' ? 'Vendor Panel' : store ? 'Store Application' : 'Become a Seller',
-            desc: store?.status === 'approved'
-                ? 'Manage your store'
-                : store
-                    ? `Status: ${store.status}`
-                    : 'Start selling on LeafyLand',
-            icon: Store,
-        },
+    const sellerHref = store?.status === 'approved' ? '/store' : store ? '/create-store' : '/become-seller'
+    const sellerLabel = store?.status === 'approved' ? 'Vendor panel' : store ? 'Store application' : 'Become a seller'
+    const sellerDesc = store?.status === 'approved'
+        ? 'Manage listings and orders'
+        : store
+            ? `Status: ${store.status}`
+            : 'Start selling on LeafyLand'
+
+    const activity = [
+        { href: '/orders', label: 'Orders', desc: 'Purchases and tracking', icon: Package },
+        { href: '/bookings', label: 'Bookings', desc: 'Services you booked', icon: Calendar },
+        { href: '/visits', label: 'Visits', desc: 'Property appointments', icon: Home },
+        { href: '/messages', label: 'Messages', desc: 'Chats with sellers', icon: MessageSquare },
+        { href: sellerHref, label: sellerLabel, desc: sellerDesc, icon: Store },
     ]
 
     return (
-        <div className="min-h-[70vh] bg-slate-50/60">
-            <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-                <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-                    <div className="bg-gradient-to-r from-emerald-700 to-emerald-600 px-6 py-8 text-white">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 rounded-full bg-white/15 border border-white/25 flex items-center justify-center overflow-hidden shrink-0">
+        <div className="flex-1" style={{ backgroundColor: BRAND_MINT }}>
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+                <div className="mb-6">
+                    <p className={brandLabelClass} style={{ color: BRAND_GREEN }}>Account</p>
+                    <h1 className="mt-1 text-xl sm:text-2xl font-bold" style={{ color: BRAND_TEXT }}>
+                        Profile settings
+                    </h1>
+                    <p className="mt-1 text-sm" style={{ color: BRAND_MUTED }}>
+                        Update your details and open your activity.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-5 items-start">
+                    <aside className={`${brandCardClass} overflow-hidden lg:sticky lg:top-24`}>
+                        <div className="px-5 pt-6 pb-5 text-center border-b" style={{ borderColor: BRAND_MINT_BORDER, backgroundColor: BRAND_MINT }}>
+                            <div
+                                className="mx-auto w-16 h-16 rounded-xl bg-white border flex items-center justify-center overflow-hidden"
+                                style={{ borderColor: BRAND_MINT_BORDER }}
+                            >
                                 {display?.image ? (
                                     <Image src={display.image} alt="" width={64} height={64} className="w-full h-full object-cover" />
                                 ) : (
-                                    <User size={28} className="text-white" />
+                                    <span className="text-lg font-bold" style={{ color: BRAND_GREEN }}>
+                                        {initialsFromName(display?.name)}
+                                    </span>
                                 )}
                             </div>
-                            <div className="min-w-0">
-                                <h1 className="text-xl sm:text-2xl font-bold truncate">
-                                    {display?.name || 'Buyer'}
-                                </h1>
-                                <p className="text-emerald-100 text-sm flex items-center gap-1.5 mt-1 truncate">
-                                    <Mail size={14} /> {display?.email}
-                                </p>
-                                <span className="inline-flex items-center gap-1 mt-2 text-[11px] font-semibold bg-white/15 px-2 py-0.5 rounded-full">
-                                    <Shield size={12} /> Buyer Account
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <form onSubmit={saveProfile} className="p-6 border-b border-slate-100 space-y-3">
-                        <h2 className="text-sm font-semibold text-slate-800">Profile details</h2>
-                        <div>
-                            <label className="text-xs font-medium text-slate-500 mb-1.5 block">Full name</label>
-                            <input
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-emerald-500 focus:bg-white"
-                                placeholder="Your name"
-                                required
-                            />
-                        </div>
-                        <div>
-                            <label className="text-xs font-medium text-slate-500 mb-1.5 block">Email</label>
-                            <input
-                                value={display?.email || ''}
-                                disabled
-                                className="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm text-slate-500"
-                            />
-                        </div>
-                        <button
-                            type="submit"
-                            disabled={saving || loading}
-                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors"
-                        >
-                            {saving ? 'Saving…' : 'Save changes'}
-                        </button>
-                    </form>
-
-                    <div className="p-6 border-b border-slate-100 space-y-3">
-                        <h2 className="text-sm font-semibold text-slate-800">
-                            {profile?.hasPassword === false ? 'Set password' : 'Change password'}
-                        </h2>
-                        <p className="text-xs text-slate-500">Use a password that is at least 6 characters.</p>
-                        <ChangePasswordForm hasPassword={profile?.hasPassword !== false} />
-                    </div>
-
-                    <div className="p-4 sm:p-6 space-y-2">
-                        <h2 className="text-sm font-semibold text-slate-800 px-2 mb-2">Quick links</h2>
-                        {links.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-emerald-50 transition-colors group"
+                            <p className="mt-3 text-sm font-bold truncate" style={{ color: BRAND_TEXT }}>
+                                {display?.name || 'Buyer'}
+                            </p>
+                            <p className="mt-0.5 text-xs truncate flex items-center justify-center gap-1" style={{ color: BRAND_MUTED }}>
+                                <Mail size={11} /> {display?.email}
+                            </p>
+                            <span
+                                className="mt-3 inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold"
+                                style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
                             >
-                                <span className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0 group-hover:bg-emerald-100">
-                                    <item.icon size={18} />
-                                </span>
-                                <span className="flex-1 min-w-0">
-                                    <span className="block text-sm font-semibold text-slate-800">{item.label}</span>
-                                    <span className="block text-xs text-slate-500 truncate">{item.desc}</span>
-                                </span>
-                                <ChevronRight size={16} className="text-slate-300 group-hover:text-emerald-600" />
-                            </Link>
-                        ))}
+                                <Shield size={11} /> Buyer
+                            </span>
+                        </div>
+
+                        <nav className="p-3 space-y-0.5">
+                            <a
+                                href="#details"
+                                className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium"
+                                style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
+                            >
+                                <User size={16} />
+                                Profile
+                            </a>
+                            {activity.map((item) => (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-slate-600 hover:bg-[#eef4ef] transition-colors"
+                                >
+                                    <item.icon size={16} />
+                                    {item.label}
+                                </Link>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => setShowLogout(true)}
+                                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                            >
+                                <LogOut size={16} />
+                                Sign out
+                            </button>
+                        </nav>
+                    </aside>
+
+                    <div className="space-y-5 min-w-0">
+                        <section id="details" className={`${brandCardClass} p-5 sm:p-6`}>
+                            <p className={brandLabelClass} style={{ color: BRAND_GREEN }}>Personal</p>
+                            <h2 className="mt-1 text-base sm:text-lg font-bold" style={{ color: BRAND_TEXT }}>
+                                Profile details
+                            </h2>
+                            <p className="mt-1 text-sm mb-5" style={{ color: BRAND_MUTED }}>
+                                This name appears on orders and messages.
+                            </p>
+                            <form onSubmit={saveProfile} className="space-y-3 max-w-lg">
+                                <div>
+                                    <label htmlFor="profile-name" className="mb-1.5 block text-xs font-medium text-slate-500">
+                                        Full name
+                                    </label>
+                                    <input
+                                        id="profile-name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        className={brandInputClass}
+                                        placeholder="Your name"
+                                        required
+                                    />
+                                </div>
+                                <div>
+                                    <label htmlFor="profile-email" className="mb-1.5 block text-xs font-medium text-slate-500">
+                                        Email
+                                    </label>
+                                    <input
+                                        id="profile-email"
+                                        value={display?.email || ''}
+                                        disabled
+                                        className={`${brandInputClass} bg-slate-50 text-slate-500`}
+                                    />
+                                </div>
+                                <button
+                                    type="submit"
+                                    disabled={saving || loading}
+                                    className={`${brandPrimaryCtaClass} disabled:opacity-60`}
+                                    style={{ backgroundColor: BRAND_GREEN }}
+                                >
+                                    {saving ? 'Saving…' : 'Save changes'}
+                                </button>
+                            </form>
+                        </section>
+
+                        <section className={`${brandCardClass} p-5 sm:p-6`}>
+                            <p className={brandLabelClass} style={{ color: BRAND_GREEN }}>Security</p>
+                            <h2 className="mt-1 text-base sm:text-lg font-bold" style={{ color: BRAND_TEXT }}>
+                                {profile?.hasPassword === false ? 'Set password' : 'Change password'}
+                            </h2>
+                            <p className="mt-1 text-sm mb-5" style={{ color: BRAND_MUTED }}>
+                                Use a password that is at least 6 characters.
+                            </p>
+                            <div className="max-w-lg">
+                                <ChangePasswordForm hasPassword={profile?.hasPassword !== false} />
+                            </div>
+                        </section>
+
+                        <section>
+                            <p className={`${brandLabelClass} mb-3`} style={{ color: BRAND_GREEN }}>Activity</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {activity.map((item) => (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`${brandCardClass} flex items-start gap-3 p-4 hover:border-[#c5d6c9] transition-colors`}
+                                    >
+                                        <span
+                                            className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+                                            style={{ backgroundColor: BRAND_GREEN_LIGHT, color: BRAND_GREEN }}
+                                        >
+                                            <item.icon size={18} />
+                                        </span>
+                                        <span className="min-w-0">
+                                            <span className="block text-sm font-semibold" style={{ color: BRAND_TEXT }}>
+                                                {item.label}
+                                            </span>
+                                            <span className="block text-xs mt-0.5" style={{ color: BRAND_MUTED }}>
+                                                {item.desc}
+                                            </span>
+                                        </span>
+                                    </Link>
+                                ))}
+                            </div>
+                        </section>
 
                         <button
                             type="button"
                             onClick={() => setShowLogout(true)}
-                            className="w-full flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-red-50 transition-colors text-left mt-2"
+                            className={`${brandDangerCtaClass} lg:hidden`}
                         >
-                            <span className="w-10 h-10 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
-                                <LogOut size={18} />
-                            </span>
-                            <span className="flex-1">
-                                <span className="block text-sm font-semibold text-slate-800">Logout</span>
-                                <span className="block text-xs text-slate-500">Sign out of your account</span>
-                            </span>
+                            <LogOut size={15} />
+                            Sign out
                         </button>
-
-                        <ConfirmLogoutModal open={showLogout} onClose={() => setShowLogout(false)} />
                     </div>
                 </div>
-
-                <div id="wishlist">
-                    <WishlistSection />
-                </div>
-
-                <p className="text-center text-xs text-slate-400 mt-4 flex items-center justify-center gap-1">
-                    <MapPin size={12} /> LeafyLand buyer account
-                </p>
             </div>
+            <ConfirmLogoutModal open={showLogout} onClose={() => setShowLogout(false)} />
         </div>
     )
 }

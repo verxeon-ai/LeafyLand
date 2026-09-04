@@ -747,7 +747,7 @@ function LoginForm() {
                             />
                             Remember me
                         </label>
-                        <Link href="/contact" className="text-[13px] font-semibold" style={{ color: BRAND.green }}>
+                        <Link href="/forgot-password" className="text-[13px] font-semibold" style={{ color: BRAND.green }}>
                             Forgot Password?
                         </Link>
                     </div>

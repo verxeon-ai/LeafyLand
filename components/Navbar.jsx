@@ -643,7 +643,7 @@ const Navbar = () => {
                             </Link>
 
                             <Link
-                                href="/profile"
+                                href="/wishlist"
                                 className="hidden sm:flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Wishlist"
