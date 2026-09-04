@@ -38,9 +38,13 @@ export default function BuyerMessagesPage() {
                 messages.map((m) => (
                     <div key={m.id} className="border border-slate-200 rounded-2xl p-4 bg-white space-y-2">
                         <div className="flex justify-between gap-2 text-xs text-slate-400">
-                            <Link href={m.store?.username ? `/shop/${m.store.username}` : '#'} className="font-semibold text-emerald-700">
-                                {m.store?.name || 'Store'}
-                            </Link>
+                            {m.store?.username ? (
+                                <Link href={`/shop/${m.store.username}`} className="font-semibold text-emerald-700 hover:underline">
+                                    {m.store?.name || 'Store'}
+                                </Link>
+                            ) : (
+                                <span className="font-semibold text-slate-700">{m.store?.name || 'Store'}</span>
+                            )}
                             <span>{new Date(m.createdAt).toLocaleString('en-IN')}</span>
                         </div>
                         <p className="text-sm text-slate-700">{m.body}</p>

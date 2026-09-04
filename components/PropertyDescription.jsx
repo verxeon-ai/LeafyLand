@@ -22,10 +22,26 @@ const PropertyDescription = ({ property }) => {
             )}
 
             <div className="flex gap-3 mt-14">
-                <Image src={property.store.logo} alt="" className="size-11 rounded-full ring ring-slate-400" width={100} height={100} />
+                {property.store?.logo ? (
+                    <Image
+                        src={property.store.logo}
+                        alt=""
+                        className="size-11 rounded-full ring ring-slate-400 object-cover"
+                        width={100}
+                        height={100}
+                    />
+                ) : (
+                    <div className="size-11 rounded-full bg-emerald-100 ring ring-slate-200" />
+                )}
                 <div>
-                    <p className="font-medium text-slate-600">Listed by {property.store.name}</p>
-                    <Link href={`/store/${property.store.username}`} className="flex items-center gap-1.5 text-green-500"> view store <ArrowRight size={14} /></Link>
+                    <p className="font-medium text-slate-600">Listed by {property.store?.name || 'Seller'}</p>
+                    {property.store?.username ? (
+                        <Link href={`/shop/${property.store.username}`} className="flex items-center gap-1.5 text-emerald-600 hover:underline">
+                            View store <ArrowRight size={14} />
+                        </Link>
+                    ) : (
+                        <span className="text-xs text-slate-400">Store page unavailable</span>
+                    )}
                 </div>
             </div>
         </div>

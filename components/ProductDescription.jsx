@@ -52,9 +52,13 @@ const ProductDescription = ({ product }) => {
                 </div>
                 <div>
                     <p className="text-sm font-medium text-slate-700">Sold by {product.storeName || 'LeafyLand'}</p>
-                    <Link href={`/shop/${product.storeId || 'leafyland'}`} className="text-xs text-emerald-600 hover:underline">
-                        View store →
-                    </Link>
+                    {product.storeUsername ? (
+                        <Link href={`/shop/${product.storeUsername}`} className="text-xs text-emerald-600 hover:underline">
+                            View store →
+                        </Link>
+                    ) : (
+                        <span className="text-xs text-slate-400">Store page unavailable</span>
+                    )}
                 </div>
             </div>
         </div>

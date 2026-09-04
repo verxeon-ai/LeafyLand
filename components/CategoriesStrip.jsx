@@ -124,7 +124,7 @@ const META = {
         subcategories: [
             { name: 'Bestsellers', href: '/products?category=Books+%26+Stationery' },
             { name: 'Notebooks', href: '/products?category=Books+%26+Stationery' },
-            { name: 'Pens & Pens', href: '/products?category=Books+%26+Stationery' },
+            { name: 'Pens & Pencils', href: '/products?category=Books+%26+Stationery' },
         ],
     },
     'Toys & Games': {

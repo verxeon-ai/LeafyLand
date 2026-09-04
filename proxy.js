@@ -44,6 +44,7 @@ export async function proxy(req) {
     const isOrders = pathname === '/orders' || pathname.startsWith('/orders/')
     const isProfile = pathname === '/profile' || pathname.startsWith('/profile/')
     const isCreateStore = pathname.startsWith('/create-store')
+    const isCheckout = pathname === '/checkout' || pathname.startsWith('/checkout/')
     const isLogin = pathname.startsWith('/login')
     const isBuyerProtected =
         pathname.startsWith('/messages') ||
@@ -54,7 +55,7 @@ export async function proxy(req) {
         return NextResponse.redirect(new URL('/auth/continue', req.url))
     }
 
-    if ((isAdmin || isStore || isOrders || isProfile || isCreateStore || isBuyerProtected) && !token) {
+    if ((isAdmin || isStore || isOrders || isProfile || isCreateStore || isCheckout || isBuyerProtected) && !token) {
         const login = new URL('/login', req.url)
         login.searchParams.set('callbackUrl', pathname)
         return NextResponse.redirect(login)
@@ -85,6 +86,8 @@ export const config = {
         '/profile/:path*',
         '/profile',
         '/create-store',
+        '/checkout',
+        '/checkout/:path*',
         '/login',
         '/messages',
         '/messages/:path*',

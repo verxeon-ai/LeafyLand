@@ -7,7 +7,7 @@
     "postinstall": "prisma generate",
     "build": "prisma generate && node scripts/repair-migrations.mjs && prisma migrate deploy && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "node -e \"console.log('ESLint is not configured in this project. Next.js 16 no longer ships next lint.');\"",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",

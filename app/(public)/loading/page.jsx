@@ -1,21 +1,23 @@
 'use client'
 
-import Loading from "@/components/Loading"
-import { useRouter } from "next/navigation"
-import { useEffect } from "react"
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import Loading from '@/components/Loading'
+
+function safeNextUrl(raw) {
+    if (!raw || typeof raw !== 'string') return '/'
+    if (!raw.startsWith('/') || raw.startsWith('//')) return '/'
+    return raw
+}
 
 export default function LoadingPage() {
     const router = useRouter()
 
     useEffect(() => {
         const params = new URLSearchParams(window.location.search)
-        const url = params.get('nextUrl')
-
-        if (url) {
-            setTimeout(() => {
-                router.push(url)
-            }, 8000)
-        }
+        const next = safeNextUrl(params.get('nextUrl'))
+        const timer = setTimeout(() => router.replace(next), 400)
+        return () => clearTimeout(timer)
     }, [router])
 
     return <Loading />

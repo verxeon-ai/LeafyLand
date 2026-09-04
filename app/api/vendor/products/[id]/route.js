@@ -1,6 +1,21 @@
 import { prisma } from '@/lib/prisma'
 import { error, json, requireStore, handleApiError, serializeProduct } from '@/lib/api'
 
+export async function GET(_req, { params }) {
+    try {
+        const { store } = await requireStore()
+        const { id } = await params
+        const product = await prisma.product.findFirst({
+            where: { id, storeId: store.id },
+            include: { store: true, rating: true, orderItems: { select: { quantity: true } } },
+        })
+        if (!product) return error('Product not found', 404)
+        return json(serializeProduct(product))
+    } catch (e) {
+        return handleApiError(e)
+    }
+}
+
 export async function PATCH(req, { params }) {
     try {
         const { store } = await requireStore()

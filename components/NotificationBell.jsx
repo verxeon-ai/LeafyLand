@@ -141,15 +141,23 @@ export default function NotificationBell({ nav = false }) {
                                     : !n.readAt
                                 return (
                                     <li key={n.id}>
-                                        <Link
-                                            href={n.link || '#'}
-                                            onClick={() => setOpen(false)}
-                                            className={`block px-4 py-3 transition-colors hover:bg-[#f4f8f5] ${fresh ? 'bg-[#eef4ef]/70' : ''}`}
-                                        >
-                                            <p className="text-sm font-medium text-slate-800">{n.title}</p>
-                                            <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>
-                                            <p className="mt-1 text-[10px] text-slate-400">{formatWhen(n.createdAt)}</p>
-                                        </Link>
+                                        {n.link ? (
+                                            <Link
+                                                href={n.link}
+                                                onClick={() => setOpen(false)}
+                                                className={`block px-4 py-3 transition-colors hover:bg-[#f4f8f5] ${fresh ? 'bg-[#eef4ef]/70' : ''}`}
+                                            >
+                                                <p className="text-sm font-medium text-slate-800">{n.title}</p>
+                                                <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>
+                                                <p className="mt-1 text-[10px] text-slate-400">{formatWhen(n.createdAt)}</p>
+                                            </Link>
+                                        ) : (
+                                            <div className={`block px-4 py-3 ${fresh ? 'bg-[#eef4ef]/70' : ''}`}>
+                                                <p className="text-sm font-medium text-slate-800">{n.title}</p>
+                                                <p className="mt-0.5 text-xs text-slate-500">{n.body}</p>
+                                                <p className="mt-1 text-[10px] text-slate-400">{formatWhen(n.createdAt)}</p>
+                                            </div>
+                                        )}
                                     </li>
                                 )
                             })}
