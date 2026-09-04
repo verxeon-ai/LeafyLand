@@ -1,8 +1,8 @@
 'use client'
 import { toast } from 'react-hot-toast'
-import Image from 'next/image'
 import PageHeader from '@/components/admin/PageHeader'
 import DataTable from '@/components/admin/DataTable'
+import CatalogImage from '@/components/CatalogImage'
 import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { BRAND_GREEN } from '@/lib/brand-ui'
@@ -20,7 +20,7 @@ export default function StoreManageProducts() {
             body: JSON.stringify({ inStock: !product.inStock }),
         })
         if (!res.ok) throw new Error('Update failed')
-        setData((prev) => prev.map((p) => p.id === productId ? { ...p, inStock: !p.inStock } : p))
+        setData((prev) => prev.map((p) => (p.id === productId ? { ...p, inStock: !p.inStock } : p)))
     }
 
     const columns = [
@@ -29,9 +29,11 @@ export default function StoreManageProducts() {
             label: 'Name',
             render: (val, row) => (
                 <div className="flex items-center gap-2">
-                    {row.images?.[0] && (
-                        <Image width={40} height={40} className="h-10 w-10 rounded-xl object-cover" src={row.images[0]} alt="" />
-                    )}
+                    {row.images?.[0] ? (
+                        <div className="relative h-10 w-10 overflow-hidden rounded-xl bg-slate-100">
+                            <CatalogImage fill src={row.images[0]} alt="" className="object-cover" sizes="40px" />
+                        </div>
+                    ) : null}
                     <span className="font-medium">{val}</span>
                 </div>
             ),

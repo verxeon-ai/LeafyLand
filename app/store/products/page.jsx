@@ -6,6 +6,7 @@ import toast from 'react-hot-toast'
 import PageHeader from '@/components/admin/PageHeader'
 import EmptyState from '@/components/admin/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import CatalogImage from '@/components/CatalogImage'
 import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { useVendorPageSearch } from '@/components/store/useVendorPageSearch'
@@ -97,10 +98,12 @@ export default function VendorProducts() {
                         <div key={product.id} className={`${brandCardClass} group overflow-hidden`}>
                             <div className="relative aspect-square bg-slate-50">
                                 {product.images?.[0] ? (
-                                    <img
+                                    <CatalogImage
+                                        fill
                                         src={product.images[0]}
                                         alt={product.name}
-                                        className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                        className="object-cover transition duration-300 group-hover:scale-105"
+                                        sizes="(max-width: 640px) 100vw, 25vw"
                                     />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-slate-300">

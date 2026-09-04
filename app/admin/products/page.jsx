@@ -6,6 +6,7 @@ import DataTable from '@/components/admin/DataTable'
 import StatusBadge from '@/components/admin/StatusBadge'
 import DetailSlideOver from '@/components/admin/DetailSlideOver'
 import FilterChips from '@/components/admin/FilterChips'
+import CatalogImage from '@/components/CatalogImage'
 import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { brandLinkClass, BRAND_GREEN } from '@/lib/brand-ui'
@@ -31,11 +32,11 @@ export default function ProductsPage() {
       key: 'images',
       label: 'Image',
       render: (val, row) => (
-        <img
-          src={val?.[0] || 'https://via.placeholder.com/40'}
-          alt={row.name || ''}
-          className="h-12 w-12 rounded-xl object-cover"
-        />
+        <div className="relative h-12 w-12 overflow-hidden rounded-xl bg-slate-100">
+          {val?.[0] ? (
+            <CatalogImage fill src={val[0]} alt={row.name || ''} className="object-cover" sizes="48px" />
+          ) : null}
+        </div>
       ),
     },
     { key: 'name', label: 'Name', render: (val) => <span className="font-semibold">{val || 'N/A'}</span> },

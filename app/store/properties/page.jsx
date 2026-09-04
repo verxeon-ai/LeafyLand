@@ -7,6 +7,7 @@ import StatusBadge from '@/components/admin/StatusBadge'
 import PageHeader from '@/components/admin/PageHeader'
 import EmptyState from '@/components/admin/EmptyState'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import CatalogImage from '@/components/CatalogImage'
 import { AdminError, AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { useVendorPageSearch } from '@/components/store/useVendorPageSearch'
@@ -68,7 +69,13 @@ export default function VendorProperties() {
                         <div key={property.id} className={`${brandCardClass} group overflow-hidden`}>
                             <div className="relative aspect-[4/3] bg-slate-50">
                                 {property.images?.[0] ? (
-                                    <img src={property.images[0]} alt={property.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                                    <CatalogImage
+                                        fill
+                                        src={property.images[0]}
+                                        alt={property.title}
+                                        className="object-cover transition duration-300 group-hover:scale-105"
+                                        sizes="(max-width: 640px) 100vw, 25vw"
+                                    />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center text-slate-300">
                                         <Home size={32} />
