@@ -398,7 +398,7 @@ const Navbar = () => {
     const accountHref = session?.user ? panelHref : '/login'
 
     const categoriesDropdown = (
-        <div className="absolute top-full left-0 mt-1.5 w-64 max-h-[70vh] overflow-y-auto bg-white rounded-lg shadow-lg border border-gray-200 z-[80] py-1">
+        <div className="absolute top-full left-0 mt-1.5 w-64 max-h-[70vh] overflow-y-auto bg-white rounded-xl shadow-lg border border-gray-200 z-[80] py-1">
             <button
                 type="button"
                 onClick={() => {
@@ -489,7 +489,7 @@ const Navbar = () => {
                         <button
                             type="button"
                             onClick={() => setMobileMenuOpen(true)}
-                            className="p-1.5 -ml-1 text-slate-700 hover:text-emerald-700 lg:hidden rounded-lg hover:bg-emerald-50 transition-colors shrink-0"
+                            className="p-1.5 -ml-1 text-slate-700 hover:text-emerald-700 lg:hidden rounded-full hover:bg-emerald-50 transition-colors shrink-0"
                             aria-label="Open menu"
                         >
                             <Menu size={22} />
@@ -513,7 +513,7 @@ const Navbar = () => {
                             <button
                                 type="button"
                                 onClick={() => setLocationOpen(!locationOpen)}
-                                className="flex items-start gap-1.5 px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors text-left"
+                                className="flex items-start gap-1.5 px-2 py-1 rounded-full hover:bg-[#eef4ef] transition-colors text-left"
                             >
                                 <MapPin size={18} className="mt-0.5 shrink-0" style={{ color: BRAND.green }} />
                                 <span>
@@ -531,7 +531,7 @@ const Navbar = () => {
                                 <div className="absolute top-full left-0 mt-1.5 w-72 bg-white rounded-xl shadow-xl border border-slate-100 z-50 overflow-hidden">
                                     <div className="p-3 border-b border-slate-100">
                                         <p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Select Location</p>
-                                        <div className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2.5">
+                                        <div className="flex items-center gap-2 bg-slate-50 rounded-xl px-3 py-2.5">
                                             <Search size={15} className="text-slate-400 shrink-0" />
                                             <input
                                                 type="text"
@@ -615,7 +615,7 @@ const Navbar = () => {
                             <button
                                 type="button"
                                 onClick={() => setMobileSearchOpen(true)}
-                                className="p-1.5 sm:p-2 lg:hidden rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="p-1.5 sm:p-2 lg:hidden rounded-full hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Open search"
                             >
@@ -624,7 +624,7 @@ const Navbar = () => {
 
                             <Link
                                 href={accountHref}
-                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-full hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                             >
                                 <User size={20} strokeWidth={1.75} />
@@ -635,7 +635,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/orders"
-                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-full hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Orders"
                             >
@@ -645,7 +645,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/wishlist"
-                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-full hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Wishlist"
                             >
@@ -655,7 +655,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/cart"
-                                className="relative flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="relative flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-full hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                             >
                                 <ShoppingCart size={20} strokeWidth={1.75} />
@@ -692,7 +692,7 @@ const Navbar = () => {
                                         <button
                                             type="button"
                                             onClick={(e) => toggleMenu(menu.id, e.currentTarget)}
-                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-md transition-colors whitespace-nowrap ${
+                                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-xl transition-colors whitespace-nowrap ${
                                                 open ? 'bg-white/80' : 'hover:bg-white/60'
                                             }`}
                                             style={{ color: BRAND.text }}
@@ -709,7 +709,7 @@ const Navbar = () => {
                                 <button
                                     type="button"
                                     onClick={(e) => toggleMenu('more', e.currentTarget)}
-                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-md transition-colors ${
+                                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-[13px] font-medium rounded-xl transition-colors ${
                                         openMenu === 'more' ? 'bg-white/80' : 'hover:bg-white/60'
                                     }`}
                                     style={{ color: BRAND.text }}
@@ -804,7 +804,7 @@ const Navbar = () => {
                             <button
                                 type="button"
                                 onClick={() => setMobileSearchOpen(false)}
-                                className="p-2 text-slate-500 hover:bg-slate-100 rounded-lg shrink-0"
+                                className="p-2 text-slate-500 hover:bg-slate-100 rounded-full shrink-0"
                                 aria-label="Close search"
                             >
                                 <X size={20} />
@@ -835,7 +835,7 @@ const Navbar = () => {
                         <div className="flex flex-col h-full p-5 overflow-y-auto overscroll-contain">
                             <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                                 <Image src={assets.logo} alt="LeafyLand" width={120} height={30} className="h-7 w-auto object-contain" />
-                                <button type="button" onClick={() => setMobileMenuOpen(false)} className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-lg">
+                                <button type="button" onClick={() => setMobileMenuOpen(false)} className="p-1.5 text-slate-500 hover:bg-slate-100 rounded-full">
                                     <X size={20} />
                                 </button>
                             </div>
@@ -848,7 +848,7 @@ const Navbar = () => {
                                             key={city.name}
                                             type="button"
                                             onClick={() => selectCity(city.name)}
-                                            className={`px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                                            className={`px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors ${
                                                 location === city.name
                                                     ? 'bg-emerald-600 text-white'
                                                     : 'bg-slate-50 text-slate-600 hover:bg-emerald-50'

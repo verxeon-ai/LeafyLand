@@ -69,10 +69,10 @@ const WishlistButton = ({ itemId, itemType, className = '', activeClassName = 't
         <button
             type="button"
             onClick={onClick}
-            className={`p-2 rounded-full bg-white/80 hover:bg-white transition ${className}`}
+            className={`inline-flex items-center justify-center rounded-full bg-white/80 hover:bg-white transition size-9 ${className}`}
             aria-label={isWishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
-            <Heart size={18} className={isWishlisted ? activeClassName : 'text-slate-500'} />
+            <Heart size={18} strokeWidth={1.75} className={`block shrink-0 ${isWishlisted ? activeClassName : 'text-slate-500'}`} />
         </button>
     )
 }

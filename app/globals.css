@@ -39,6 +39,22 @@
     html {
         overflow-anchor: none;
         overflow-x: clip;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+    }
+
+    /*
+      Windows laptops often run at 125% OS display scaling, so CSS pixels
+      render larger in the browser. MacBook Retina typically stays at ~100%
+      CSS scale, so the same UI looks smaller and needs ~110% browser zoom.
+
+      On dense desktop displays (Retina / 2x), raise the rem root so Tailwind
+      spacing and type match the Windows look at 100% zoom.
+    */
+    @media (min-resolution: 2dppx) and (hover: hover) and (pointer: fine) {
+        html {
+            font-size: 110%;
+        }
     }
 
     body {
