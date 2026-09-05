@@ -47,7 +47,7 @@ const FeaturedSection = ({ title, subtitle, items, renderItem, viewAllLink, view
                 className="flex gap-3 sm:gap-4 overflow-x-auto no-scrollbar pb-2 scroll-smooth overscroll-x-contain -mx-4 px-4 sm:mx-0 sm:px-0"
             >
                 {items.map((item, i) => (
-                    <div key={item.id || i} className="flex-shrink-0">
+                    <div key={item.id || i} className="flex-shrink-0 flex [&>*]:h-full">
                         {renderItem(item)}
                     </div>
                 ))}
