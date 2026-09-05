@@ -5,7 +5,7 @@ import { ArrowRight } from 'lucide-react'
 import { BRAND_GREEN } from '@/lib/brand-ui'
 
 const EXPLORE_CATEGORIES = [
-    { label: 'Plants & Gardening', href: '/products?category=Gardening', icon: '/icons/explore/plants.png' },
+    { label: 'Plants & Gardening', href: '/products?group=leafyland', icon: '/icons/explore/plants.png' },
     { label: 'Home & Living', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/home.png' },
     { label: 'Electronics', href: '/products?category=Electronics', icon: '/icons/explore/electronics.png' },
     { label: 'Fashion', href: '/products?category=Fashion', icon: '/icons/explore/fashion.png' },

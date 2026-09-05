@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { serializeProductList } from '@/lib/api'
 import { storeMatchesCity } from '@/lib/location'
-import { isMarketplaceCategory, getHomeProductGroup, MARKETPLACE_CATEGORIES } from '@/lib/categories'
+import { isMarketplaceCategory, getHomeProductGroup, getHomeGroupCategoryWhere, MARKETPLACE_CATEGORIES } from '@/lib/categories'
 
 export const dynamic = 'force-dynamic'
 
@@ -75,12 +75,8 @@ export async function GET(req) {
     }
 
     const homeGroup = getHomeProductGroup(groupId)
-    const groupCategories = homeGroup?.categories || null
+    const groupCategoryWhere = getHomeGroupCategoryWhere(homeGroup)
     let categoryFilter = category && category !== 'All' ? category : null
-
-    if (marketplaceOnly && !categoryFilter && !groupCategories) {
-        // Restrict to marketplace categories via `in`
-    }
 
     const where = ids.length
         ? { id: { in: ids } }
@@ -90,10 +86,16 @@ export async function GET(req) {
             store: { status: 'approved', isActive: true },
             ...(storeId ? { storeId } : {}),
             ...(cityStoreIds ? { storeId: { in: cityStoreIds } } : {}),
-            ...(categoryFilter ? { category: categoryFilter } : {}),
-            ...(groupCategories && !categoryFilter ? { category: { in: groupCategories } } : {}),
-            ...(marketplaceOnly && !categoryFilter && !groupCategories
-                ? { category: { in: MARKETPLACE_CATEGORIES } }
+            ...(categoryFilter
+                ? { category: { equals: categoryFilter, mode: 'insensitive' } }
+                : {}),
+            ...(groupCategoryWhere && !categoryFilter ? groupCategoryWhere : {}),
+            ...(marketplaceOnly && !categoryFilter && !groupCategoryWhere
+                ? {
+                    OR: MARKETPLACE_CATEGORIES.map((c) => ({
+                        category: { equals: c, mode: 'insensitive' },
+                    })),
+                }
                 : {}),
             ...(q
                 ? {
