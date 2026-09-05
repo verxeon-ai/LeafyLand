@@ -105,7 +105,7 @@ const Carousel = () => {
 
     return (
         <div
-            className="relative w-full rounded-xl overflow-hidden shadow-sm h-[200px] sm:h-[260px] md:h-[300px] lg:h-[340px]"
+            className="relative w-full rounded-xl overflow-hidden shadow-sm h-[200px] sm:h-[260px] md:h-[320px] lg:h-[380px]"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
             onTouchStart={(e) => setTouchX(e.touches[0].clientX)}

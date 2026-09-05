@@ -48,12 +48,18 @@
       render larger in the browser. MacBook Retina typically stays at ~100%
       CSS scale, so the same UI looks smaller and needs ~110% browser zoom.
 
-      On dense desktop displays (Retina / 2x), raise the rem root so Tailwind
-      spacing and type match the Windows look at 100% zoom.
+      Raise rem on dense desktop displays so homepage + product pages match
+      Windows at 100% zoom. Slightly stronger on wide screens.
     */
     @media (min-resolution: 2dppx) and (hover: hover) and (pointer: fine) {
         html {
-            font-size: 110%;
+            font-size: 112.5%;
+        }
+    }
+
+    @media (min-resolution: 2dppx) and (hover: hover) and (pointer: fine) and (min-width: 1440px) {
+        html {
+            font-size: 118.75%;
         }
     }
 

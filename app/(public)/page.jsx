@@ -69,15 +69,15 @@ export default function Home() {
 
     return (
         <div className="bg-slate-50/50 flex-1 flex flex-col">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2 w-full">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 pt-5 pb-2">
                 <Carousel />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-4 w-full">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 pb-4">
                 <ExploreCategories />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 flex-1">
                 <NearYouProducts />
                 <div className="pb-1 pt-1">
                     <PartnersMarquee />

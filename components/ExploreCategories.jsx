@@ -15,7 +15,7 @@ import BeautyCareIcon from '@/components/icons/BeautyCareIcon'
 import { BRAND_GREEN, BRAND_MINT } from '@/lib/brand-ui'
 
 const EXPLORE_CATEGORIES = [
-    { label: 'Plants & Gardening', href: '/products?group=leafyland', Icon: Sprout },
+    { label: 'Plants & Gardening', href: '/products?group=leafyland', Icon: Sprout, iconSize: 26, strokeWidth: 2 },
     { label: 'Home & Living', href: '/products?category=Home+%26+Kitchen', Icon: Sofa },
     { label: 'Electronics', href: '/products?category=Electronics', Icon: Headphones },
     { label: 'Fashion', href: '/products?category=Fashion', Icon: Shirt },
@@ -42,7 +42,7 @@ export default function ExploreCategories() {
             </div>
 
             <div className="flex lg:grid lg:grid-cols-9 gap-3 lg:gap-1.5 overflow-x-auto lg:overflow-visible no-scrollbar">
-                {EXPLORE_CATEGORIES.map(({ label, href, Icon, iconSize = 22 }) => (
+                {EXPLORE_CATEGORIES.map(({ label, href, Icon, iconSize = 22, strokeWidth = 1.75 }) => (
                     <Link
                         key={label}
                         href={href}
@@ -54,7 +54,7 @@ export default function ExploreCategories() {
                         >
                             <Icon
                                 size={iconSize}
-                                strokeWidth={1.75}
+                                strokeWidth={strokeWidth}
                                 className="transition-colors duration-200"
                                 aria-hidden
                             />
