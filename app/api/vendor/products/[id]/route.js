@@ -36,6 +36,7 @@ export async function PATCH(req, { params }) {
         }
         if (typeof body.inStock === 'boolean') data.inStock = body.inStock
         if (Array.isArray(body.images)) data.images = body.images
+        data.status = 'pending'
 
         const product = await prisma.product.update({
             where: { id },

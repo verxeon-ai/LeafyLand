@@ -635,8 +635,9 @@ const Navbar = () => {
 
                             <Link
                                 href="/orders"
-                                className="hidden sm:flex flex-col items-center gap-0.5 px-1.5 sm:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
+                                aria-label="Orders"
                             >
                                 <Package size={20} strokeWidth={1.75} />
                                 <span className="hidden lg:block text-[10px] font-medium" style={{ color: BRAND.muted }}>Orders</span>
@@ -644,7 +645,7 @@ const Navbar = () => {
 
                             <Link
                                 href="/wishlist"
-                                className="hidden sm:flex flex-col items-center gap-0.5 px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
+                                className="flex flex-col items-center gap-0.5 px-1 sm:px-1.5 md:px-2 py-1 rounded-lg hover:bg-[#eef4ef] transition-colors"
                                 style={{ color: BRAND.text }}
                                 aria-label="Wishlist"
                             >
@@ -741,7 +742,7 @@ const Navbar = () => {
                             <span className="mx-2 h-5 w-px bg-gray-300 shrink-0" aria-hidden />
 
                             <Link
-                                href="/products"
+                                href="/products?deals=1"
                                 className="inline-flex items-center gap-1.5 px-2.5 py-1.5 text-[13px] font-semibold hover:opacity-80 transition-opacity whitespace-nowrap"
                                 style={{ color: BRAND.green }}
                             >
@@ -900,7 +901,7 @@ const Navbar = () => {
                             </div>
 
                             <div className="mt-auto pt-4 border-t border-slate-100 flex flex-col gap-2">
-                                <Link href="/products" onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
+                                <Link href="/products?deals=1" onClick={() => setTimeout(() => setMobileMenuOpen(false), 0)}
                                     className="flex items-center justify-center gap-2 py-2.5 text-emerald-700 border border-emerald-200 rounded-xl text-sm font-semibold">
                                     <Percent size={16} /> Today&apos;s Deals
                                 </Link>

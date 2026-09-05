@@ -2,15 +2,18 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import toast from 'react-hot-toast'
 import { Store, Upload, CheckCircle, Leaf, Info } from 'lucide-react'
 import { fileToDataUrl } from '@/components/store/StoreLogo'
 
 export default function CreateStore() {
+    const router = useRouter()
     const [alreadySubmitted, setAlreadySubmitted] = useState(false)
     const [status, setStatus] = useState('')
     const [checking, setChecking] = useState(true)
     const [message, setMessage] = useState('')
+    const [redirectIn, setRedirectIn] = useState(5)
 
     const [storeInfo, setStoreInfo] = useState({
         name: '',
@@ -25,6 +28,22 @@ export default function CreateStore() {
     const onChangeHandler = (e) => {
         setStoreInfo({ ...storeInfo, [e.target.name]: e.target.value })
     }
+
+    useEffect(() => {
+        if (status !== 'approved') return
+        setRedirectIn(5)
+        const tick = setInterval(() => {
+            setRedirectIn((n) => {
+                if (n <= 1) {
+                    clearInterval(tick)
+                    router.push('/store')
+                    return 0
+                }
+                return n - 1
+            })
+        }, 1000)
+        return () => clearInterval(tick)
+    }, [status, router])
 
     const fetchSellerStatus = async () => {
         try {
@@ -95,15 +114,25 @@ export default function CreateStore() {
                 {status === 'approved' && (
                     <p className="mt-5 text-slate-400 text-sm">
                         Redirecting to dashboard in{' '}
-                        <span className="font-semibold">5 seconds</span>
+                        <span className="font-semibold">{redirectIn} second{redirectIn === 1 ? '' : 's'}</span>
                     </p>
                 )}
-                <Link
-                    href="/"
-                    className="mt-6 inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
-                >
-                    Back to Home
-                </Link>
+                <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+                    {status === 'approved' && (
+                        <Link
+                            href="/store"
+                            className="inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors"
+                        >
+                            Open vendor panel
+                        </Link>
+                    )}
+                    <Link
+                        href="/"
+                        className={`${status === 'approved' ? 'inline-flex items-center gap-2 px-6 py-2.5 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors' : 'inline-flex items-center gap-2 px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors'}`}
+                    >
+                        Back to Home
+                    </Link>
+                </div>
             </div>
         )
     }

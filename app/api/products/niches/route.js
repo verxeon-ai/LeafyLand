@@ -10,6 +10,7 @@ export async function GET(req) {
         by: ['category'],
         where: {
             inStock: true,
+            status: 'approved',
             store: { status: 'approved', isActive: true },
         },
         _count: { category: true },

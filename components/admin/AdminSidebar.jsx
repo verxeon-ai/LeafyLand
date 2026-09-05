@@ -14,6 +14,7 @@ import {
     Wrench,
     Tag,
     Wallet,
+    Mail,
     PanelLeftClose,
     PanelLeftOpen,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ const navGroups = [
             { name: 'Users', href: '/admin/users', icon: Users },
             { name: 'Orders', href: '/admin/orders', icon: ShoppingBag },
             { name: 'Payouts', href: '/admin/payouts', icon: Wallet },
+            { name: 'Contact', href: '/admin/contact', icon: Mail },
         ],
     },
     {

@@ -119,7 +119,7 @@ export default function StoreAddProductForm() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || (isEdit ? 'Could not update product' : 'Could not add product'))
 
-            toast.success(isEdit ? 'Product updated' : 'Product added successfully!')
+            toast.success(isEdit ? 'Product updated — pending re-approval' : 'Product submitted for approval!')
             if (isEdit) {
                 router.push('/store/products')
                 return

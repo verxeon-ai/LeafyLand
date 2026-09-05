@@ -21,7 +21,7 @@ const marketplaceLinks = [
     { text: 'Properties', path: '/properties', icon: Building2 },
     { text: 'Services', path: '/services', icon: Wrench },
     { text: 'Book a Service', path: '/services', icon: CalendarDays },
-    { text: 'Classifieds', path: '/products', icon: Tag },
+    { text: 'Classifieds', path: '/products?marketplace=1', icon: Tag },
     { text: 'Become a Seller', path: '/become-seller', icon: Store },
 ]
 

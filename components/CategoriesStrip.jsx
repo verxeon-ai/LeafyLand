@@ -1,6 +1,6 @@
 'use client'
 import { useState, useRef, useEffect } from 'react'
-import { Leaf, Wrench, Droplets, Home as HomeIcon, Scissors, FlaskConical, Fence, ChevronDown, Smartphone, Laptop, Shirt, Sofa, Dumbbell, BookOpen, Gamepad2, Sparkles, Car, CalendarDays } from 'lucide-react'
+import { Leaf, Wrench, Droplets, Home as HomeIcon, Scissors, FlaskConical, Fence, ChevronDown, Smartphone, Laptop, Shirt, Sofa, Dumbbell, BookOpen, Gamepad2, Sparkles, Car, CalendarDays, ShoppingBasket, PawPrint } from 'lucide-react'
 import Link from 'next/link'
 import { cachedJson } from '@/lib/cachedJson'
 
@@ -109,6 +109,22 @@ const META = {
             { name: 'Kitchen Appliances', href: '/products?category=Home+%26+Kitchen' },
             { name: 'Bottles & Flasks', href: '/products?category=Home+%26+Kitchen' },
             { name: 'Induction & Cooktops', href: '/products?category=Home+%26+Kitchen' },
+        ],
+    },
+    'Grocery': {
+        sub: 'Daily essentials', icon: ShoppingBasket, color: 'bg-[#e8f5e9]', iconColor: 'text-green-700',
+        subcategories: [
+            { name: 'All grocery', href: '/products?category=Grocery' },
+            { name: 'Pantry', href: '/products?category=Grocery' },
+            { name: 'Snacks', href: '/products?category=Grocery' },
+        ],
+    },
+    'Pet Supplies': {
+        sub: 'Pets & care', icon: PawPrint, color: 'bg-[#fff3e0]', iconColor: 'text-orange-700',
+        subcategories: [
+            { name: 'All pet supplies', href: '/products?category=Pet+Supplies' },
+            { name: 'Food', href: '/products?category=Pet+Supplies' },
+            { name: 'Accessories', href: '/products?category=Pet+Supplies' },
         ],
     },
     'Sports & Outdoors': {

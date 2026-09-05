@@ -7,6 +7,7 @@ import PageHeader from '@/components/admin/PageHeader'
 import DataTable from '@/components/admin/DataTable'
 import DetailSlideOver from '@/components/admin/DetailSlideOver'
 import FilterChips from '@/components/admin/FilterChips'
+import ConfirmDialog from '@/components/ConfirmDialog'
 import { AdminTableSkeleton } from '@/components/admin/AdminStates'
 import { useCachedJson } from '@/lib/useCachedJson'
 import { setCachedJson } from '@/lib/cachedJson'
@@ -14,7 +15,9 @@ import {
   brandCardClass,
   brandPrimaryCtaClass,
   brandGhostCtaClass,
+  brandDangerCtaClass,
   brandInputClass,
+  brandSelectClass,
   brandLinkClass,
   BRAND_GREEN,
   BRAND_GREEN_LIGHT,
@@ -58,6 +61,10 @@ export default function UsersPage() {
   const [showCreateForm, setShowCreateForm] = useState(false)
   const [creating, setCreating] = useState(false)
   const [newAdmin, setNewAdmin] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+  const [editName, setEditName] = useState('')
+  const [editRole, setEditRole] = useState('buyer')
+  const [saving, setSaving] = useState(false)
+  const [deleting, setDeleting] = useState(null)
 
   const filteredData = useMemo(() => {
     if (roleFilter === 'All') return users
@@ -103,6 +110,65 @@ export default function UsersPage() {
     }
   }
 
+  const openUser = (row) => {
+    setSelectedUser(row)
+    setEditName(row.name || '')
+    setEditRole(row.role === 'admin' ? 'admin' : 'buyer')
+  }
+
+  const saveUser = async () => {
+    if (!selectedUser) return
+    setSaving(true)
+    try {
+      const res = await fetch('/api/admin/users', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: selectedUser.id,
+          name: editName,
+          role: editRole,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        toast.error(data.error || 'Could not update user')
+        return
+      }
+      toast.success('User updated')
+      setUsers((prev) => {
+        const next = prev.map((u) => (u.id === data.id ? { ...u, ...data } : u))
+        setCachedJson('/api/admin/users', next)
+        return next
+      })
+      setSelectedUser(data)
+    } catch {
+      toast.error('Could not update user')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleDelete = async () => {
+    if (!deleting) return
+    const res = await fetch('/api/admin/users', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: deleting.id }),
+    })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) {
+      toast.error(data.error || 'Could not delete')
+      throw new Error('delete')
+    }
+    toast.success('User deleted')
+    setUsers((prev) => {
+      const next = prev.filter((u) => u.id !== deleting.id)
+      setCachedJson('/api/admin/users', next)
+      return next
+    })
+    setSelectedUser((prev) => (prev?.id === deleting.id ? null : prev))
+  }
+
   const columns = [
     {
       key: 'name',
@@ -144,7 +210,7 @@ export default function UsersPage() {
       render: (_, row) => (
         <button
           type="button"
-          onClick={() => setSelectedUser(row)}
+          onClick={() => openUser(row)}
           className={brandLinkClass}
           style={{ color: BRAND_GREEN }}
         >
@@ -299,9 +365,68 @@ export default function UsersPage() {
                 />
               </DetailSection>
             )}
+
+            <DetailSection title="Edit">
+              <div className="space-y-3">
+                <label className="block text-xs text-slate-500">
+                  Name
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className={`${brandInputClass} mt-1`}
+                  />
+                </label>
+                <label className="block text-xs text-slate-500">
+                  Platform role
+                  <select
+                    value={editRole}
+                    onChange={(e) => setEditRole(e.target.value)}
+                    className={`mt-1 w-full ${brandSelectClass}`}
+                  >
+                    <option value="buyer">Buyer</option>
+                    <option value="admin">Admin</option>
+                  </select>
+                </label>
+                {selectedUser.storeName && (
+                  <p className="text-xs text-slate-400">
+                    Sellers keep their store when demoted to buyer; store access still depends on store approval.
+                  </p>
+                )}
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    disabled={saving}
+                    onClick={saveUser}
+                    className={`${brandPrimaryCtaClass} disabled:opacity-60`}
+                    style={{ backgroundColor: BRAND_GREEN }}
+                  >
+                    {saving ? 'Saving…' : 'Save changes'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setDeleting(selectedUser)}
+                    className={brandDangerCtaClass}
+                  >
+                    Delete user
+                  </button>
+                </div>
+              </div>
+            </DetailSection>
           </>
         )}
       </DetailSlideOver>
+
+      <ConfirmDialog
+        open={!!deleting}
+        onClose={() => setDeleting(null)}
+        danger
+        eyebrow="Users"
+        title="Delete this user?"
+        description={deleting ? `"${deleting.name || deleting.email}" will be permanently removed.` : ''}
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+      />
     </div>
   )
 }

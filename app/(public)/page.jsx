@@ -27,7 +27,7 @@ export default function Home() {
 
     useEffect(() => {
         let cancelled = false
-        cachedJson('/api/products').then((p) => {
+        cachedJson('/api/products?limit=40').then((p) => {
             if (cancelled) return
             if (Array.isArray(p)) setProducts(p)
             setCatalogReady(true)

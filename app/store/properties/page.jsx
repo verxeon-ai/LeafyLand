@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Trash2, Home } from 'lucide-react'
+import { Plus, Trash2, Home, Edit } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import StatusBadge from '@/components/admin/StatusBadge'
@@ -91,13 +91,22 @@ export default function VendorProperties() {
                                 <p className="mt-1 truncate text-xs text-slate-400">{property.location}</p>
                                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
                                     <span className="text-lg font-bold text-slate-800">₹{(property.price || 0).toLocaleString('en-IN')}</span>
-                                    <button
-                                        type="button"
-                                        onClick={() => setDeleting(property)}
-                                        className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                    <div className="flex items-center gap-1">
+                                        <Link
+                                            href={`/store/add-property?id=${property.id}`}
+                                            className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]"
+                                            title="Edit property"
+                                        >
+                                            <Edit size={14} />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={() => setDeleting(property)}
+                                            className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-red-50 hover:text-red-600"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>

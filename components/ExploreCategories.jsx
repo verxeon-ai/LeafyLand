@@ -9,9 +9,9 @@ const EXPLORE_CATEGORIES = [
     { label: 'Home & Living', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/home.png' },
     { label: 'Electronics', href: '/products?category=Electronics', icon: '/icons/explore/electronics.png' },
     { label: 'Fashion', href: '/products?category=Fashion', icon: '/icons/explore/fashion.png' },
-    { label: 'Grocery', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/grocery.png' },
+    { label: 'Grocery', href: '/products?category=Grocery', icon: '/icons/explore/grocery.png' },
     { label: 'Beauty & Personal Care', href: '/products?category=Beauty+%26+Personal+Care', icon: '/icons/explore/beauty.png' },
-    { label: 'Pet Supplies', href: '/shop', icon: '/icons/explore/pet.png' },
+    { label: 'Pet Supplies', href: '/products?category=Pet+Supplies', icon: '/icons/explore/pet.png' },
     { label: 'Automotive', href: '/products?category=Automotive', icon: '/icons/explore/automotive.png' },
     { label: 'More', href: '/products', icon: '/icons/explore/more.png' },
 ]

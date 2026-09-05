@@ -2,13 +2,14 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, MapPin, Star, Clock, CheckCircle } from 'lucide-react'
+import { ChevronLeft, MapPin, Star, Clock, CheckCircle, Store } from 'lucide-react'
 import CatalogImage from '@/components/CatalogImage'
 import dynamic from 'next/dynamic'
 import ReviewsList from '@/components/ReviewsList'
 import WishlistButton from '@/components/WishlistButton'
 import { DetailSkeleton } from '@/components/CatalogSkeleton'
 import { cachedJson, peekDetail } from '@/lib/cachedJson'
+import { BRAND_GREEN } from '@/lib/brand-ui'
 
 const BookServiceModal = dynamic(() => import('@/components/BookServiceModal'), { ssr: false })
 
@@ -67,6 +68,7 @@ const ServicePage = () => {
         : 0)
 
     const providerName = service.store?.name || 'Provider'
+    const storeUsername = service.store?.username
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -136,10 +138,19 @@ const ServicePage = () => {
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
                             <span className="text-sm font-semibold text-blue-700">{providerName?.[0] || 'P'}</span>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                             <p className="text-sm font-medium text-slate-700">{providerName}</p>
                             <p className="text-xs text-slate-400">Service Provider</p>
                         </div>
+                        {storeUsername && (
+                            <Link
+                                href={`/shop/${storeUsername}`}
+                                className="inline-flex shrink-0 items-center gap-1.5 text-xs font-semibold hover:underline"
+                                style={{ color: BRAND_GREEN }}
+                            >
+                                <Store size={14} /> View store
+                            </Link>
+                        )}
                     </div>
                 </div>
             </div>
