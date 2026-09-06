@@ -1,25 +1,31 @@
 import Link from 'next/link'
 import Image from 'next/image'
-import { brandPrimaryCtaClass, brandRadiusClass, BRAND_GREEN, BRAND_MINT } from '@/lib/brand-ui'
+import { brandPrimaryCtaClass, brandRadiusClass, BRAND_GREEN, BRAND_MINT, BRAND_TEXT } from '@/lib/brand-ui'
 
 export default function PropertiesBanner() {
     return (
         <section
-            className={`relative overflow-hidden shadow-sm flex h-[168px] sm:h-[196px] md:h-[220px] ${brandRadiusClass} mt-5`}
+            className={`relative mt-5 flex h-[168px] overflow-hidden shadow-sm sm:h-[196px] md:h-[220px] ${brandRadiusClass}`}
             style={{ backgroundColor: BRAND_MINT }}
             aria-label="Explore properties"
         >
-            <div className="relative z-10 flex-1 min-w-0 flex items-center px-4 sm:px-8 md:px-10">
-                <div className="max-w-[15.5rem] sm:max-w-xs">
+            <div className="relative z-10 flex min-w-0 flex-1 items-center px-4 sm:px-8 md:px-10">
+                <div className="max-w-[15.5rem] sm:max-w-xs md:max-w-sm">
                     <p
-                        className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-[0.14em]"
+                        className="text-[9px] font-semibold uppercase tracking-[0.14em] sm:text-[11px]"
                         style={{ color: BRAND_GREEN }}
                     >
                         Find land &amp; homes
                     </p>
-                    <h2 className="mt-1 text-lg sm:text-xl md:text-2xl font-bold text-slate-800 leading-snug">
+                    <h2
+                        className="mt-1 text-lg font-bold leading-snug sm:text-xl md:text-2xl"
+                        style={{ color: BRAND_TEXT }}
+                    >
                         Farmhouses, plots &amp; green retreats
                     </h2>
+                    <p className="mt-1.5 hidden text-sm leading-relaxed text-slate-500 sm:block">
+                        Browse farmland, farmhouses, and green estates from verified sellers.
+                    </p>
                     <Link
                         href="/properties"
                         className={`mt-3 ${brandPrimaryCtaClass}`}
@@ -29,19 +35,26 @@ export default function PropertiesBanner() {
                     </Link>
                 </div>
             </div>
-            <div className="relative w-[42%] sm:w-[46%] md:w-[48%] h-full shrink-0 overflow-hidden">
+
+            <div className="relative h-full w-[48%] shrink-0 overflow-hidden sm:w-[50%] md:w-[52%]">
                 <Image
-                    src="/bgs3.png"
-                    alt="Farmhouse and green property landscape"
-                    width={1400}
-                    height={380}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 h-[175%] w-auto max-w-none"
+                    src="/property-farmhouse-light.jpg"
+                    alt="Bright white farmhouse with green lawn and garden"
+                    fill
+                    className="object-cover object-[60%_center]"
                     sizes="(max-width: 768px) 50vw, 640px"
-                    quality={80}
+                    quality={90}
                 />
                 <div
-                    className="absolute inset-y-0 left-0 w-8 sm:w-12 pointer-events-none"
-                    style={{ background: `linear-gradient(to right, ${BRAND_MINT}, transparent)` }}
+                    className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-20 md:w-24"
+                    style={{
+                        background: `linear-gradient(
+                            90deg,
+                            ${BRAND_MINT} 0%,
+                            rgba(244, 248, 245, 0.7) 45%,
+                            rgba(244, 248, 245, 0) 100%
+                        )`,
+                    }}
                 />
             </div>
         </section>

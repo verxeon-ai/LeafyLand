@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { Search, Sparkles } from 'lucide-react'
 import ServiceCategoryCard from '@/components/ServiceCategoryCard'
 import { BRAND_GREEN } from '@/lib/brand-ui'
-import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
+import { cachedJson, restoreCachedJson } from '@/lib/cachedJson'
 import { ServiceGridSkeleton } from '@/components/CatalogSkeleton'
 
 const CATEGORY_COPY = {
@@ -21,8 +21,9 @@ function ServicesContent() {
     const urlCategory = searchParams.get('category') || ''
     const urlSearch = searchParams.get('search') || ''
     const [search, setSearch] = useState(urlSearch)
-    const [services, setServices] = useState(() => Array.isArray(peekCachedJson('/api/services')) ? peekCachedJson('/api/services') : [])
-    const [loading, setLoading] = useState(() => !Array.isArray(peekCachedJson('/api/services')))
+    // Always start empty so SSR HTML matches the client's first paint (cache is client-only).
+    const [services, setServices] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         setSearch(urlSearch)
@@ -30,6 +31,11 @@ function ServicesContent() {
 
     useEffect(() => {
         let cancelled = false
+        const hit = restoreCachedJson('/api/services')
+        if (Array.isArray(hit)) {
+            setServices(hit)
+            setLoading(false)
+        }
         cachedJson('/api/services')
             .then((data) => { if (!cancelled && Array.isArray(data)) setServices(data) })
             .finally(() => { if (!cancelled) setLoading(false) })

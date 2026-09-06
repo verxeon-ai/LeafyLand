@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import PropertyCard from "@/components/PropertyCard"
 import { Search } from 'lucide-react'
-import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
+import { cachedJson, restoreCachedJson } from '@/lib/cachedJson'
 import { PropertyGridSkeleton } from '@/components/CatalogSkeleton'
 
 const PropertiesContent = () => {
@@ -14,8 +14,9 @@ const PropertiesContent = () => {
     const selectedType = urlType || 'All'
     const [search, setSearch] = useState(urlSearch)
     const [listingFilter, setListingFilter] = useState('All')
-    const [properties, setProperties] = useState(() => Array.isArray(peekCachedJson('/api/properties')) ? peekCachedJson('/api/properties') : [])
-    const [loading, setLoading] = useState(() => !Array.isArray(peekCachedJson('/api/properties')))
+    // Always start empty so SSR HTML matches the client's first paint (cache is client-only).
+    const [properties, setProperties] = useState([])
+    const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         setSearch(urlSearch)
@@ -23,6 +24,11 @@ const PropertiesContent = () => {
 
     useEffect(() => {
         let cancelled = false
+        const hit = restoreCachedJson('/api/properties')
+        if (Array.isArray(hit)) {
+            setProperties(hit)
+            setLoading(false)
+        }
         cachedJson('/api/properties')
             .then((data) => { if (!cancelled && Array.isArray(data)) setProperties(data) })
             .finally(() => { if (!cancelled) setLoading(false) })
@@ -49,8 +55,11 @@ const PropertiesContent = () => {
             <div className="mb-6">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-800">Properties</h1>
                 <p className="text-sm text-slate-500 mt-1">
-                    {leafyCount > 0 && <span className="text-emerald-600 font-medium">{leafyCount} LeafyLand</span>}
-                    {' '}listings found
+                    {loading
+                        ? 'Loading listings…'
+                        : leafyCount > 0
+                            ? <><span className="text-emerald-600 font-medium">{leafyCount} LeafyLand</span> listings found</>
+                            : '0 listings found'}
                 </p>
             </div>
 
