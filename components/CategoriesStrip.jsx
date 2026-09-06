@@ -12,7 +12,7 @@ const META = {
     'Plants': {
         sub: 'Indoor & outdoor', icon: Leaf, color: 'bg-[#e8f5e9]', iconColor: 'text-emerald-600',
         subcategories: [
-            { name: 'Indoor Greenary', href: '/products?category=Indoor+Greenary' },
+            { name: 'Indoor Greenery', href: '/products?category=Indoor+Greenery' },
             { name: 'Big Plant', href: '/products?category=Big+Plant' },
             { name: 'Gardening', href: '/products?category=Gardening' },
             { name: 'Soil & Fertilizers', href: '/products?category=Soil+%26+Fertilizers' },

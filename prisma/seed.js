@@ -89,8 +89,8 @@ async function main() {
             data: [
                 { name: 'Areca Palm Giant', description: 'Tall, lush Areca Palm. Height 4-5 feet.', mrp: 2100, price: 1499, category: 'Big Plant', images: [img('1509423350716-97f9360b4e09')], stock: 15, inStock: true, featured: true, storeId: store.id },
                 { name: 'Fiddle Leaf Fig', description: 'Statement fiddle leaf fig for living rooms.', mrp: 3200, price: 2499, category: 'Big Plant', images: [img('1545241047-6083a3684587')], stock: 10, inStock: true, featured: true, storeId: store.id },
-                { name: 'Money Plant Golden', description: 'Low-maintenance golden money plant.', mrp: 450, price: 299, category: 'Indoor Greenary', images: [img('1485955900006-10f4d324d981')], stock: 40, inStock: true, featured: true, storeId: store.id },
-                { name: 'Snake Plant Laurentii', description: 'Air-purifying snake plant.', mrp: 650, price: 449, category: 'Indoor Greenary', images: [img('1593691509543-c55fb32e5cee')], stock: 35, inStock: true, featured: false, storeId: store.id },
+                { name: 'Money Plant Golden', description: 'Low-maintenance golden money plant.', mrp: 450, price: 299, category: 'Indoor Greenery', images: [img('1485955900006-10f4d324d981')], stock: 40, inStock: true, featured: true, storeId: store.id },
+                { name: 'Snake Plant Laurentii', description: 'Air-purifying snake plant.', mrp: 650, price: 449, category: 'Indoor Greenery', images: [img('1593691509543-c55fb32e5cee')], stock: 35, inStock: true, featured: false, storeId: store.id },
                 { name: 'Garden Tool Set', description: 'Shovel, rake, trowel, weeder, cultivator.', mrp: 1800, price: 1299, category: 'Gardening', images: [img('1416879595882-3373a0480b5b')], stock: 20, inStock: true, featured: false, storeId: store.id },
                 { name: 'Organic Potting Mix 5kg', description: 'Premium organic potting soil.', mrp: 550, price: 399, category: 'Soil & Fertilizers', images: [img('1466692476866-aef1dfb1e735')], stock: 50, inStock: true, featured: false, storeId: store.id },
             ],

@@ -59,19 +59,7 @@ export default function Home() {
         Promise.all(
             HOME_CATEGORY_SECTIONS.map(async (section) => {
                 try {
-                    const names = [section.category, ...(section.aliases || [])]
-                    const batches = await Promise.all(names.map((name) => fetchCategoryProducts(name)))
-                    const seen = new Set()
-                    const items = []
-                    for (const batch of batches) {
-                        for (const p of batch) {
-                            if (!p?.id || seen.has(p.id)) continue
-                            seen.add(p.id)
-                            items.push(p)
-                            if (items.length >= SECTION_LIMIT) break
-                        }
-                        if (items.length >= SECTION_LIMIT) break
-                    }
+                    const items = await fetchCategoryProducts(section.category)
                     return { ...section, items }
                 } catch {
                     return { ...section, items: [] }

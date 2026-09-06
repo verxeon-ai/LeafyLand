@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { serializeProductList } from '@/lib/api'
 import { storeMatchesCity } from '@/lib/location'
-import { isMarketplaceCategory, getHomeProductGroup, getHomeGroupCategoryWhere, MARKETPLACE_CATEGORIES } from '@/lib/categories'
+import { isMarketplaceCategory, getHomeProductGroup, getHomeGroupCategoryWhere, MARKETPLACE_CATEGORIES, categoryEqualsWhere } from '@/lib/categories'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,7 +87,7 @@ export async function GET(req) {
             ...(storeId ? { storeId } : {}),
             ...(cityStoreIds ? { storeId: { in: cityStoreIds } } : {}),
             ...(categoryFilter
-                ? { category: { equals: categoryFilter, mode: 'insensitive' } }
+                ? categoryEqualsWhere(categoryFilter)
                 : {}),
             ...(groupCategoryWhere && !categoryFilter ? groupCategoryWhere : {}),
             ...(marketplaceOnly && !categoryFilter && !groupCategoryWhere
