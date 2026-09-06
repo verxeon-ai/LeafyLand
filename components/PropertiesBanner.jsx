@@ -2,6 +2,9 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { brandPrimaryCtaClass, brandRadiusClass, BRAND_GREEN, BRAND_MINT, BRAND_TEXT } from '@/lib/brand-ui'
 
+const FADE =
+    'linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.35) 18%, rgba(0,0,0,0.85) 42%, #000 62%)'
+
 export default function PropertiesBanner() {
     return (
         <section
@@ -36,22 +39,32 @@ export default function PropertiesBanner() {
                 </div>
             </div>
 
-            <div className="relative h-full w-[48%] shrink-0 overflow-hidden sm:w-[50%] md:w-[52%]">
-                <Image
-                    src="/property-farmhouse-light.jpg"
-                    alt="Bright white farmhouse with green lawn and garden"
-                    fill
-                    className="object-cover object-[60%_center]"
-                    sizes="(max-width: 768px) 50vw, 640px"
-                    quality={90}
-                />
+            <div className="relative h-full w-[52%] shrink-0 overflow-hidden sm:w-[54%] md:w-[56%]">
                 <div
-                    className="pointer-events-none absolute inset-y-0 left-0 w-16 sm:w-20 md:w-24"
+                    className="absolute inset-0"
+                    style={{
+                        WebkitMaskImage: FADE,
+                        maskImage: FADE,
+                    }}
+                >
+                    <Image
+                        src="/property-farmhouse-light.jpg"
+                        alt="Bright white farmhouse with green lawn and garden"
+                        fill
+                        className="object-cover object-[62%_center]"
+                        sizes="(max-width: 768px) 55vw, 700px"
+                        quality={90}
+                    />
+                </div>
+                <div
+                    className="pointer-events-none absolute inset-y-0 left-0 w-[55%] sm:w-[48%] md:w-[42%]"
                     style={{
                         background: `linear-gradient(
                             90deg,
                             ${BRAND_MINT} 0%,
-                            rgba(244, 248, 245, 0.7) 45%,
+                            rgba(244, 248, 245, 0.92) 28%,
+                            rgba(244, 248, 245, 0.55) 58%,
+                            rgba(244, 248, 245, 0.18) 82%,
                             rgba(244, 248, 245, 0) 100%
                         )`,
                     }}
