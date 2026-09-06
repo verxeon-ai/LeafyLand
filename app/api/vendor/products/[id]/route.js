@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma'
 import { error, json, requireStore, handleApiError, serializeProduct } from '@/lib/api'
+import { sanitizeImageUrls } from '@/lib/images'
 
 export async function GET(_req, { params }) {
     try {
@@ -35,7 +36,11 @@ export async function PATCH(req, { params }) {
             data.inStock = Number(body.stock) > 0
         }
         if (typeof body.inStock === 'boolean') data.inStock = body.inStock
-        if (Array.isArray(body.images)) data.images = body.images
+        if (Array.isArray(body.images)) {
+            const safeImages = sanitizeImageUrls(body.images)
+            if (!safeImages.length) return error('Upload at least one product photo via /api/upload')
+            data.images = safeImages
+        }
 
         const product = await prisma.product.update({
             where: { id },
@@ -58,7 +63,6 @@ export async function DELETE(_req, { params }) {
         })
         if (!existing) return error('Product not found', 404)
 
-        // Products that appear in past orders cannot be hard-deleted (FK on OrderItem).
         if (existing._count.orderItems > 0) {
             await prisma.product.update({
                 where: { id },

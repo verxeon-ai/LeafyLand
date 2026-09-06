@@ -11,7 +11,7 @@ const EXPLORE_CATEGORIES = [
     { label: 'Fashion', href: '/products?category=Fashion', icon: '/icons/explore/fashion.png' },
     { label: 'Grocery', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/grocery.png' },
     { label: 'Beauty & Personal Care', href: '/products?category=Beauty+%26+Personal+Care', icon: '/icons/explore/beauty.png' },
-    { label: 'Pet Supplies', href: '/shop', icon: '/icons/explore/pet.png' },
+    { label: 'Pet Supplies', href: '/products', icon: '/icons/explore/pet.png' },
     { label: 'Automotive', href: '/products?category=Automotive', icon: '/icons/explore/automotive.png' },
     { label: 'More', href: '/products', icon: '/icons/explore/more.png' },
 ]

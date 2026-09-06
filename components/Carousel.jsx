@@ -43,7 +43,7 @@ const slides = [
         title: 'Sports, electronics & everyday deals',
         subtitle: 'Classifieds and marketplace finds — from gadgets to sports gear.',
         cta: 'Shop marketplace',
-        href: '/shop',
+        href: '/products',
         image: '/bgs4.png',
         wide: true,
     },

@@ -3,8 +3,11 @@ import { error, json, serializeProduct, PUBLIC_DETAIL_CACHE } from '@/lib/api'
 
 export async function GET(_req, { params }) {
     const { id } = await params
-    const product = await prisma.product.findUnique({
-        where: { id },
+    const product = await prisma.product.findFirst({
+        where: {
+            id,
+            store: { status: 'approved', isActive: true },
+        },
         include: {
             store: { select: { id: true, name: true, username: true, logo: true } },
             rating: { include: { user: { select: { name: true, image: true } } } },

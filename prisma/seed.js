@@ -125,10 +125,18 @@ async function main() {
     if (existingProps === 0) {
         await prisma.property.createMany({
             data: [
-                { title: '2 Acre Farmhouse', description: 'Ready farmhouse with well and trees.', propertyType: 'Farmhouse', listingType: 'SALE', price: 8500000, location: 'Nashik', landSize: '2 Acres', images: [img('1500382017468-9049fed747ef')], status: 'approved', storeId: store.id, features: ['Water', 'Electricity'] },
-                { title: 'Agricultural Land', description: 'Fertile plot near highway.', propertyType: 'Agricultural Land', listingType: 'SALE', price: 3200000, location: 'Pune', landSize: '1 Acre', images: [img('1500382017468-9049fed747ef')], status: 'approved', storeId: store.id, features: ['Road Access'] },
+                { title: '2 Acre Farmhouse', description: 'Ready farmhouse with well and trees.', propertyType: 'Farmhouse', listingType: 'SALE', price: 8500000, location: 'Nashik', landSize: '2 Acres', images: ['/property-farmhouse-light.jpg'], status: 'approved', storeId: store.id, features: ['Water', 'Electricity'] },
+                { title: 'Agricultural Land', description: 'Fertile plot near highway.', propertyType: 'Agricultural Land', listingType: 'SALE', price: 3200000, location: 'Pune', landSize: '1 Acre', images: ['/property-agri-land-light.jpg'], status: 'approved', storeId: store.id, features: ['Road Access'] },
             ],
         })
+    }
+
+    const propertyPhotos = {
+        '2 Acre Farmhouse': ['/property-farmhouse-light.jpg'],
+        'Agricultural Land': ['/property-agri-land-light.jpg'],
+    }
+    for (const [title, images] of Object.entries(propertyPhotos)) {
+        await prisma.property.updateMany({ where: { title }, data: { images } })
     }
 
     await prisma.coupon.upsert({

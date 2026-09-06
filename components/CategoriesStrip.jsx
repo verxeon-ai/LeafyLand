@@ -13,11 +13,10 @@ const META = {
         sub: 'Indoor & outdoor', icon: Leaf, color: 'bg-[#e8f5e9]', iconColor: 'text-emerald-600',
         subcategories: [
             { name: 'Indoor Greenary', href: '/products?category=Indoor+Greenary' },
-            { name: 'Outdoor Plants', href: '/products?category=Plants' },
             { name: 'Big Plant', href: '/products?category=Big+Plant' },
-            { name: 'Bulbs', href: '/products?category=Bulbs' },
-            { name: 'Fruit Plant', href: '/products?category=Fruit+Plant' },
-            { name: 'Seeds', href: '/products?category=Seeds' },
+            { name: 'Gardening', href: '/products?category=Gardening' },
+            { name: 'Soil & Fertilizers', href: '/products?category=Soil+%26+Fertilizers' },
+            { name: 'Electronics', href: '/products?category=Electronics' },
         ],
     },
     'Garden Tools': {
@@ -41,14 +40,12 @@ const META = {
         subcategories: [
             { name: 'Farmhouses', href: '/properties?type=Farmhouse' },
             { name: 'Land', href: '/properties?type=Agricultural+Land' },
-            { name: 'Farm Stays', href: '/properties?type=Farm+Stay' },
+            { name: 'Nursery', href: '/properties?type=Nursery' },
         ],
     },
     'Landscaping': {
         sub: 'Book a pro', icon: Scissors, color: 'bg-[#e8f5e9]', iconColor: 'text-emerald-600',
         subcategories: [
-            { name: 'Daily Needs', href: '/services?category=Daily+Needs+Services' },
-            { name: 'Home Services', href: '/services?category=Home+Services' },
             { name: 'Garden Maintenance', href: '/services?category=Garden+Maintenance' },
             { name: 'Landscaping', href: '/services?category=Landscaping' },
             { name: 'Irrigation', href: '/services?category=Irrigation' },

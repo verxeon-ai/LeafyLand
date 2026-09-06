@@ -1,10 +1,33 @@
 'use client'
 import { memo } from 'react'
-import { MapPin, Maximize, BedDouble, Star } from 'lucide-react'
+import { MapPin, Maximize, Star } from 'lucide-react'
 import Link from 'next/link'
 import WishlistButton from '@/components/WishlistButton'
 import CatalogImage from '@/components/CatalogImage'
-import { BRAND_GREEN } from '@/lib/brand-ui'
+import { BRAND_GREEN, brandCardClass } from '@/lib/brand-ui'
+
+const CURATED_BY_TITLE = {
+    '2 Acre Farmhouse': '/property-farmhouse-light.jpg',
+    'Agricultural Land': '/property-agri-land-light.jpg',
+}
+
+const FALLBACK_BY_TYPE = {
+    Farmhouse: '/property-farmhouse-light.jpg',
+    'Agricultural Land': '/property-agri-land-light.jpg',
+    Nursery: '/property-agri-land-light.jpg',
+    Farmland: '/property-agri-land-light.jpg',
+    Cottage: '/property-farmhouse-light.jpg',
+    'Garden Plot': '/property-agri-land-light.jpg',
+}
+
+const SHARED_SEED_FIELD = '1500382017468-9049fed747ef'
+
+function propertyImage(property) {
+    if (CURATED_BY_TITLE[property.title]) return CURATED_BY_TITLE[property.title]
+    const src = property.images?.[0]
+    if (src && !src.includes(SHARED_SEED_FIELD)) return src
+    return FALLBACK_BY_TYPE[property.propertyType] || '/property-farmhouse.jpg'
+}
 
 const PropertyCard = ({ property, fluid = false }) => {
     const currency = '₹'
@@ -15,48 +38,70 @@ const PropertyCard = ({ property, fluid = false }) => {
             : property.avgRating || 0
 
     return (
-        <Link href={`/properties/${property.id}`} className={`group block ${fluid ? 'w-full min-w-0' : 'w-52 sm:w-56 flex-shrink-0'}`}>
-            <div className="relative bg-slate-50 rounded-2xl overflow-hidden aspect-[4/3]">
-                <CatalogImage
-                    fill
-                    className="object-cover group-hover:scale-105 transition duration-300"
-                    src={property.images?.[0] || 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800&h=600&fit=crop&crop=entropy'}
-                    alt={property.title}
-                    sizes="(max-width: 640px) 100vw, 224px"
-                />
-                <span
-                    className={`absolute top-2 left-2 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-md ${property.listingType === 'SALE' ? '' : 'bg-blue-500'}`}
-                    style={property.listingType === 'SALE' ? { backgroundColor: BRAND_GREEN } : undefined}
-                >
-                    {property.listingType === 'SALE' ? 'FOR SALE' : 'FOR RENT'}
-                </span>
-                <div className="absolute top-2 right-2 z-10">
-                    <WishlistButton itemId={property.id} itemType="property" />
-                </div>
-                <span className="absolute bottom-2 right-2 bg-white/90 text-amber-700 text-[11px] font-bold px-3 py-1.5 rounded-lg shadow-md border border-amber-200 group-hover:bg-amber-500 group-hover:text-white group-hover:border-amber-500 transition-all">
-                    ENQUIRE
-                </span>
-            </div>
-            <div className="pt-2 px-0.5">
-                <p className="text-sm font-bold text-slate-800 truncate">{property.title}</p>
-                <p className="flex items-center gap-1 text-slate-500 text-[11px] mt-0.5">
-                    <MapPin size={10} /> {property.location}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                    <span className="flex items-center gap-0.5 text-[10px] text-slate-500">
-                        <Maximize size={9} /> {property.landSize}
+        <Link
+            href={`/properties/${property.id}`}
+            className={`group block ${fluid ? 'w-full min-w-0' : 'w-[260px] sm:w-[280px] flex-shrink-0'}`}
+        >
+            <article className={`${brandCardClass} overflow-hidden transition-shadow duration-200 group-hover:shadow-md`}>
+                <div className="relative aspect-[4/3] overflow-hidden bg-slate-100">
+                    <CatalogImage
+                        fill
+                        className="object-cover transition duration-300 group-hover:scale-105"
+                        src={propertyImage(property)}
+                        alt={property.title}
+                        sizes="(max-width: 640px) 80vw, 280px"
+                    />
+                    <span
+                        className={`absolute top-2.5 left-2.5 rounded-lg px-2 py-0.5 text-[10px] font-bold tracking-wide text-white ${
+                            property.listingType === 'SALE' ? '' : 'bg-blue-500'
+                        }`}
+                        style={property.listingType === 'SALE' ? { backgroundColor: BRAND_GREEN } : undefined}
+                    >
+                        {property.listingType === 'SALE' ? 'FOR SALE' : 'FOR RENT'}
                     </span>
-                    {rating > 0 && (
-                        <span className="flex items-center gap-0.5 text-[10px] text-slate-600">
-                            <Star size={9} fill="#059669" className="text-emerald-600" /> {rating}
-                        </span>
-                    )}
+                    <div className="absolute top-2.5 right-2.5 z-10">
+                        <WishlistButton itemId={property.id} itemType="property" />
+                    </div>
+                    <span
+                        className="absolute bottom-2.5 right-2.5 rounded-lg px-3 py-1.5 text-[11px] font-bold text-white shadow-sm transition-opacity group-hover:opacity-95"
+                        style={{ backgroundColor: BRAND_GREEN }}
+                    >
+                        Enquire
+                    </span>
                 </div>
-                <p className="text-sm font-bold text-slate-800 mt-1">
-                    {currency}{property.price.toLocaleString()}
-                    {property.listingType === 'RENT' && <span className="text-[10px] font-normal text-slate-500">/mo</span>}
-                </p>
-            </div>
+                <div className="space-y-1.5 p-3.5">
+                    <p className="truncate text-sm font-bold text-slate-800">{property.title}</p>
+                    <p className="flex min-w-0 items-center gap-1 text-[11px] text-slate-500">
+                        <MapPin size={11} className="shrink-0" style={{ color: BRAND_GREEN }} />
+                        <span className="truncate">{property.location}</span>
+                        {property.propertyType ? (
+                            <>
+                                <span className="text-slate-300">·</span>
+                                <span className="truncate">{property.propertyType}</span>
+                            </>
+                        ) : null}
+                    </p>
+                    <div className="flex items-center gap-2.5 text-[11px] text-slate-500">
+                        {property.landSize ? (
+                            <span className="flex items-center gap-1">
+                                <Maximize size={10} /> {property.landSize}
+                            </span>
+                        ) : null}
+                        {rating > 0 && (
+                            <span className="flex items-center gap-0.5 font-medium text-slate-600">
+                                <Star size={10} fill={BRAND_GREEN} style={{ color: BRAND_GREEN }} /> {rating}
+                            </span>
+                        )}
+                    </div>
+                    <p className="pt-0.5 text-base font-bold text-slate-800">
+                        {currency}
+                        {(property.price || 0).toLocaleString('en-IN')}
+                        {property.listingType === 'RENT' && (
+                            <span className="text-[11px] font-normal text-slate-500">/mo</span>
+                        )}
+                    </p>
+                </div>
+            </article>
         </Link>
     )
 }

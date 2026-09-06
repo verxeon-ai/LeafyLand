@@ -5,8 +5,12 @@ import { avgRating, serializeReview } from '@/lib/reviews'
 export async function GET(_req, { params }) {
     try {
         const { id } = await params
-        const property = await prisma.property.findUnique({
-            where: { id },
+        const property = await prisma.property.findFirst({
+            where: {
+                id,
+                status: 'approved',
+                store: { status: 'approved', isActive: true },
+            },
             include: {
                 store: { select: { id: true, name: true, username: true, logo: true } },
                 rating: {

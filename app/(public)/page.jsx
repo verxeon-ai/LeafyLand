@@ -11,6 +11,7 @@ import { HOME_PRODUCT_GROUPS } from '@/lib/categories'
 import { ProductGridSkeleton, ServiceGridSkeleton } from "@/components/CatalogSkeleton";
 import ServicesBanner from "@/components/ServicesBanner";
 import ServiceCategoryCard from "@/components/ServiceCategoryCard";
+import PropertyCard from "@/components/PropertyCard";
 
 function pickGroupProducts(products, categories, limit = 10) {
     const inGroup = products.filter((p) => categories.includes(p.category))
@@ -22,8 +23,10 @@ function pickGroupProducts(products, categories, limit = 10) {
 export default function Home() {
     const [products, setProducts] = useState([])
     const [services, setServices] = useState([])
+    const [properties, setProperties] = useState([])
     const [catalogReady, setCatalogReady] = useState(false)
     const [servicesReady, setServicesReady] = useState(false)
+    const [propertiesReady, setPropertiesReady] = useState(false)
 
     useEffect(() => {
         let cancelled = false
@@ -37,6 +40,11 @@ export default function Home() {
             if (Array.isArray(s)) setServices(s)
             setServicesReady(true)
         }).catch(() => { if (!cancelled) setServicesReady(true) })
+        cachedJson('/api/properties').then((p) => {
+            if (cancelled) return
+            if (Array.isArray(p)) setProperties(p)
+            setPropertiesReady(true)
+        }).catch(() => { if (!cancelled) setPropertiesReady(true) })
         return () => { cancelled = true }
     }, [])
 
@@ -97,6 +105,21 @@ export default function Home() {
                                 <ServiceCategoryCard service={service} />
                             </div>
                         )}
+                    />
+                )}
+                {!propertiesReady && properties.length === 0 && (
+                    <div className="py-5 pb-8">
+                        <div className="h-5 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
+                        <ServiceGridSkeleton count={5} />
+                    </div>
+                )}
+                {properties.length > 0 && (
+                    <FeaturedSection
+                        title="Available Properties"
+                        subtitle="Farmhouses, land & green estates"
+                        items={properties.slice(0, 10)}
+                        viewAllLink="/properties"
+                        renderItem={(property) => <PropertyCard property={property} />}
                     />
                 )}
             </div>

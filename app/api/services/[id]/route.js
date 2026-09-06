@@ -4,8 +4,12 @@ import { avgRating, serializeReview } from '@/lib/reviews'
 
 export async function GET(_req, { params }) {
     const { id } = await params
-    const service = await prisma.service.findUnique({
-        where: { id },
+    const service = await prisma.service.findFirst({
+        where: {
+            id,
+            status: 'approved',
+            store: { status: 'approved', isActive: true },
+        },
         include: {
             store: { select: { id: true, name: true, username: true, logo: true } },
             rating: {

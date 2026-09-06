@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import { Heart, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useDispatch } from 'react-redux'
 import { toggleWishlist } from '@/lib/features/wishlist/wishlistSlice'
+import CatalogImage from '@/components/CatalogImage'
 
 const FILTERS = [
     { id: 'all', label: 'All' },
@@ -117,17 +117,17 @@ export default function WishlistSection() {
                                 key={`${item.itemType}-${item.itemId}`}
                                 className="flex gap-3 p-3 rounded-xl border border-slate-100 hover:border-emerald-100 hover:bg-emerald-50/30 transition"
                             >
-                                <Link href={item.href} className="shrink-0 w-20 h-20 rounded-lg overflow-hidden bg-slate-100">
+                                <Link href={item.href} className="relative block h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-slate-100">
                                     {item.image ? (
-                                        <Image
+                                        <CatalogImage
+                                            fill
                                             src={item.image}
                                             alt={item.title}
-                                            width={80}
-                                            height={80}
-                                            className="w-full h-full object-cover"
+                                            className="object-cover"
+                                            sizes="80px"
                                         />
                                     ) : (
-                                        <div className="w-full h-full bg-slate-200" />
+                                        <div className="h-full w-full bg-slate-200" />
                                     )}
                                 </Link>
                                 <div className="flex-1 min-w-0">
