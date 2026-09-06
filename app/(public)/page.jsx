@@ -6,12 +6,15 @@ import NearYouProducts from '@/components/NearYouProducts'
 import PartnersMarquee from '@/components/PartnersMarquee'
 import FeaturedSection from '@/components/FeaturedSection'
 import ProductCard from '@/components/ProductCard'
-import { HOME_PRODUCT_GROUPS } from '@/lib/categories'
+import PropertyCard from '@/components/PropertyCard'
+import { HOME_CATEGORY_SECTIONS, HOME_PRODUCT_GROUPS } from '@/lib/categories'
+import { HOME_PROPERTY_SECTIONS } from '@/lib/nav-menus'
 import { ProductGridSkeleton, ServiceGridSkeleton } from '@/components/CatalogSkeleton'
 import ServicesBanner from '@/components/ServicesBanner'
+import PropertiesBanner from '@/components/PropertiesBanner'
 import ServiceCategoryCard from '@/components/ServiceCategoryCard'
 
-const GROUP_LIMIT = 12
+const SECTION_LIMIT = 12
 
 function normalizeProducts(data) {
     if (Array.isArray(data)) return data
@@ -19,24 +22,79 @@ function normalizeProducts(data) {
     return []
 }
 
+function normalizeList(data) {
+    return Array.isArray(data) ? data : []
+}
+
+async function fetchCategoryProducts(category) {
+    const res = await fetch(
+        `/api/products?paginated=1&limit=${SECTION_LIMIT}&category=${encodeURIComponent(category)}`,
+        { cache: 'no-store' },
+    )
+    const data = await res.json()
+    return normalizeProducts(data)
+}
+
+async function fetchPropertiesByType(type) {
+    const res = await fetch(
+        `/api/properties?limit=${SECTION_LIMIT}&type=${encodeURIComponent(type)}`,
+        { cache: 'no-store' },
+    )
+    const data = await res.json()
+    return normalizeList(data).slice(0, SECTION_LIMIT)
+}
+
 export default function Home() {
-    const [groups, setGroups] = useState([])
+    const [categorySections, setCategorySections] = useState([])
+    const [marketplaceGroups, setMarketplaceGroups] = useState([])
+    const [propertySections, setPropertySections] = useState([])
     const [services, setServices] = useState([])
     const [catalogReady, setCatalogReady] = useState(false)
     const [servicesReady, setServicesReady] = useState(false)
+    const [propertiesReady, setPropertiesReady] = useState(false)
 
     useEffect(() => {
         let cancelled = false
 
         Promise.all(
-            HOME_PRODUCT_GROUPS.map(async (group) => {
+            HOME_CATEGORY_SECTIONS.map(async (section) => {
+                try {
+                    const names = [section.category, ...(section.aliases || [])]
+                    const batches = await Promise.all(names.map((name) => fetchCategoryProducts(name)))
+                    const seen = new Set()
+                    const items = []
+                    for (const batch of batches) {
+                        for (const p of batch) {
+                            if (!p?.id || seen.has(p.id)) continue
+                            seen.add(p.id)
+                            items.push(p)
+                            if (items.length >= SECTION_LIMIT) break
+                        }
+                        if (items.length >= SECTION_LIMIT) break
+                    }
+                    return { ...section, items }
+                } catch {
+                    return { ...section, items: [] }
+                }
+            }),
+        )
+            .then((rows) => {
+                if (cancelled) return
+                setCategorySections(rows.filter((s) => s.items.length > 0))
+            })
+            .finally(() => {
+                if (!cancelled) setCatalogReady(true)
+            })
+
+        Promise.all(
+            HOME_PRODUCT_GROUPS.filter((g) => g.id !== 'leafyland').map(async (group) => {
                 try {
                     const res = await fetch(
-                        `/api/products?paginated=1&limit=${GROUP_LIMIT}&group=${encodeURIComponent(group.id)}`,
+                        `/api/products?paginated=1&limit=${SECTION_LIMIT}&group=${encodeURIComponent(group.id)}`,
                         { cache: 'no-store' },
                     )
                     const data = await res.json()
-                    const items = normalizeProducts(data).slice(0, GROUP_LIMIT)
+                    const items = normalizeProducts(data).slice(0, SECTION_LIMIT)
                     return { ...group, items }
                 } catch {
                     return { ...group, items: [] }
@@ -45,11 +103,9 @@ export default function Home() {
         )
             .then((rows) => {
                 if (cancelled) return
-                setGroups(rows.filter((g) => g.items.length > 0))
+                setMarketplaceGroups(rows.filter((g) => g.items.length > 0))
             })
-            .finally(() => {
-                if (!cancelled) setCatalogReady(true)
-            })
+            .catch(() => {})
 
         fetch('/api/services', { cache: 'no-store' })
             .then((r) => r.json())
@@ -61,6 +117,35 @@ export default function Home() {
             .finally(() => {
                 if (!cancelled) setServicesReady(true)
             })
+
+        ;(async () => {
+            try {
+                const nichesRes = await fetch('/api/properties/niches', { cache: 'no-store' })
+                const niches = await nichesRes.json().catch(() => [])
+                const nicheNames = (Array.isArray(niches) ? niches : [])
+                    .filter((n) => n?.name && Number(n.count) > 0)
+                    .map((n) => n.name)
+
+                const types = nicheNames.length
+                    ? nicheNames
+                    : HOME_PROPERTY_SECTIONS.map((s) => s.type)
+
+                const rows = await Promise.all(
+                    types.map(async (type) => {
+                        const items = await fetchPropertiesByType(type)
+                        return { title: type, type, items }
+                    }),
+                )
+
+                if (!cancelled) {
+                    setPropertySections(rows.filter((r) => r.items.length > 0))
+                }
+            } catch {
+                if (!cancelled) setPropertySections([])
+            } finally {
+                if (!cancelled) setPropertiesReady(true)
+            }
+        })()
 
         return () => { cancelled = true }
     }, [])
@@ -77,18 +162,33 @@ export default function Home() {
                 <ExploreCategories />
             </div>
 
-            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 flex-1">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 flex-1 pb-8">
                 <NearYouProducts />
-                <div className="pb-1 pt-1">
-                    <PartnersMarquee />
-                </div>
-                {!catalogReady && groups.length === 0 && (
-                    <div className="py-5">
-                        <div className="h-5 w-36 bg-slate-100 rounded mb-3 animate-pulse" />
-                        <ProductGridSkeleton count={5} />
+               
+
+                {!catalogReady && categorySections.length === 0 && (
+                    <div className="py-5 space-y-6">
+                        {[0, 1, 2].map((i) => (
+                            <div key={i}>
+                                <div className="h-5 w-36 bg-slate-100 rounded mb-3 animate-pulse" />
+                                <ProductGridSkeleton count={5} />
+                            </div>
+                        ))}
                     </div>
                 )}
-                {groups.map((group) => (
+
+                {categorySections.map((section) => (
+                    <FeaturedSection
+                        key={section.category}
+                        title={section.title}
+                        subtitle={`Shop ${section.title.toLowerCase()}`}
+                        items={section.items}
+                        viewAllLink={`/products?category=${encodeURIComponent(section.category)}`}
+                        renderItem={(product) => <ProductCard product={product} />}
+                    />
+                ))}
+
+                {marketplaceGroups.map((group) => (
                     <FeaturedSection
                         key={group.id}
                         title={group.title}
@@ -98,9 +198,10 @@ export default function Home() {
                         renderItem={(product) => <ProductCard product={product} />}
                     />
                 ))}
+
                 <ServicesBanner />
                 {!servicesReady && vendorServices.length === 0 && (
-                    <div className="py-5 pb-8">
+                    <div className="py-5">
                         <div className="h-5 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
                         <ServiceGridSkeleton count={5} />
                     </div>
@@ -118,7 +219,28 @@ export default function Home() {
                         )}
                     />
                 )}
+
+                <PropertiesBanner />
+                {!propertiesReady && propertySections.length === 0 && (
+                    <div className="py-5">
+                        <div className="h-5 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
+                        <ProductGridSkeleton count={5} />
+                    </div>
+                )}
+                {propertySections.map((section) => (
+                    <FeaturedSection
+                        key={section.type}
+                        title={section.title}
+                        subtitle={`Explore ${section.title.toLowerCase()}`}
+                        items={section.items}
+                        viewAllLink={`/properties?type=${encodeURIComponent(section.type)}`}
+                        renderItem={(property) => <PropertyCard property={property} />}
+                    />
+                ))}
             </div>
+            <div className="pb-1 pt-1">
+                    <PartnersMarquee />
+                </div>
         </div>
     )
 }

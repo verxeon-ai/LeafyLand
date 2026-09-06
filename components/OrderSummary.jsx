@@ -84,7 +84,7 @@ const OrderSummary = ({ totalPrice, items }) => {
 
             <p className='text-slate-400 text-xs my-4'>Payment Method</p>
             <div className='space-y-2'>
-                <label className='flex gap-2 items-center cursor-pointer'>
+                <label className='flex gap-2 items-center'>
                     <input
                         type="radio"
                         name="payment"
@@ -94,18 +94,6 @@ const OrderSummary = ({ totalPrice, items }) => {
                     />
                     <span>Pay online (Razorpay — UPI, Card, Netbanking)</span>
                 </label>
-                <div className='flex gap-2 items-center opacity-60 cursor-not-allowed select-none'>
-                    <input
-                        type="radio"
-                        name="payment"
-                        disabled
-                        className='accent-emerald-700'
-                    />
-                    <span className='text-slate-500'>Cash on Delivery</span>
-                    <span className='text-[10px] font-semibold uppercase tracking-wide bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full'>
-                        Coming soon
-                    </span>
-                </div>
             </div>
 
             {configLoaded && !razorpayEnabled && (
