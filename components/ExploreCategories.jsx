@@ -1,19 +1,29 @@
 'use client'
 import Link from 'next/link'
-import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
-import { BRAND_GREEN } from '@/lib/brand-ui'
+import {
+    ArrowRight,
+    Sprout,
+    Sofa,
+    Headphones,
+    Shirt,
+    ShoppingBasket,
+    PawPrint,
+    Car,
+    MoreHorizontal,
+} from 'lucide-react'
+import BeautyCareIcon from '@/components/icons/BeautyCareIcon'
+import { BRAND_GREEN, BRAND_MINT } from '@/lib/brand-ui'
 
 const EXPLORE_CATEGORIES = [
-    { label: 'Plants & Gardening', href: '/products?category=Gardening', icon: '/icons/explore/plants.png' },
-    { label: 'Home & Living', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/home.png' },
-    { label: 'Electronics', href: '/products?category=Electronics', icon: '/icons/explore/electronics.png' },
-    { label: 'Fashion', href: '/products?category=Fashion', icon: '/icons/explore/fashion.png' },
-    { label: 'Grocery', href: '/products?category=Home+%26+Kitchen', icon: '/icons/explore/grocery.png' },
-    { label: 'Beauty & Personal Care', href: '/products?category=Beauty+%26+Personal+Care', icon: '/icons/explore/beauty.png' },
-    { label: 'Pet Supplies', href: '/products', icon: '/icons/explore/pet.png' },
-    { label: 'Automotive', href: '/products?category=Automotive', icon: '/icons/explore/automotive.png' },
-    { label: 'More', href: '/products', icon: '/icons/explore/more.png' },
+    { label: 'Plants & Gardening', href: '/products?group=leafyland', Icon: Sprout, iconSize: 26, strokeWidth: 2 },
+    { label: 'Home & Living', href: '/products?category=Home+%26+Kitchen', Icon: Sofa },
+    { label: 'Electronics', href: '/products?category=Electronics', Icon: Headphones },
+    { label: 'Fashion', href: '/products?category=Fashion', Icon: Shirt },
+    { label: 'Grocery', href: '/products?category=Grocery', Icon: ShoppingBasket },
+    { label: 'Beauty & Personal Care', href: '/products?category=Beauty+%26+Personal+Care', Icon: BeautyCareIcon, iconSize: 26 },
+    { label: 'Pet Supplies', href: '/products?category=Pet+Supplies', Icon: PawPrint },
+    { label: 'Automotive', href: '/products?category=Automotive', Icon: Car },
+    { label: 'More', href: '/products', Icon: MoreHorizontal },
 ]
 
 export default function ExploreCategories() {
@@ -32,26 +42,25 @@ export default function ExploreCategories() {
             </div>
 
             <div className="flex lg:grid lg:grid-cols-9 gap-3 lg:gap-1.5 overflow-x-auto lg:overflow-visible no-scrollbar">
-                {EXPLORE_CATEGORIES.map((cat) => (
+                {EXPLORE_CATEGORIES.map(({ label, href, Icon, iconSize = 22, strokeWidth = 1.75 }) => (
                     <Link
-                        key={cat.label}
-                        href={cat.href}
+                        key={label}
+                        href={href}
                         className="group flex flex-col items-center gap-1.5 shrink-0 w-[68px] lg:w-auto lg:min-w-0"
                     >
-                        <span className="relative flex h-[46px] w-[46px] sm:h-[50px] sm:w-[50px] items-center justify-center rounded-full bg-white border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.07)] transition-all group-hover:shadow-[0_4px_12px_rgba(15,23,42,0.1)] group-hover:-translate-y-0.5 overflow-hidden">
-                            <Image
-                                src={cat.icon}
-                                alt=""
-                                width={40}
-                                height={40}
-                                className="h-8 w-8 sm:h-9 sm:w-9 object-contain pointer-events-none select-none"
-                                draggable={false}
-                                sizes="40px"
-                                quality={70}
+                        <span
+                            className="relative flex h-[46px] w-[46px] sm:h-[50px] sm:w-[50px] items-center justify-center rounded-full border border-slate-100 shadow-[0_2px_8px_rgba(15,23,42,0.07)] transition-all group-hover:shadow-[0_4px_12px_rgba(15,23,42,0.1)] group-hover:-translate-y-0.5 group-hover:border-[#2f7d4a]/30 text-[#8fb89a] group-hover:text-[#2f7d4a]"
+                            style={{ backgroundColor: BRAND_MINT }}
+                        >
+                            <Icon
+                                size={iconSize}
+                                strokeWidth={strokeWidth}
+                                className="transition-colors duration-200"
+                                aria-hidden
                             />
                         </span>
                         <span className="text-[10px] sm:text-[11px] font-medium text-slate-700 text-center leading-tight line-clamp-2 px-0.5">
-                            {cat.label}
+                            {label}
                         </span>
                     </Link>
                 ))}

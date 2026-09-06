@@ -54,26 +54,8 @@ function LogoMicrosoft() {
     )
 }
 
-function LogoPepsi() {
-    return (
-        <span className="inline-flex items-center gap-1.5">
-            <svg viewBox="0 0 32 32" className="w-6 h-6" aria-hidden>
-                <circle cx="16" cy="16" r="15" fill="#004B93" />
-                <path d="M3 18c6-8 20-8 26 0" fill="#E32934" />
-                <path d="M4 16c5-3 19-3 24 0" stroke="#fff" strokeWidth="3" fill="none" />
-            </svg>
-            <span className="text-[13px] font-bold italic text-[#004B93]">pepsi</span>
-        </span>
-    )
-}
 
-function LogoCoke() {
-    return (
-        <span className="text-[15px] font-bold italic text-[#e31c23] tracking-tight" style={{ fontFamily: 'Georgia, serif' }}>
-            Coca-Cola
-        </span>
-    )
-}
+
 
 const PARTNERS = [
     { id: 'ola', node: <LogoOla /> },
@@ -81,8 +63,8 @@ const PARTNERS = [
     { id: 'copy', node: null },
     { id: 'tata', node: <LogoTata /> },
     { id: 'ms', node: <LogoMicrosoft /> },
-    { id: 'pepsi', node: <LogoPepsi /> },
-    { id: 'coke', node: <LogoCoke /> },
+
+
     { id: 'dlf-2', node: <LogoDlf /> },
 ]
 

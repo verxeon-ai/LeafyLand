@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Home } from 'lucide-react'
+import { Plus, Trash2, Home, Edit } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import StatusBadge from '@/components/admin/StatusBadge'
@@ -28,12 +28,11 @@ export default function VendorProperties() {
     const handleDelete = async () => {
         if (!deleting) return
         const res = await fetch(`/api/vendor/properties/${deleting.id}`, { method: 'DELETE' })
-        const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-            toast.error(data.error || 'Could not delete')
+            toast.error('Could not delete')
             throw new Error('delete')
         }
-        toast.success(data.message || (data.softDeleted ? 'Property unpublished (in use)' : 'Property deleted'))
+        toast.success('Property deleted')
         reload({ silent: true })
     }
 
@@ -93,7 +92,11 @@ export default function VendorProperties() {
                                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
                                     <span className="text-lg font-bold text-slate-800">₹{(property.price || 0).toLocaleString('en-IN')}</span>
                                     <div className="flex items-center gap-1">
-                                        <Link href={`/store/add-property?id=${property.id}`} className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]" title="Edit property">
+                                        <Link
+                                            href={`/store/add-property?id=${property.id}`}
+                                            className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]"
+                                            title="Edit property"
+                                        >
                                             <Edit size={14} />
                                         </Link>
                                         <button

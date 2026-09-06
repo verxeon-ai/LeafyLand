@@ -53,9 +53,9 @@ const ProductCard = ({ product, fluid = false }) => {
     }
 
     return (
-        <article className={`${fluid ? 'w-full min-w-0' : 'w-[172px] sm:w-[188px] flex-shrink-0'} flex flex-col rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden`}>
-            <Link href={`/products/${product.id}`} className="group block">
-                <div className="relative aspect-square bg-slate-50 overflow-hidden">
+        <article className={`${fluid ? 'w-full min-w-0 h-full' : 'w-[172px] sm:w-[188px] flex-shrink-0'} flex flex-col rounded-xl border border-slate-100 bg-white shadow-sm overflow-hidden`}>
+            <Link href={`/products/${product.id}`} className="group flex flex-1 flex-col min-h-0">
+                <div className="relative aspect-square bg-slate-50 overflow-hidden shrink-0">
                     {product.images?.[0] ? (
                         <CatalogImage
                             fill
@@ -96,8 +96,8 @@ const ProductCard = ({ product, fluid = false }) => {
                     </button>
                 </div>
 
-                <div className="px-2.5 pt-2.5 pb-2">
-                    <div className="flex items-baseline gap-1.5 flex-wrap">
+                <div className="flex flex-1 flex-col px-2.5 pt-2.5 pb-2">
+                    <div className="flex items-baseline gap-1.5 flex-wrap min-h-[1.25rem]">
                         <span className="text-base font-bold text-slate-900 leading-none">
                             {currency}{product.price.toLocaleString('en-IN')}
                         </span>
@@ -108,20 +108,25 @@ const ProductCard = ({ product, fluid = false }) => {
                         )}
                     </div>
 
-                    {savings > 0 && (
-                        <p className="mt-1 text-[11px] font-semibold" style={{ color: BRAND_GREEN }}>
-                            {currency}{savings.toLocaleString('en-IN')} OFF
-                        </p>
-                    )}
+                    <p
+                        className="mt-1 text-[11px] font-semibold min-h-[1rem] leading-none"
+                        style={{ color: savings > 0 ? BRAND_GREEN : 'transparent' }}
+                        aria-hidden={savings <= 0}
+                    >
+                        {savings > 0 ? `${currency}${savings.toLocaleString('en-IN')} OFF` : '\u00a0'}
+                    </p>
 
-                    <h3 className="mt-1.5 text-sm font-bold text-slate-900 leading-snug line-clamp-2">
+                    <h3
+                        className="mt-1.5 text-sm font-bold text-slate-900 leading-snug line-clamp-2 min-h-[2.5rem]"
+                        title={product.name}
+                    >
                         {product.name}
                     </h3>
 
-                    <p className="mt-0.5 text-[11px] text-slate-400 truncate">{product.category}</p>
+                    <p className="mt-0.5 text-[11px] text-slate-400 truncate min-h-[1rem]">{product.category}</p>
 
                     {rating != null ? (
-                        <div className="mt-1.5 flex items-center gap-1">
+                        <div className="mt-1.5 flex items-center gap-1 min-h-[18px]">
                             <Star size={12} fill={BRAND_GREEN} className="shrink-0" style={{ color: BRAND_GREEN }} />
                             <span className="text-xs font-semibold text-slate-700">{rating}</span>
                             {reviewCount > 0 && (
@@ -136,7 +141,7 @@ const ProductCard = ({ product, fluid = false }) => {
                 </div>
             </Link>
 
-            <div className="mt-auto px-2.5 pb-2.5 flex items-stretch gap-1.5">
+            <div className="mt-auto px-2.5 pb-2.5 flex items-stretch gap-1.5 shrink-0">
                 <button
                     type="button"
                     onClick={handleAdd}

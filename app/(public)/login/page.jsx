@@ -519,6 +519,14 @@ function LoginForm() {
     const [formError, setFormError] = useState('')
     const [remember, setRemember] = useState(false)
     const [agreeTerms, setAgreeTerms] = useState(false)
+    const [googleEnabled, setGoogleEnabled] = useState(false)
+
+    useEffect(() => {
+        fetch('/api/auth/config')
+            .then((r) => r.json())
+            .then((d) => setGoogleEnabled(Boolean(d?.googleEnabled)))
+            .catch(() => setGoogleEnabled(false))
+    }, [])
 
     useEffect(() => {
         try {
@@ -783,7 +791,7 @@ function LoginForm() {
                 </button>
             </form>
 
-            {googleBlock}
+            {googleEnabled && googleBlock}
 
             {!mobile && (
                 <p className="auth-secure-note mt-3.5 flex items-center justify-center gap-1.5 text-[11px]" style={{ color: BRAND.muted }}>

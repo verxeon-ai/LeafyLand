@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { Plus, Edit, Trash2, Wrench } from 'lucide-react'
+import { Plus, Trash2, Wrench, Edit } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import StatusBadge from '@/components/admin/StatusBadge'
@@ -28,12 +28,11 @@ export default function VendorServices() {
     const handleDelete = async () => {
         if (!deleting) return
         const res = await fetch(`/api/vendor/services/${deleting.id}`, { method: 'DELETE' })
-        const data = await res.json().catch(() => ({}))
         if (!res.ok) {
-            toast.error(data.error || 'Could not delete')
+            toast.error('Could not delete')
             throw new Error('delete')
         }
-        toast.success(data.message || (data.softDeleted ? 'Service unpublished (has bookings)' : 'Service deleted'))
+        toast.success('Service deleted')
         reload({ silent: true })
     }
 
@@ -93,7 +92,11 @@ export default function VendorServices() {
                                 <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
                                     <span className="text-lg font-bold text-slate-800">₹{(service.startingPrice || 0).toLocaleString('en-IN')}</span>
                                     <div className="flex items-center gap-1">
-                                        <Link href={`/store/add-service?id=${service.id}`} className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]" title="Edit service">
+                                        <Link
+                                            href={`/store/add-service?id=${service.id}`}
+                                            className="rounded-xl p-1.5 text-slate-400 transition-colors hover:bg-[#eef4ef] hover:text-[#2f7d4a]"
+                                            title="Edit service"
+                                        >
                                             <Edit size={14} />
                                         </Link>
                                         <button

@@ -38,10 +38,22 @@ export async function POST(req) {
                 images: safeImages,
                 stock: Number(stock || 0),
                 inStock: Number(stock || 0) > 0,
+                status: 'pending',
                 storeId: store.id,
             },
             include: { store: true, rating: true },
         })
+        try {
+            const { notifyAllAdmins } = await import('@/lib/payments/notify')
+            await notifyAllAdmins({
+                type: 'PRODUCT_PENDING',
+                title: 'New product listing',
+                body: `"${product.name}" from ${store.name} needs review.`,
+                link: '/admin/products',
+            })
+        } catch (e) {
+            console.error('Product notification failed:', e?.message || e)
+        }
         return json(serializeProduct(product), 201)
     } catch (e) {
         return handleApiError(e)

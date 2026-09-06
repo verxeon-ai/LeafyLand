@@ -52,11 +52,13 @@ export default function CheckoutFlow() {
     const [couponCodeInput, setCouponCodeInput] = useState('')
     const [coupon, setCoupon] = useState(null)
     const [couponBusy, setCouponBusy] = useState(false)
+    const paymentMethod = 'RAZORPAY'
     const [razorpayEnabled, setRazorpayEnabled] = useState(false)
     const [configLoaded, setConfigLoaded] = useState(false)
     const [touched, setTouched] = useState({})
     const [submitAttempt, setSubmitAttempt] = useState(0)
     const [ready, setReady] = useState(false)
+    const [placing, setPlacing] = useState(false)
     const prefilled = useRef(false)
 
     useEffect(() => {
@@ -90,8 +92,12 @@ export default function CheckoutFlow() {
     useEffect(() => {
         fetch('/api/razorpay/config')
             .then((r) => r.json())
-            .then((d) => setRazorpayEnabled(Boolean(d?.enabled)))
-            .catch(() => setRazorpayEnabled(false))
+            .then((d) => {
+                setRazorpayEnabled(Boolean(d?.enabled))
+            })
+            .catch(() => {
+                setRazorpayEnabled(false)
+            })
             .finally(() => setConfigLoaded(true))
     }, [])
 
@@ -162,7 +168,7 @@ export default function CheckoutFlow() {
             return
         }
         if (step === 4 && !razorpayEnabled) {
-            toast.error('Online payment is not configured yet')
+            toast.error('Online payment is not configured. Please try again later.')
             return
         }
         setStep((s) => Math.min(s + 1, 5))
@@ -214,17 +220,20 @@ export default function CheckoutFlow() {
     }
 
     const placeOrder = async () => {
-        if (paying) return
+        if (paying || placing) return
         if (!addressId) return toast.error('Please select a delivery address')
         if (!items.length) return toast.error('Your cart is empty')
         if (unavailable) return toast.error('Remove unavailable items before placing the order')
-        if (!razorpayEnabled) return toast.error('Online payment is not configured yet. Please try again later.')
+        if (!razorpayEnabled) {
+            return toast.error('Online payment is not configured. Please try again later.')
+        }
         if (Object.keys(errors).length) {
             setStep(1)
             setSubmitAttempt((n) => n + 1)
             return toast.error('Please complete your contact details')
         }
 
+        setPlacing(true)
         try {
             await syncAddressContact()
             const verified = await pay({
@@ -241,6 +250,8 @@ export default function CheckoutFlow() {
             router.push(orderId ? `/orders/${orderId}/success` : '/orders')
         } catch (err) {
             toast.error(err.message || 'Payment could not be completed')
+        } finally {
+            setPlacing(false)
         }
     }
 
@@ -304,7 +315,8 @@ export default function CheckoutFlow() {
         )
     }
 
-    const continueLabel = step === 5 ? (paying ? 'Placing order…' : 'Place order') : 'Continue'
+    const busy = paying || placing
+    const continueLabel = step === 5 ? (busy ? 'Placing order…' : 'Place order') : 'Continue'
 
     return (
         <div className="mx-auto w-full min-w-0 max-w-6xl overflow-x-hidden px-3 pb-32 pt-4 sm:px-6 sm:pt-6 lg:pb-10">
@@ -444,34 +456,25 @@ export default function CheckoutFlow() {
                     {step === 4 && (
                         <section>
                             <h2 className="text-base font-bold text-slate-800">Payment</h2>
-                            <p className="mt-1 text-sm text-slate-500">You’ll complete payment securely on the next step.</p>
+                            <p className="mt-1 text-sm text-slate-500">Pay securely online to place your order.</p>
                             <div className="mt-5 space-y-3">
-                                <label
-                                    className="flex cursor-pointer items-start gap-3 rounded-xl border p-4"
-                                    style={{ borderColor: BRAND_GREEN, backgroundColor: BRAND_GREEN_LIGHT }}
+                                <div
+                                    className={`flex items-start gap-3 rounded-xl border p-4 ${razorpayEnabled ? '' : 'opacity-60'}`}
+                                    style={{
+                                        borderColor: razorpayEnabled ? BRAND_GREEN : undefined,
+                                        backgroundColor: razorpayEnabled ? BRAND_GREEN_LIGHT : undefined,
+                                    }}
                                 >
-                                    <input type="radio" name="payment" checked readOnly className="mt-1 accent-[#2f7d4a]" />
+                                    <Lock size={18} className="mt-0.5 shrink-0" style={{ color: BRAND_GREEN }} />
                                     <div>
                                         <p className="text-sm font-semibold text-slate-800">Pay online</p>
                                         <p className="text-xs text-slate-500">Razorpay — UPI, cards, and netbanking</p>
-                                    </div>
-                                </label>
-                                <div className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-4 opacity-70">
-                                    <input type="radio" name="payment-cod" disabled className="mt-1" />
-                                    <div>
-                                        <div className="flex flex-wrap items-center gap-2">
-                                            <p className="text-sm font-semibold text-slate-700">Cash on Delivery</p>
-                                            <span className="rounded-xl bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
-                                                Coming soon
-                                            </span>
-                                        </div>
-                                        <p className="text-xs text-slate-500">Not available for this checkout yet.</p>
                                     </div>
                                 </div>
                             </div>
                             {configLoaded && !razorpayEnabled && (
                                 <p className="mt-4 rounded-xl border border-amber-100 bg-amber-50 px-3 py-2 text-xs text-amber-800">
-                                    Online payment is not configured on the server yet. Please try again later.
+                                    Online payment is not configured on the server. Checkout cannot continue until Razorpay keys are set.
                                 </p>
                             )}
                         </section>
@@ -480,7 +483,9 @@ export default function CheckoutFlow() {
                     {step === 5 && (
                         <section>
                             <h2 className="text-base font-bold text-slate-800">Review & confirm</h2>
-                            <p className="mt-1 text-sm text-slate-500">Place order will open Razorpay to complete payment.</p>
+                            <p className="mt-1 text-sm text-slate-500">
+                                Place order will open Razorpay to complete payment securely.
+                            </p>
 
                             <div className="mt-5 space-y-4">
                                 <ReviewBlock title="Customer" onEdit={() => setStep(1)}>
@@ -503,7 +508,7 @@ export default function CheckoutFlow() {
                                     ))}
                                 </ReviewBlock>
                                 <ReviewBlock title="Payment" onEdit={() => setStep(4)}>
-                                    <p>{paymentMethodLabel('RAZORPAY')}</p>
+                                    <p>{paymentMethodLabel(paymentMethod)}</p>
                                 </ReviewBlock>
                             </div>
                         </section>
@@ -522,7 +527,7 @@ export default function CheckoutFlow() {
                         <button
                             type="button"
                             onClick={step === 5 ? placeOrder : goNext}
-                            disabled={paying || (step === 4 && !razorpayEnabled) || (step === 5 && !razorpayEnabled)}
+                            disabled={busy || (step >= 4 && !razorpayEnabled)}
                             className={`${brandPrimaryCtaClass} min-w-40 px-6 py-2.5 disabled:cursor-not-allowed disabled:opacity-60`}
                             style={{ backgroundColor: BRAND_GREEN }}
                         >
@@ -569,7 +574,7 @@ export default function CheckoutFlow() {
                     <button
                         type="button"
                         onClick={step === 5 ? placeOrder : goNext}
-                        disabled={paying || (step >= 4 && !razorpayEnabled)}
+                        disabled={busy || (step >= 4 && !razorpayEnabled)}
                         className={`${brandPrimaryCtaClass} min-h-11 min-w-0 flex-[1.6] py-2.5 disabled:opacity-60`}
                         style={{ backgroundColor: BRAND_GREEN }}
                     >

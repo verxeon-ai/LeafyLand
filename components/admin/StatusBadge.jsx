@@ -12,6 +12,9 @@ const STATUS_STYLES = {
   cancelled: 'bg-red-100 text-red-700',
   shipped: 'bg-blue-100 text-blue-700',
   inactive: 'bg-slate-100 text-slate-600',
+  new: 'bg-amber-100 text-amber-700',
+  read: 'bg-blue-100 text-blue-700',
+  closed: 'bg-slate-100 text-slate-600',
 }
 
 const DEFAULT_STYLE = 'bg-slate-100 text-slate-600'

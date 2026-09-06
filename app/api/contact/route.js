@@ -20,6 +20,17 @@ export async function POST(req) {
         const inquiry = await prisma.contactInquiry.create({
             data: { name, email, subject, message },
         })
+        try {
+            const { notifyAllAdmins } = await import('@/lib/payments/notify')
+            await notifyAllAdmins({
+                type: 'CONTACT_INQUIRY',
+                title: 'New contact message',
+                body: `${name}: ${subject}`,
+                link: '/admin/contact',
+            })
+        } catch (e) {
+            console.error('Contact notification failed:', e?.message || e)
+        }
         return json({ id: inquiry.id, ok: true }, 201)
     } catch (e) {
         return handleApiError(e)

@@ -19,18 +19,7 @@ export async function GET() {
     }
 }
 
-export async function POST(req) {
-    try {
-        const user = await requireUser()
-        const body = await req.json()
-        const { paymentMethod = 'COD' } = body
-
-        if (paymentMethod === 'COD') {
-            return error('Cash on Delivery is not available yet. Please pay online with Razorpay.', 403)
-        }
-
-        return error('Use Razorpay checkout to place orders', 400)
-    } catch (e) {
-        return handleApiError(e)
-    }
+/** COD is disabled — all new orders must go through Razorpay checkout. */
+export async function POST() {
+    return error('Cash on Delivery is not available. Please pay online with Razorpay.', 400)
 }

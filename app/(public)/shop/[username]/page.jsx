@@ -1,30 +1,42 @@
 'use client'
-import ProductCard from "@/components/ProductCard"
-import { useParams } from "next/navigation"
-import { useEffect, useState } from "react"
-import { MailIcon, MapPinIcon } from "lucide-react"
+import ProductCard from '@/components/ProductCard'
+import { useParams } from 'next/navigation'
+import { useCallback, useEffect, useState } from 'react'
+import { MailIcon, MapPinIcon } from 'lucide-react'
 import CatalogImage from '@/components/CatalogImage'
-import { cachedJson, peekCachedJson } from '@/lib/cachedJson'
 import { ProductGridSkeleton } from '@/components/CatalogSkeleton'
+import { BRAND_GREEN, brandPrimaryCtaClass } from '@/lib/brand-ui'
+
+const PAGE_SIZE = 60
 
 export default function StoreShop() {
     const { username } = useParams()
-    const shopUrl = `/api/shops/${username}`
-    const cached = peekCachedJson(shopUrl)
-    const [products, setProducts] = useState(() => Array.isArray(cached?.products) ? cached.products : [])
-    const [storeInfo, setStoreInfo] = useState(() => (cached?.id || cached?.name ? cached : null))
-    const [loading, setLoading] = useState(!cached?.name)
+    const [products, setProducts] = useState([])
+    const [storeInfo, setStoreInfo] = useState(null)
+    const [total, setTotal] = useState(0)
+    const [hasMore, setHasMore] = useState(false)
+    const [loading, setLoading] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
     const [notFound, setNotFound] = useState(false)
+
+    const fetchPage = useCallback(async (offset) => {
+        const params = new URLSearchParams({
+            paginated: '1',
+            limit: String(PAGE_SIZE),
+            offset: String(offset || 0),
+        })
+        const res = await fetch(`/api/shops/${username}?${params}`, { cache: 'no-store' })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data?.error || 'Store not found')
+        return data
+    }, [username])
 
     useEffect(() => {
         let cancelled = false
-        const hit = peekCachedJson(shopUrl)
-        if (hit?.name) {
-            setStoreInfo(hit)
-            setProducts(hit.products || [])
-            setLoading(false)
-        }
-        cachedJson(shopUrl)
+        setLoading(true)
+        setProducts([])
+        setNotFound(false)
+        fetchPage(0)
             .then((data) => {
                 if (cancelled) return
                 if (data?.error || (!data?.id && !data?.name)) {
@@ -33,12 +45,37 @@ export default function StoreShop() {
                     return
                 }
                 setStoreInfo(data)
-                setProducts(data.products || [])
+                setProducts(Array.isArray(data.products) ? data.products : [])
+                setTotal(Number(data.total) || 0)
+                setHasMore(Boolean(data.hasMore))
             })
-            .catch(() => { if (!cancelled) setNotFound(true) })
-            .finally(() => { if (!cancelled) setLoading(false) })
+            .catch(() => {
+                if (!cancelled) setNotFound(true)
+            })
+            .finally(() => {
+                if (!cancelled) setLoading(false)
+            })
         return () => { cancelled = true }
-    }, [username, shopUrl])
+    }, [username, fetchPage])
+
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return
+        setLoadingMore(true)
+        try {
+            const data = await fetchPage(products.length)
+            const next = Array.isArray(data.products) ? data.products : []
+            setProducts((prev) => {
+                const seen = new Set(prev.map((p) => p.id))
+                return [...prev, ...next.filter((p) => !seen.has(p.id))]
+            })
+            setTotal(Number(data.total) || 0)
+            setHasMore(Boolean(data.hasMore))
+        } catch {
+            /* keep list */
+        } finally {
+            setLoadingMore(false)
+        }
+    }
 
     if (notFound && !loading) {
         return (
@@ -66,8 +103,7 @@ export default function StoreShop() {
                     <div className="text-center md:text-left">
                         <h1 className="text-3xl font-semibold text-slate-800">{storeInfo.name}</h1>
                         <p className="text-sm text-slate-600 mt-2 max-w-lg">{storeInfo.description}</p>
-                        <div className="text-xs text-slate-500 mt-4 space-y-1"></div>
-                        <div className="space-y-2 text-sm text-slate-500">
+                        <div className="space-y-2 text-sm text-slate-500 mt-4">
                             {storeInfo.address && (
                                 <div className="flex items-center">
                                     <MapPinIcon className="w-4 h-4 text-gray-500 mr-2" />
@@ -94,16 +130,40 @@ export default function StoreShop() {
                 </div>
             )}
 
-            <div className=" max-w-7xl mx-auto mb-40">
-                <h1 className="text-2xl mt-12">Shop <span className="text-slate-800 font-medium">Products</span></h1>
+            <div className="max-w-7xl mx-auto mb-40">
+                <h1 className="text-2xl mt-12">
+                    Shop <span className="text-slate-800 font-medium">Products</span>
+                </h1>
+                {!loading && products.length > 0 && (
+                    <p className="text-sm text-slate-500 mt-2">
+                        Showing {products.length}{total > products.length ? ` of ${total}` : ''} products
+                    </p>
+                )}
                 {loading && products.length === 0 ? (
                     <div className="mt-5">
                         <ProductGridSkeleton count={10} />
                     </div>
                 ) : (
-                    <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 mx-auto">
-                        {products.map((product) => <ProductCard key={product.id} product={product} fluid />)}
-                    </div>
+                    <>
+                        <div className="mt-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 sm:gap-4 mx-auto">
+                            {products.map((product) => (
+                                <ProductCard key={product.id} product={product} fluid />
+                            ))}
+                        </div>
+                        {hasMore && (
+                            <div className="flex justify-center mt-8">
+                                <button
+                                    type="button"
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className={`${brandPrimaryCtaClass} min-w-[10rem] px-6 py-2.5 disabled:opacity-60`}
+                                    style={{ backgroundColor: BRAND_GREEN }}
+                                >
+                                    {loadingMore ? 'Loading…' : 'Load more'}
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </div>

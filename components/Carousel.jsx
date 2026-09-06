@@ -43,7 +43,7 @@ const slides = [
         title: 'Sports, electronics & everyday deals',
         subtitle: 'Classifieds and marketplace finds — from gadgets to sports gear.',
         cta: 'Shop marketplace',
-        href: '/products',
+        href: '/products?marketplace=1',
         image: '/bgs4.png',
         wide: true,
     },
@@ -105,7 +105,7 @@ const Carousel = () => {
 
     return (
         <div
-            className="relative w-full rounded-xl overflow-hidden shadow-sm h-[200px] sm:h-[260px] md:h-[300px] lg:h-[340px]"
+            className="relative w-full rounded-xl overflow-hidden shadow-sm h-[200px] sm:h-[260px] md:h-[320px] lg:h-[380px]"
             onMouseEnter={() => setPaused(true)}
             onMouseLeave={() => setPaused(false)}
             onTouchStart={(e) => setTouchX(e.touches[0].clientX)}

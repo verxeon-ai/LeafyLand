@@ -1,83 +1,194 @@
 'use client'
 import { useEffect, useState } from 'react'
-import Carousel from "@/components/Carousel";
-import ExploreCategories from "@/components/ExploreCategories";
-import NearYouProducts from "@/components/NearYouProducts";
-import PartnersMarquee from "@/components/PartnersMarquee";
-import FeaturedSection from "@/components/FeaturedSection";
-import ProductCard from "@/components/ProductCard";
-import { cachedJson } from '@/lib/cachedJson'
-import { HOME_PRODUCT_GROUPS } from '@/lib/categories'
-import { ProductGridSkeleton, ServiceGridSkeleton } from "@/components/CatalogSkeleton";
-import ServicesBanner from "@/components/ServicesBanner";
-import ServiceCategoryCard from "@/components/ServiceCategoryCard";
-import PropertyCard from "@/components/PropertyCard";
+import Carousel from '@/components/Carousel'
+import ExploreCategories from '@/components/ExploreCategories'
+import NearYouProducts from '@/components/NearYouProducts'
+import PartnersMarquee from '@/components/PartnersMarquee'
+import FeaturedSection from '@/components/FeaturedSection'
+import ProductCard from '@/components/ProductCard'
+import PropertyCard from '@/components/PropertyCard'
+import { HOME_CATEGORY_SECTIONS, HOME_PRODUCT_GROUPS } from '@/lib/categories'
+import { HOME_PROPERTY_SECTIONS } from '@/lib/nav-menus'
+import { ProductGridSkeleton, ServiceGridSkeleton } from '@/components/CatalogSkeleton'
+import ServicesBanner from '@/components/ServicesBanner'
+import PropertiesBanner from '@/components/PropertiesBanner'
+import ServiceCategoryCard from '@/components/ServiceCategoryCard'
 
-function pickGroupProducts(products, categories, limit = 10) {
-    const inGroup = products.filter((p) => categories.includes(p.category))
-    const featured = inGroup.filter((p) => p.featured)
-    const rest = inGroup.filter((p) => !p.featured)
-    return [...featured, ...rest].slice(0, limit)
+const SECTION_LIMIT = 12
+
+function normalizeProducts(data) {
+    if (Array.isArray(data)) return data
+    if (data && Array.isArray(data.products)) return data.products
+    return []
+}
+
+function normalizeList(data) {
+    return Array.isArray(data) ? data : []
+}
+
+async function fetchCategoryProducts(category) {
+    const res = await fetch(
+        `/api/products?paginated=1&limit=${SECTION_LIMIT}&category=${encodeURIComponent(category)}`,
+        { cache: 'no-store' },
+    )
+    const data = await res.json()
+    return normalizeProducts(data)
+}
+
+async function fetchPropertiesByType(type) {
+    const res = await fetch(
+        `/api/properties?limit=${SECTION_LIMIT}&type=${encodeURIComponent(type)}`,
+        { cache: 'no-store' },
+    )
+    const data = await res.json()
+    return normalizeList(data).slice(0, SECTION_LIMIT)
 }
 
 export default function Home() {
-    const [products, setProducts] = useState([])
+    const [categorySections, setCategorySections] = useState([])
+    const [marketplaceGroups, setMarketplaceGroups] = useState([])
+    const [propertySections, setPropertySections] = useState([])
     const [services, setServices] = useState([])
-    const [properties, setProperties] = useState([])
     const [catalogReady, setCatalogReady] = useState(false)
     const [servicesReady, setServicesReady] = useState(false)
     const [propertiesReady, setPropertiesReady] = useState(false)
 
     useEffect(() => {
         let cancelled = false
-        cachedJson('/api/products').then((p) => {
-            if (cancelled) return
-            if (Array.isArray(p)) setProducts(p)
-            setCatalogReady(true)
-        }).catch(() => { if (!cancelled) setCatalogReady(true) })
-        cachedJson('/api/services').then((s) => {
-            if (cancelled) return
-            if (Array.isArray(s)) setServices(s)
-            setServicesReady(true)
-        }).catch(() => { if (!cancelled) setServicesReady(true) })
-        cachedJson('/api/properties').then((p) => {
-            if (cancelled) return
-            if (Array.isArray(p)) setProperties(p)
-            setPropertiesReady(true)
-        }).catch(() => { if (!cancelled) setPropertiesReady(true) })
+
+        Promise.all(
+            HOME_CATEGORY_SECTIONS.map(async (section) => {
+                try {
+                    const names = [section.category, ...(section.aliases || [])]
+                    const batches = await Promise.all(names.map((name) => fetchCategoryProducts(name)))
+                    const seen = new Set()
+                    const items = []
+                    for (const batch of batches) {
+                        for (const p of batch) {
+                            if (!p?.id || seen.has(p.id)) continue
+                            seen.add(p.id)
+                            items.push(p)
+                            if (items.length >= SECTION_LIMIT) break
+                        }
+                        if (items.length >= SECTION_LIMIT) break
+                    }
+                    return { ...section, items }
+                } catch {
+                    return { ...section, items: [] }
+                }
+            }),
+        )
+            .then((rows) => {
+                if (cancelled) return
+                setCategorySections(rows.filter((s) => s.items.length > 0))
+            })
+            .finally(() => {
+                if (!cancelled) setCatalogReady(true)
+            })
+
+        Promise.all(
+            HOME_PRODUCT_GROUPS.filter((g) => g.id !== 'leafyland').map(async (group) => {
+                try {
+                    const res = await fetch(
+                        `/api/products?paginated=1&limit=${SECTION_LIMIT}&group=${encodeURIComponent(group.id)}`,
+                        { cache: 'no-store' },
+                    )
+                    const data = await res.json()
+                    const items = normalizeProducts(data).slice(0, SECTION_LIMIT)
+                    return { ...group, items }
+                } catch {
+                    return { ...group, items: [] }
+                }
+            }),
+        )
+            .then((rows) => {
+                if (cancelled) return
+                setMarketplaceGroups(rows.filter((g) => g.items.length > 0))
+            })
+            .catch(() => {})
+
+        fetch('/api/services', { cache: 'no-store' })
+            .then((r) => r.json())
+            .then((s) => {
+                if (cancelled) return
+                if (Array.isArray(s)) setServices(s)
+            })
+            .catch(() => {})
+            .finally(() => {
+                if (!cancelled) setServicesReady(true)
+            })
+
+        ;(async () => {
+            try {
+                const nichesRes = await fetch('/api/properties/niches', { cache: 'no-store' })
+                const niches = await nichesRes.json().catch(() => [])
+                const nicheNames = (Array.isArray(niches) ? niches : [])
+                    .filter((n) => n?.name && Number(n.count) > 0)
+                    .map((n) => n.name)
+
+                const types = nicheNames.length
+                    ? nicheNames
+                    : HOME_PROPERTY_SECTIONS.map((s) => s.type)
+
+                const rows = await Promise.all(
+                    types.map(async (type) => {
+                        const items = await fetchPropertiesByType(type)
+                        return { title: type, type, items }
+                    }),
+                )
+
+                if (!cancelled) {
+                    setPropertySections(rows.filter((r) => r.items.length > 0))
+                }
+            } catch {
+                if (!cancelled) setPropertySections([])
+            } finally {
+                if (!cancelled) setPropertiesReady(true)
+            }
+        })()
+
         return () => { cancelled = true }
     }, [])
-
-    const groups = HOME_PRODUCT_GROUPS.map((group) => ({
-        ...group,
-        items: pickGroupProducts(products, group.categories),
-    })).filter((group) => group.items.length > 0)
 
     const vendorServices = services.slice(0, 10)
 
     return (
         <div className="bg-slate-50/50 flex-1 flex flex-col">
-            {/* Carousel */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-5 pb-2 w-full">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 pt-5 pb-2">
                 <Carousel />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-4 w-full">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 pb-4">
                 <ExploreCategories />
             </div>
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full flex-1">
+            <div className="mx-auto w-full max-w-[90rem] px-3 sm:px-4 lg:px-6 flex-1 pb-8">
                 <NearYouProducts />
-                <div className="pb-1 pt-1">
-                    <PartnersMarquee />
-                </div>
-                {!catalogReady && products.length === 0 && (
-                    <div className="py-5">
-                        <div className="h-5 w-36 bg-slate-100 rounded mb-3 animate-pulse" />
-                        <ProductGridSkeleton count={5} />
+               
+
+                {!catalogReady && categorySections.length === 0 && (
+                    <div className="py-5 space-y-6">
+                        {[0, 1, 2].map((i) => (
+                            <div key={i}>
+                                <div className="h-5 w-36 bg-slate-100 rounded mb-3 animate-pulse" />
+                                <ProductGridSkeleton count={5} />
+                            </div>
+                        ))}
                     </div>
                 )}
-                {groups.map((group) => (
+
+                {categorySections.map((section) => (
+                    <FeaturedSection
+                        key={section.category}
+                        title={section.title}
+                        subtitle={`Shop ${section.title.toLowerCase()}`}
+                        items={section.items}
+                        viewAllLink={`/products?category=${encodeURIComponent(section.category)}`}
+                        renderItem={(product) => <ProductCard product={product} />}
+                    />
+                ))}
+
+                {marketplaceGroups.map((group) => (
                     <FeaturedSection
                         key={group.id}
                         title={group.title}
@@ -87,9 +198,10 @@ export default function Home() {
                         renderItem={(product) => <ProductCard product={product} />}
                     />
                 ))}
+
                 <ServicesBanner />
                 {!servicesReady && vendorServices.length === 0 && (
-                    <div className="py-5 pb-8">
+                    <div className="py-5">
                         <div className="h-5 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
                         <ServiceGridSkeleton count={5} />
                     </div>
@@ -107,22 +219,28 @@ export default function Home() {
                         )}
                     />
                 )}
-                {!propertiesReady && properties.length === 0 && (
-                    <div className="py-5 pb-8">
+
+                <PropertiesBanner />
+                {!propertiesReady && propertySections.length === 0 && (
+                    <div className="py-5">
                         <div className="h-5 w-40 bg-slate-100 rounded mb-3 animate-pulse" />
-                        <ServiceGridSkeleton count={5} />
+                        <ProductGridSkeleton count={5} />
                     </div>
                 )}
-                {properties.length > 0 && (
+                {propertySections.map((section) => (
                     <FeaturedSection
-                        title="Available Properties"
-                        subtitle="Farmhouses, land & green estates"
-                        items={properties.slice(0, 10)}
-                        viewAllLink="/properties"
+                        key={section.type}
+                        title={section.title}
+                        subtitle={`Explore ${section.title.toLowerCase()}`}
+                        items={section.items}
+                        viewAllLink={`/properties?type=${encodeURIComponent(section.type)}`}
                         renderItem={(property) => <PropertyCard property={property} />}
                     />
-                )}
+                ))}
             </div>
+            <div className="pb-1 pt-1">
+                    <PartnersMarquee />
+                </div>
         </div>
-    );
+    )
 }

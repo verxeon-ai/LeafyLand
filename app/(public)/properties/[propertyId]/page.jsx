@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import { ChevronLeft, MapPin, Maximize, BedDouble, CheckCircle, Star, CalendarIcon } from 'lucide-react'
+import { ChevronLeft, MapPin, Maximize, BedDouble, CheckCircle, Star, CalendarIcon, MessageSquare, Store } from 'lucide-react'
 import CatalogImage from '@/components/CatalogImage'
 import dynamic from 'next/dynamic'
 import ReviewsList from '@/components/ReviewsList'
@@ -12,6 +12,7 @@ import { DetailSkeleton } from '@/components/CatalogSkeleton'
 import { cachedJson, peekDetail } from '@/lib/cachedJson'
 
 const ScheduleVisitModal = dynamic(() => import('@/components/ScheduleVisitModal'), { ssr: false })
+const ContactSellerModal = dynamic(() => import('@/components/ContactSellerModal'), { ssr: false })
 
 const PropertyPage = () => {
     const { propertyId } = useParams()
@@ -21,6 +22,7 @@ const PropertyPage = () => {
     const [loading, setLoading] = useState(!initial?.id)
     const [notFound, setNotFound] = useState(false)
     const [showVisitModal, setShowVisitModal] = useState(false)
+    const [showContact, setShowContact] = useState(false)
     const [tab, setTab] = useState('Overview')
 
     useEffect(() => {
@@ -68,6 +70,8 @@ const PropertyPage = () => {
         : 0)
 
     const providerName = property.store?.name || 'Lister'
+    const storeId = property.storeId || property.store?.id
+    const storeUsername = property.store?.username
 
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
@@ -144,6 +148,13 @@ const PropertyPage = () => {
                         >
                             <CalendarIcon size={16} /> Schedule Visit
                         </button>
+                        <button
+                            type="button"
+                            onClick={() => setShowContact(true)}
+                            className="flex items-center gap-2 border border-slate-200 hover:border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium rounded-xl transition"
+                        >
+                            <MessageSquare size={16} /> Contact Seller
+                        </button>
                         <Link
                             href="/visits"
                             className="border border-slate-200 hover:border-slate-300 text-slate-700 px-6 py-3 text-sm font-medium rounded-xl transition inline-flex items-center"
@@ -151,6 +162,15 @@ const PropertyPage = () => {
                             My visits
                         </Link>
                     </div>
+                    {storeUsername && (
+                        <Link
+                            href={`/shop/${storeUsername}`}
+                            className="mt-4 inline-flex items-center gap-2 text-sm font-semibold hover:underline"
+                            style={{ color: BRAND_GREEN }}
+                        >
+                            <Store size={15} /> View store · {providerName}
+                        </Link>
+                    )}
                 </div>
             </div>
 
@@ -200,6 +220,14 @@ const PropertyPage = () => {
 
             {showVisitModal && (
                 <ScheduleVisitModal property={property} setShowVisitModal={setShowVisitModal} />
+            )}
+            {showContact && (
+                <ContactSellerModal
+                    storeId={storeId}
+                    listingId={property.id}
+                    listingPath="properties"
+                    onClose={() => setShowContact(false)}
+                />
             )}
         </div>
     )

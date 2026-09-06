@@ -74,9 +74,7 @@ export default function StoreAddPropertyForm() {
             .finally(() => {
                 if (!cancelled) setLoadingProperty(false)
             })
-        return () => {
-            cancelled = true
-        }
+        return () => { cancelled = true }
     }, [editId, router])
 
     const previewImages = useMemo(() => {
@@ -147,12 +145,11 @@ export default function StoreAddPropertyForm() {
             const data = await res.json()
             if (!res.ok) throw new Error(data.error || (isEdit ? 'Could not update property' : 'Could not add property'))
 
+            toast.success(isEdit ? 'Property updated — pending re-approval' : 'Property submitted for approval!')
             if (isEdit) {
-                toast.success('Property updated — pending approval')
                 router.push('/store/properties')
                 return
             }
-            toast.success('Property submitted for approval!')
             setForm(emptyForm)
             setImages([])
             setExistingImages([])
@@ -180,16 +177,13 @@ export default function StoreAddPropertyForm() {
                 eyebrow="Vendor"
             />
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                <div className="space-y-6 lg:col-span-2">
-                    <form onSubmit={onSubmit} className={`${brandCardClass} space-y-5 p-6`}>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2">
+                    <form onSubmit={onSubmit} className={`${brandCardClass} p-6 space-y-5`}>
                         <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-500">Title</label>
+                            <label className="block text-xs font-medium text-slate-500 mb-1.5">Title</label>
                             <input
-                                type="text"
-                                name="title"
-                                value={form.title}
-                                onChange={onChange}
+                                type="text" name="title" value={form.title} onChange={onChange}
                                 placeholder="e.g. 2 Kanal Farmhouse in DHA"
                                 required
                                 className={brandInputClass}
@@ -197,41 +191,30 @@ export default function StoreAddPropertyForm() {
                         </div>
 
                         <div>
-                            <label className="mb-1.5 block text-xs font-medium text-slate-500">Description</label>
+                            <label className="block text-xs font-medium text-slate-500 mb-1.5">Description</label>
                             <textarea
-                                name="description"
-                                value={form.description}
-                                onChange={onChange}
+                                name="description" value={form.description} onChange={onChange}
                                 placeholder="Describe the property..."
-                                rows={4}
-                                required
+                                rows={4} required
                                 className={`${brandInputClass} resize-none`}
                             />
                         </div>
 
                         <div className="grid grid-cols-2 gap-4">
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Property Type</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Property Type</label>
                                 <select
-                                    name="propertyType"
-                                    value={form.propertyType}
-                                    onChange={onChange}
-                                    required
+                                    name="propertyType" value={form.propertyType} onChange={onChange} required
                                     className={`w-full ${brandSelectClass}`}
                                 >
                                     <option value="">Select type</option>
-                                    {propertyTypes.map((t) => (
-                                        <option key={t} value={t}>{t}</option>
-                                    ))}
+                                    {propertyTypes.map((t) => <option key={t} value={t}>{t}</option>)}
                                 </select>
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Listing Type</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Listing Type</label>
                                 <select
-                                    name="listingType"
-                                    value={form.listingType}
-                                    onChange={onChange}
-                                    required
+                                    name="listingType" value={form.listingType} onChange={onChange} required
                                     className={`w-full ${brandSelectClass}`}
                                 >
                                     <option value="SALE">Sale</option>
@@ -239,91 +222,67 @@ export default function StoreAddPropertyForm() {
                                 </select>
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Price (₹)</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Price (₹)</label>
                                 <input
-                                    type="number"
-                                    name="price"
-                                    value={form.price}
-                                    onChange={onChange}
-                                    placeholder="0"
-                                    min={0}
-                                    required
+                                    type="number" name="price" value={form.price} onChange={onChange}
+                                    placeholder="0" min={0} required
                                     className={brandInputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Location</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Location</label>
                                 <input
-                                    type="text"
-                                    name="location"
-                                    value={form.location}
-                                    onChange={onChange}
-                                    placeholder="City / area"
-                                    required
+                                    type="text" name="location" value={form.location} onChange={onChange}
+                                    placeholder="City / area" required
                                     className={brandInputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Land Size</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Land Size</label>
                                 <input
-                                    type="text"
-                                    name="landSize"
-                                    value={form.landSize}
-                                    onChange={onChange}
-                                    placeholder="e.g. 2 Kanal"
-                                    required
+                                    type="text" name="landSize" value={form.landSize} onChange={onChange}
+                                    placeholder="e.g. 2 Kanal" required
                                     className={brandInputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Covered Area</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Covered Area</label>
                                 <input
-                                    type="text"
-                                    name="coveredArea"
-                                    value={form.coveredArea}
-                                    onChange={onChange}
+                                    type="text" name="coveredArea" value={form.coveredArea} onChange={onChange}
                                     placeholder="e.g. 3500 sq ft"
                                     className={brandInputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Bedrooms</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Bedrooms</label>
                                 <input
-                                    type="number"
-                                    name="bedrooms"
-                                    value={form.bedrooms}
-                                    onChange={onChange}
-                                    placeholder="0"
-                                    min={0}
+                                    type="number" name="bedrooms" value={form.bedrooms} onChange={onChange}
+                                    placeholder="0" min={0}
                                     className={brandInputClass}
                                 />
                             </div>
                             <div>
-                                <label className="mb-1.5 block text-xs font-medium text-slate-500">Bathrooms</label>
+                                <label className="block text-xs font-medium text-slate-500 mb-1.5">Bathrooms</label>
                                 <input
-                                    type="number"
-                                    name="bathrooms"
-                                    value={form.bathrooms}
-                                    onChange={onChange}
-                                    placeholder="0"
-                                    min={0}
+                                    type="number" name="bathrooms" value={form.bathrooms} onChange={onChange}
+                                    placeholder="0" min={0}
                                     className={brandInputClass}
                                 />
                             </div>
                         </div>
 
                         <div>
-                            <label className="mb-2 block text-xs font-medium text-slate-500">Features</label>
+                            <label className="block text-xs font-medium text-slate-500 mb-2">Features</label>
                             <div className="flex flex-wrap gap-2">
                                 {featureOptions.map((f) => (
                                     <button
                                         key={f}
                                         type="button"
                                         onClick={() => toggleFeature(f)}
-                                        className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors ${
+                                        className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
                                             form.features.includes(f)
-                                                ? 'border-[#2f7d4a] bg-[#eef4ef] text-[#2f7d4a]'
-                                                : 'border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300'
+                                                ? 'bg-[#eef4ef] border-[#2f7d4a] text-[#2f7d4a]'
+                                                : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                                         }`}
                                     >
                                         {f}
@@ -332,43 +291,36 @@ export default function StoreAddPropertyForm() {
                             </div>
                         </div>
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            className={`w-full ${brandPrimaryCtaClass} py-3 disabled:opacity-60`}
-                            style={{ backgroundColor: BRAND_GREEN }}
-                        >
+                        <button type="submit" disabled={loading} className={`w-full ${brandPrimaryCtaClass} py-3 disabled:opacity-60`} style={{ backgroundColor: BRAND_GREEN }}>
                             {loading ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Property'}
                         </button>
                     </form>
                 </div>
 
                 <div className={`${brandCardClass} p-6`}>
-                    <h2 className="mb-4 text-sm font-semibold text-slate-800">Property Images</h2>
-                    <p className="mb-4 text-xs text-slate-500">Upload up to 5 images. First image will be the cover.</p>
+                    <h2 className="text-sm font-semibold text-slate-800 mb-4">Property Images</h2>
+                    <p className="text-xs text-slate-500 mb-4">Upload up to 5 images. First image will be the cover.</p>
 
                     <div className="grid grid-cols-2 gap-3">
                         {previewImages.map((item, i) => (
-                            <div key={`${item.kind}-${i}-${item.src}`} className="group relative aspect-square overflow-hidden rounded-xl bg-slate-100">
-                                <img src={item.src} alt="" className="h-full w-full object-cover" />
+                            <div key={`${item.kind}-${i}-${item.src}`} className="relative aspect-square bg-slate-100 rounded-xl overflow-hidden group">
+                                <img src={item.src} alt="" className="w-full h-full object-cover" />
                                 <button
                                     type="button"
                                     onClick={() => removePreview(i)}
-                                    className="absolute top-1.5 right-1.5 rounded-lg bg-black/50 p-1 text-white opacity-0 transition-opacity group-hover:opacity-100"
+                                    className="absolute top-1.5 right-1.5 p-1 bg-black/50 text-white rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
                                 >
                                     <X size={12} />
                                 </button>
                                 {i === 0 && (
-                                    <span className="absolute bottom-1.5 left-1.5 rounded bg-[#2f7d4a] px-1.5 py-0.5 text-[8px] font-bold text-white">
-                                        COVER
-                                    </span>
+                                    <span className="absolute bottom-1.5 left-1.5 bg-[#2f7d4a] text-white text-[8px] font-bold px-1.5 py-0.5 rounded">COVER</span>
                                 )}
                             </div>
                         ))}
                         {previewImages.length < 5 && (
-                            <label className="flex aspect-square cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 bg-slate-50 transition-colors hover:border-[#2f7d4a] hover:bg-[#eef4ef]/50">
+                            <label className="aspect-square bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center cursor-pointer hover:border-[#2f7d4a] hover:bg-[#eef4ef]/50 transition-colors">
                                 <Plus size={20} className="text-slate-400" />
-                                <span className="mt-1 text-[10px] text-slate-400">Add Image</span>
+                                <span className="text-[10px] text-slate-400 mt-1">Add Image</span>
                                 <input type="file" accept="image/*" multiple onChange={handleImageUpload} className="hidden" />
                             </label>
                         )}

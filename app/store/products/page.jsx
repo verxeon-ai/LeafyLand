@@ -115,6 +115,11 @@ export default function VendorProducts() {
                                 }`}>
                                     {product.stock <= 3 ? 'LOW STOCK' : `${product.stock} in stock`}
                                 </span>
+                                {(product.status || 'approved') !== 'approved' && (
+                                    <span className="absolute top-2 right-2 rounded-xl bg-slate-800/80 px-2 py-0.5 text-[9px] font-bold uppercase text-white">
+                                        {product.status || 'pending'}
+                                    </span>
+                                )}
                             </div>
                             <div className="p-4">
                                 <h3 className="truncate text-sm font-semibold text-slate-800">{product.name}</h3>

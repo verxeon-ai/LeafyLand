@@ -26,9 +26,16 @@ export async function PATCH(req) {
         await requireAdmin()
         const { id, status } = await req.json()
         if (!id || !allowed.includes(status)) return error('Invalid status')
+        const existing = await prisma.order.findUnique({ where: { id } })
+        if (!existing) return error('Order not found', 404)
+
+        const paidOnDelivery = status === 'DELIVERED' && existing.paymentMethod === 'COD'
         const order = await prisma.order.update({
             where: { id },
-            data: { status },
+            data: {
+                status,
+                ...(paidOnDelivery ? { isPaid: true, paymentStatus: 'CAPTURED' } : {}),
+            },
             include: {
                 user: true,
                 store: true,

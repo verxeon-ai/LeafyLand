@@ -12,7 +12,7 @@ export async function GET() {
         orderBy: { order: 'asc' },
     })
 
-    if (categories.length === 0) {
+    if (categories.length < defaults().length) {
         const list = defaults()
         await prisma.$transaction(
             list.map((d) =>
